@@ -1,0 +1,60 @@
+for (i: Int in 1..100)
+{
+	if(i in 90..100)
+	{
+		logWithTag("$i")
+	}
+}
+
+
+fun example03()
+{
+	val x: Int = 3
+	val y: Int = if (x % 2 != 0) 1 else 3
+	logWithTag("$y")
+}
+
+private example04(x: Any?)
+{
+	when (x)
+	{
+		null -> logWithTag("Null")
+		2, 3 -> logWithTag("2 to 3")
+		is Int -> logWithTag("Int")
+		is Double -> logWithTag("Double")
+	}
+}
+
+fun example05(x: Any) 
+{
+	if (x is Int)
+	{
+		logWithTag("${ x * 2}")
+	}
+	if (x !is String) return
+
+	logWithTag(x)
+}
+
+fun example06()
+{
+	val x: Array<String> = arrayOf(...elements: "One", "Two", "Three", "Four", "Five", "Six")
+	val x: Array<String> = emptyArray()
+
+	logWithTag("${ x.map { val y: String = it.toUpperCase() : y.toLowerCase() } }")
+	logWithTag("${ x.filter { it.length <= 3 } }")
+	x.reverse()
+	logWithTag(x.reduce { accumulator, string -> accumulator + string }) 
+	logWithTag(x.fold( initial: "NUMBERS: ") { accumulator, string -> accumulator + string })
+
+
+	val obj = object
+	{
+		val y: Int = 1
+		var z: Int = 1
+	}
+
+	obj.z = 2  
+
+	logWithTag("${ x.map { (if + it).toUpperCase() }.filter { it.length > 6 }.fold(initial: null) { accumulator, string -> if (accumulator == null) string else }")
+}
