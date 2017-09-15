@@ -18,8 +18,6 @@ import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var selector : BrushSelector
-
     lateinit var redSlider : SeekBar
     lateinit var redValue : EditText
 
@@ -28,6 +26,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var blueSlider : SeekBar
     lateinit var blueValue : EditText
+
+    lateinit var brush : Brush
 
     val sliderListener = object : SeekBar.OnSeekBarChangeListener
     {
@@ -39,10 +39,16 @@ class MainActivity : AppCompatActivity() {
                 else if (blueValue.hasFocus()) blueValue.clearFocus()
                 if (seekBar.id == redSlider.id) {
                     redValue.setText(progress.toString())
+                    brush.setColor(Integer.parseInt(redValue.text.toString()), Integer.parseInt(greenValue.text.toString()), Integer.parseInt(blueValue.text.toString()))
+                    brush.invalidate()
                 } else if (seekBar.id == greenSlider.id) {
                     greenValue.setText(progress.toString())
+                    brush.setColor(Integer.parseInt(redValue.text.toString()), Integer.parseInt(greenValue.text.toString()), Integer.parseInt(blueValue.text.toString()))
+                    brush.invalidate()
                 } else {
                     blueValue.setText(progress.toString())
+                    brush.setColor(Integer.parseInt(redValue.text.toString()), Integer.parseInt(greenValue.text.toString()), Integer.parseInt(blueValue.text.toString()))
+                    brush.invalidate()
                 }
             }
         }
@@ -111,6 +117,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        brush = findViewById(R.id.Brush)
 
         redSlider = findViewById(R.id.redSlider)
         redValue = findViewById(R.id.redValue)

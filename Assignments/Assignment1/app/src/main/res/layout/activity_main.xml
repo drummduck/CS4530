@@ -15,6 +15,7 @@
         android:layout_height="37dp"
         android:max="255"
         android:progress="0"
+        android:thumbTint="@android:color/holo_green_light"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -56,6 +57,7 @@
         android:layout_height="36dp"
         android:max="255"
         android:progress="0"
+        android:thumbTint="@android:color/holo_green_light"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/redSlider"
         android:layout_marginEnd="8dp"
@@ -97,6 +99,7 @@
         android:max="255"
         android:progress="0"
         android:layout_marginTop="8dp"
+        android:thumbTint="@android:color/holo_green_light"
         app:layout_constraintTop_toBottomOf="@+id/greenSlider"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp" />
@@ -121,13 +124,19 @@
         android:text="0"
         android:textAlignment="textEnd"
         android:maxLength="3"
-        android:ems="3"        android:id="@+id/blueValue"
+        android:ems="3"
+        android:id="@+id/blueValue"
         app:layout_constraintEnd_toStartOf="@+id/blueSlider"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/greenValue"
         app:layout_constraintStart_toEndOf="@+id/blueTitle"
         android:layout_marginStart="8dp" />
+
+    <com.example.natha.assignment1.Brush
+        android:id="@+id/Brush"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 
 
