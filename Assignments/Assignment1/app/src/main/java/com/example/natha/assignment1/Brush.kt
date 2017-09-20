@@ -1,12 +1,10 @@
 package com.example.natha.assignment1
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import android.widget.TextView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.widget.SeekBar
@@ -17,30 +15,43 @@ import kotlinx.android.synthetic.main.activity_main.view.*
  */
 class Brush : View {
     val paint : Paint = Paint()
+    val path : Path = Path()
 
     constructor(context: Context?) : super(context) {
         paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 20F
     }
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
         paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 20F
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 20F
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes) {
         paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 20F
     }
 
      fun setColor(r : Int, g : Int, b : Int) {
-        paint.setARGB(0, r, g, b)
+        paint.setARGB(255, r, g, b)
+        invalidate()
     }
 
      fun setWidth(width : Float) {
         paint.strokeWidth = width
+         invalidate()
+    }
+
+    fun setJoin(join : Paint.Join)
+    {
+        paint.strokeJoin = join
+        invalidate()
     }
 
     override fun onDraw(canvas : Canvas?)
@@ -56,13 +67,18 @@ class Brush : View {
         }
 
         var line2 = object {
-
+            val startX = canvas.width.toFloat() - canvas.width/2F
+            val endX = canvas.width.toFloat() - canvas.width/5F
+            val startY = canvas.height - canvas.height/4F
+            val endY = canvas.height - canvas.height/8F
         }
 
-        canvas.drawLine(line1.startX, line1.startY, line1.endX, line1.endY, paint)
+        path.setLastPoint(line1.startX, line1.startY)
+        path.lineTo(line1.endX, line1.endY)
+        path.lineTo(line2.endX, line2.endY)
+
+        canvas.drawPath(path, paint)
     }
-
-
 }
 
 

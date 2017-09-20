@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         var index: Int = 0
 
         inputString = String.fromAsset(this, "Assignment0input.txt") ?: ""
-       // val filepath: String = filesDir.absolutePath + File.separator + "Output.txt"
+       //  val filepath: String = filesDir.absolutePath + File.separator + "Output.txt"
 
 
         //Object

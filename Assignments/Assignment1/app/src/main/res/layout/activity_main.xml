@@ -15,7 +15,7 @@
         android:layout_height="37dp"
         android:max="255"
         android:progress="0"
-        android:thumbTint="@android:color/holo_green_light"
+        android:thumbTint="@android:color/holo_blue_light"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +57,7 @@
         android:layout_height="36dp"
         android:max="255"
         android:progress="0"
-        android:thumbTint="@android:color/holo_green_light"
+        android:thumbTint="@android:color/holo_blue_light"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/redSlider"
         android:layout_marginEnd="8dp"
@@ -99,7 +99,7 @@
         android:max="255"
         android:progress="0"
         android:layout_marginTop="8dp"
-        android:thumbTint="@android:color/holo_green_light"
+        android:thumbTint="@android:color/holo_blue_light"
         app:layout_constraintTop_toBottomOf="@+id/greenSlider"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp" />
@@ -136,8 +136,92 @@
     <com.example.natha.assignment1.Brush
         android:id="@+id/Brush"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp" />
 
+    <SeekBar
+        android:id="@+id/widthSlider"
+        android:layout_width="351dp"
+        android:layout_height="26dp"
+        android:min="5"
+        android:maxHeight="20dp"
+        android:minHeight="20dp"
+        android:layout_marginTop="8dp"
+        android:max="505"
+        android:thumbTint="@android:color/holo_blue_light"
+        android:backgroundTint="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@+id/widthTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        tools:layout_editor_absoluteX="-12dp" />
 
+    <TextView
+        android:id="@+id/widthTitle"
+        android:layout_width="74dp"
+        android:layout_height="wrap_content"
+        android:textSize="4mm"
+        android:text="Width:"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="4mm"
+        android:background="@drawable/back"
+        android:inputType="number"
+        android:text="0"
+        android:textAlignment="textEnd"
+        android:maxLength="4"
+        android:ems="3"
+        android:id="@+id/widthValue"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider"
+        app:layout_constraintStart_toEndOf="@+id/widthTitle"
+        android:layout_marginStart="8dp" />
+
+    <TextView
+        android:id="@+id/joinTitle"
+        android:layout_width="74dp"
+        android:layout_height="wrap_content"
+        android:textSize="4mm"
+        android:text="Join:"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/widthSlider" />
+
+    <Spinner
+        android:id="@+id/joinSelect"
+        android:layout_width="132dp"
+        android:layout_height="32dp"
+        android:layout_marginTop="8dp"
+        android:entries="@array/spinnerItems"
+        android:entryValues = "@array/spinnerItemValues"
+        app:layout_constraintTop_toBottomOf="@+id/widthSlider"
+        app:layout_constraintStart_toEndOf="@+id/joinTitle"
+        android:layout_marginStart="8dp" />
+
+    <com.example.natha.assignment1.CapControl
+        android:id="@+id/capControl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/joinSelect"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/Brush" />
 
 </android.support.constraint.ConstraintLayout>
