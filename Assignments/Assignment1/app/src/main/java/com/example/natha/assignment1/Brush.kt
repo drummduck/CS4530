@@ -54,6 +54,12 @@ class Brush : View {
         invalidate()
     }
 
+    fun setCap(cap : Paint.Cap)
+    {
+        paint.strokeCap = cap
+        invalidate()
+    }
+
     override fun onDraw(canvas : Canvas?)
     {
         super.onDraw(canvas)

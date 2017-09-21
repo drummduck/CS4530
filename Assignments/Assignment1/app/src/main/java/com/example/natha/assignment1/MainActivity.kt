@@ -37,6 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var capControl : CapControl
 
+    companion object {
+
+    }
+
     val sliderListener = object : SeekBar.OnSeekBarChangeListener
     {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean)
@@ -65,7 +69,6 @@ class MainActivity : AppCompatActivity() {
                 {
                     widthValue.setText((widthSlider.progress.toDouble()/10).toString())
                     brush.setWidth((widthSlider.progress/10).toFloat())
-                    capControl.setWidth((widthSlider.progress/10).toFloat())
                 }
             }
         }
@@ -135,15 +138,12 @@ class MainActivity : AppCompatActivity() {
             if(parent !is AdapterView<*>) return
             if(position == 0) {
                 brush.setJoin(Paint.Join.MITER)
-                capControl.setJoin(Paint.Join.MITER)
             }
             else if(position == 1) {
                 brush.setJoin(Paint.Join.BEVEL)
-                capControl.setJoin(Paint.Join.BEVEL)
             }
             else if(position == 2) {
                 brush.setJoin(Paint.Join.ROUND)
-                capControl.setJoin(Paint.Join.ROUND)
             }
         }
     }
@@ -164,7 +164,6 @@ class MainActivity : AppCompatActivity() {
         widthSlider.progress = 200
         widthValue = findViewById(R.id.widthValue)
         widthValue.setText("20.0")
-
         redSlider = findViewById(R.id.redSlider)
         redValue = findViewById(R.id.redValue)
 
