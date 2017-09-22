@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     //Functions
     fun testForValidity(word: inputWord): answers
     {
-        if(containsOnlyLetters(word) && hasEvenCharacterCount(word) && appearsMoreThanOnce(word))
+        if(word.word.toCharArray().filter {it.isLetter()}.size == word.size && hasEvenCharacterCount(word) && appearsMoreThanOnce(word))
         {
             passed = true
             return answers.YES
@@ -96,15 +96,15 @@ class MainActivity : AppCompatActivity() {
         else return answers.NO
     }
 
-    fun containsOnlyLetters(inWord: inputWord): Boolean{
-
-        for(i in inWord.word.toCharArray())
-        {
-            if(!i.isLetter()) return false
-        }
-        //Log.i("DEBUG", "CONTAINS ONLY LETTERS PASSED: " + inWord.word)
-        return true
-    }
+//    fun containsOnlyLetters(inWord: inputWord): Boolean{
+//
+//        for(i in inWord.word.toCharArray())
+//        {
+//            if(!i.isLetter()) return false
+//        }
+//        //Log.i("DEBUG", "CONTAINS ONLY LETTERS PASSED: " + inWord.word)
+//        return true
+//    }
 
     fun hasEvenCharacterCount(inWord: inputWord): Boolean {
         if(inWord.word.length % 2 == 0)

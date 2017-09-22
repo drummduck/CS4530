@@ -1,10 +1,12 @@
 package com.example.natha.assignment1
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.net.wifi.p2p.WifiP2pManager
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -17,76 +19,100 @@ import kotlinx.android.synthetic.main.activity_main.*
 class CapControl : View {
 
     val paint = Paint()
+    val linePaint = Paint()
     val rect = Rect()
     val rectPaint = Paint()
     var firstDraw = true
 
     var canvas = Canvas()
 
-    lateinit var brush : Brush
+    var currentCap = Paint.Cap.BUTT
 
     constructor(context: Context?) : super(context)
     {
-        paint.color = Color.BLACK
+        paint.setARGB(100,0,0,0)
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 80F
-        paint.strokeCap = Paint.Cap.BUTT
+
+        linePaint.style = Paint.Style.STROKE
+        linePaint.color = Color.BLACK
+        linePaint.strokeWidth = 5F
 
         rectPaint.color = Color.BLACK
         rectPaint.style = Paint.Style.STROKE
-        rectPaint.strokeWidth = 30F
-        rectPaint.strokeCap = Paint.Cap.BUTT
+        rectPaint.strokeWidth = 10F
 
-        brush = findViewById(R.id.Brush)
     }
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     {
-        paint.color = Color.BLACK
+        paint.setARGB(100,0,0,0)
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 80F
-        paint.strokeCap = Paint.Cap.BUTT
+
+        linePaint.style = Paint.Style.STROKE
+        linePaint.color = Color.BLACK
+        linePaint.strokeWidth = 5F
 
         rectPaint.color = Color.BLACK
         rectPaint.style = Paint.Style.STROKE
-        rectPaint.strokeWidth = 30F
-        rectPaint.strokeCap = Paint.Cap.BUTT
-
-        brush = findViewById(R.id.Brush)
-
+        rectPaint.strokeWidth = 10F
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     {
-        paint.color = Color.BLACK
+        paint.setARGB(100,0,0,0)
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 80F
-        paint.strokeCap = Paint.Cap.BUTT
+
+        linePaint.style = Paint.Style.STROKE
+        linePaint.color = Color.BLACK
+        linePaint.strokeWidth = 5F
 
         rectPaint.color = Color.BLACK
         rectPaint.style = Paint.Style.STROKE
-        rectPaint.strokeWidth = 30F
-        rectPaint.strokeCap = Paint.Cap.BUTT
-
-        brush = findViewById(R.id.Brush)
-
+        rectPaint.strokeWidth = 10F
     }
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
     {
-        paint.color = Color.BLACK
+        paint.setARGB(100,0,0,0)
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 20F
-        paint.strokeCap = Paint.Cap.BUTT
+        paint.strokeWidth = 80F
+
+        linePaint.style = Paint.Style.STROKE
+        linePaint.color = Color.BLACK
+        linePaint.strokeWidth = 5F
 
         rectPaint.color = Color.BLACK
         rectPaint.style = Paint.Style.STROKE
-        rectPaint.strokeWidth = 30F
-        rectPaint.strokeCap = Paint.Cap.BUTT
+        rectPaint.strokeWidth = 10F
+    }
 
-        brush = findViewById(R.id.Brush)
+    interface OnCapChangedListener
+    {
+        fun onCapChanged(capControl : CapControl, cap : Paint.Cap)
+    }
+
+    private var onCapChangedListener : OnCapChangedListener?  = null
+
+    fun setOnCapChangedListener(onCapChangedListener : OnCapChangedListener)
+    {
+        this.onCapChangedListener  = onCapChangedListener
+    }
+
+    fun setOnCapChangedListener(onCapChangedListener: ((capControl: CapControl, cap: Paint.Cap) -> Unit))
+    {
+        this.onCapChangedListener = object : OnCapChangedListener
+        {
+            override fun onCapChanged(capControl: CapControl, cap: Paint.Cap)
+            {
+                onCapChangedListener(capControl, cap)
+            }
+        }
     }
 
 
+
     fun setColor(r : Int, g : Int, b : Int) {
-        paint.setARGB(255, r, g, b)
+        paint.setARGB(100, r, g, b)
         invalidate()
     }
 
@@ -96,45 +122,55 @@ class CapControl : View {
 
         super.onDraw(canvas)
 
-        Log.e("DIMENSIONS", "Height: " + canvas.height + " Width: " + canvas.width)
-
+        paint.strokeCap = Paint.Cap.BUTT
         canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/8F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/8F, paint)
-        if(firstDraw)
-        {
-            rect.set(canvas.width/7 + rectPaint.strokeWidth.toInt(), (canvas.height - canvas.height/8) + rectPaint.strokeWidth.toInt(), ((canvas.width/7)*2) + rectPaint.strokeWidth.toInt(), (canvas.height - canvas.height/8) + rectPaint.strokeWidth.toInt())
-            canvas.drawRect(rect, rectPaint)
-            firstDraw = false
-        }
+        canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/8F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/8F, linePaint)
+        if(firstDraw) rect.set(canvas.width / 7 - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+
+        canvas.drawRect(rect, rectPaint)
+        firstDraw = false
+
         paint.strokeCap = Paint.Cap.SQUARE
         canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/8F, paint)
+        canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/8F, linePaint)
         paint.strokeCap = Paint.Cap.ROUND
         canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, paint)
+        canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, linePaint)
 
         this.canvas = canvas
     }
 
 
-    val onTouch = object : OnTouchListener
-    {
-        override fun onTouch(view: View?, event: MotionEvent?): Boolean {
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
 
-            if(event !is MotionEvent || view !is View) return false
 
-            if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F + paint.strokeWidth && event.getY() < canvas.height - canvas.height/8F + paint.strokeWidth - paint.strokeWidth)
-            {
-                brush.setCap(Paint.Cap.BUTT)
-            }
-            else if(event.getX() > (canvas.width/7)*3F && event.getX() < (canvas.width/7)*4F && event.getY() > canvas.height - canvas.height/8F + paint.strokeWidth && event.getY() < canvas.height - canvas.height/8F + paint.strokeWidth - paint.strokeWidth)
-            {
-                brush.setCap(Paint.Cap.SQUARE)
-            }
-            else if(event.getX() > (canvas.width/7)*5F && event.getX() < (canvas.width/7)*6F && event.getY() > canvas.height - canvas.height/8F + paint.strokeWidth && event.getY() < canvas.height - canvas.height/8F + paint.strokeWidth - paint.strokeWidth)
-            {
-                brush.setCap(Paint.Cap.ROUND)
-            }
+        if(event !is MotionEvent) return false
 
-            return true
+        Log.e("MOTION EVEN COORDINATES:", "X COORDINATE: " + event.getX() + " Y COORDINATE: " + event.getY())
+        Log.e("FIRST SQUARE LOCATION: ", String.format("startX: %s, endX: %s, startY: %s, endY: %s", (canvas.width/7).toFloat().toString(), ((canvas.width/7)*2F).toString(), (canvas.height - canvas.height/8F - paint.strokeWidth).toString(), (canvas.height - canvas.height/8F + paint.strokeWidth).toString()))
+       // Log.e("SECOND SQUARE LOCATION: ",)
+        //Log.e("THIRD SQUARE LOCATION",)
+
+        if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+        {
+            rect.set(canvas.width/7 - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*2) + 80, (canvas.height - canvas.height/8) + 80)
+            currentCap = Paint.Cap.BUTT
+        }
+        else if(event.getX() > (canvas.width/7)*3F && event.getX() < (canvas.width/7)*4F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+        {
+            rect.set(((canvas.width/7)*3), (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*4) + 80, (canvas.height - canvas.height/8) + 80)
+            currentCap = Paint.Cap.SQUARE
+        }
+        else if(event.getX() > (canvas.width/7)*5F && event.getX() < (canvas.width/7)*6F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+        {
+            rect.set(((canvas.width/7)*5) - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*6) + 80, (canvas.height - canvas.height/8) + 80)
+            currentCap = Paint.Cap.ROUND
         }
 
+        onCapChangedListener?.onCapChanged(this, currentCap)
+
+        return true
     }
+
+
 }

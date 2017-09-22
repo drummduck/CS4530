@@ -37,10 +37,6 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var capControl : CapControl
 
-    companion object {
-
-    }
-
     val sliderListener = object : SeekBar.OnSeekBarChangeListener
     {
         override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean)
@@ -156,6 +152,7 @@ class MainActivity : AppCompatActivity() {
         brush = findViewById(R.id.Brush)
 
         capControl = findViewById(R.id.capControl)
+        capControl.setOnCapChangedListener{_, cap -> brush.setCap(cap)}
 
         joinSelect = findViewById(R.id.joinSelect)
         joinSelect.onItemSelectedListener = joinSelection
