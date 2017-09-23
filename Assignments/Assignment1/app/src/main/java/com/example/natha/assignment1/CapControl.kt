@@ -26,7 +26,7 @@ class CapControl : View {
     var currentCap = Paint.Cap.BUTT
     var timer = 0
 
-    var canvas = Canvas()
+    lateinit var canvas : Canvas
 
     constructor(context: Context?) : super(context)
     {
@@ -139,6 +139,7 @@ class CapControl : View {
         canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, paint)
         canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, linePaint)
 
+
         this.canvas = canvas
     }
 
@@ -149,26 +150,26 @@ class CapControl : View {
 
 
 
-        if(event.y.toInt() > context.resources.displayMetrics.heightPixels/3)
+        if(event.y.toInt() > context.resources.displayMetrics.heightPixels - context.resources.displayMetrics.heightPixels/3)
         {
 
             if (timer == 0) {
                 if (currentCap == Paint.Cap.BUTT) {
-                    rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 4) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt() - 20, (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt() - 40, ((canvas.width / 7) * 4) + paint.strokeWidth.toInt()/2, (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt()/2)
                     currentCap = Paint.Cap.SQUARE
                     onCapChangedListener?.onCapChanged(this, currentCap)
                 } else if (currentCap == Paint.Cap.SQUARE) {
-                    rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 6) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt() - 20, (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt() - 40, ((canvas.width / 7) * 6) + paint.strokeWidth.toInt()/2, (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt()/2)
                     currentCap = Paint.Cap.ROUND
                     onCapChangedListener?.onCapChanged(this, currentCap)
                 } else if (currentCap == Paint.Cap.ROUND) {
-                    rect.set((canvas.width / 7) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    rect.set((canvas.width / 7) - paint.strokeWidth.toInt() + 20, (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt() - 40, ((canvas.width / 7) * 2) + paint.strokeWidth.toInt()/2, (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt()/2)
                     currentCap = Paint.Cap.BUTT
                     onCapChangedListener?.onCapChanged(this, currentCap)
                 }
             }
 
-            if(timer == 3) timer = 0
+            if(timer == 2) timer = 0
             else timer++
         }
 //        if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)

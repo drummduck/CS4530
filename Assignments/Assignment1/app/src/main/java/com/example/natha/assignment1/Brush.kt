@@ -82,7 +82,7 @@ class Brush : View {
         path.setLastPoint(line1.startX, line1.startY)
         path.lineTo(line1.endX, line1.endY)
         path.lineTo(line2.endX, line2.endY)
-        path.lineTo(line1.endX, line1.endY)
+
 
         canvas.drawPath(path, paint)
     }
