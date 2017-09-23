@@ -68,20 +68,21 @@ class Brush : View {
         var line1 = object {
             val startX = canvas.width - (canvas.width - canvas.width/5F)
             val endX = canvas.width.toFloat() - canvas.width/2F
-            val startY = canvas.height - canvas.height/8F
-            val endY = canvas.height - canvas.height/4F
+            val startY = canvas.height - canvas.height/2F
+            val endY = canvas.height - canvas.height/3F
         }
 
         var line2 = object {
             val startX = canvas.width.toFloat() - canvas.width/2F
             val endX = canvas.width.toFloat() - canvas.width/5F
-            val startY = canvas.height - canvas.height/4F
-            val endY = canvas.height - canvas.height/8F
+            val startY = canvas.height - canvas.height/3F
+            val endY = canvas.height - canvas.height/2F
         }
 
         path.setLastPoint(line1.startX, line1.startY)
         path.lineTo(line1.endX, line1.endY)
         path.lineTo(line2.endX, line2.endY)
+        path.lineTo(line1.endX, line1.endY)
 
         canvas.drawPath(path, paint)
     }

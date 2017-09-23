@@ -23,10 +23,10 @@ class CapControl : View {
     val rect = Rect()
     val rectPaint = Paint()
     var firstDraw = true
+    var currentCap = Paint.Cap.BUTT
+    var timer = 0
 
     var canvas = Canvas()
-
-    var currentCap = Paint.Cap.BUTT
 
     constructor(context: Context?) : super(context)
     {
@@ -118,6 +118,8 @@ class CapControl : View {
 
     override fun onDraw(canvas: Canvas?) {
 
+
+
         if(canvas !is Canvas) return
 
         super.onDraw(canvas)
@@ -143,31 +145,49 @@ class CapControl : View {
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
-
         if(event !is MotionEvent) return false
 
-        Log.e("MOTION EVEN COORDINATES:", "X COORDINATE: " + event.getX() + " Y COORDINATE: " + event.getY())
-        Log.e("FIRST SQUARE LOCATION: ", String.format("startX: %s, endX: %s, startY: %s, endY: %s", (canvas.width/7).toFloat().toString(), ((canvas.width/7)*2F).toString(), (canvas.height - canvas.height/8F - paint.strokeWidth).toString(), (canvas.height - canvas.height/8F + paint.strokeWidth).toString()))
-       // Log.e("SECOND SQUARE LOCATION: ",)
-        //Log.e("THIRD SQUARE LOCATION",)
 
-        if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
-        {
-            rect.set(canvas.width/7 - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*2) + 80, (canvas.height - canvas.height/8) + 80)
-            currentCap = Paint.Cap.BUTT
-        }
-        else if(event.getX() > (canvas.width/7)*3F && event.getX() < (canvas.width/7)*4F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
-        {
-            rect.set(((canvas.width/7)*3), (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*4) + 80, (canvas.height - canvas.height/8) + 80)
-            currentCap = Paint.Cap.SQUARE
-        }
-        else if(event.getX() > (canvas.width/7)*5F && event.getX() < (canvas.width/7)*6F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
-        {
-            rect.set(((canvas.width/7)*5) - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*6) + 80, (canvas.height - canvas.height/8) + 80)
-            currentCap = Paint.Cap.ROUND
-        }
 
-        onCapChangedListener?.onCapChanged(this, currentCap)
+        if(event.y.toInt() > context.resources.displayMetrics.heightPixels/3)
+        {
+
+            if (timer == 0) {
+                if (currentCap == Paint.Cap.BUTT) {
+                    rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 4) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    currentCap = Paint.Cap.SQUARE
+                    onCapChangedListener?.onCapChanged(this, currentCap)
+                } else if (currentCap == Paint.Cap.SQUARE) {
+                    rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 6) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    currentCap = Paint.Cap.ROUND
+                    onCapChangedListener?.onCapChanged(this, currentCap)
+                } else if (currentCap == Paint.Cap.ROUND) {
+                    rect.set((canvas.width / 7) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+                    currentCap = Paint.Cap.BUTT
+                    onCapChangedListener?.onCapChanged(this, currentCap)
+                }
+            }
+
+            if(timer == 3) timer = 0
+            else timer++
+        }
+//        if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+//        {
+//            rect.set(canvas.width/7 - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*2) + 80, (canvas.height - canvas.height/8) + 80)
+//            currentCap = Paint.Cap.BUTT
+//        }
+//        else if(event.getX() > (canvas.width/7)*3F && event.getX() < (canvas.width/7)*4F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+//        {
+//            rect.set(((canvas.width/7)*3), (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*4) + 80, (canvas.height - canvas.height/8) + 80)
+//            currentCap = Paint.Cap.SQUARE
+//        }
+//        else if(event.getX() > (canvas.width/7)*5F && event.getX() < (canvas.width/7)*6F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
+//        {
+//            rect.set(((canvas.width/7)*5) - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*6) + 80, (canvas.height - canvas.height/8) + 80)
+//            currentCap = Paint.Cap.ROUND
+//        }
+
+
 
         return true
     }

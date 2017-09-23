@@ -152,7 +152,9 @@ class MainActivity : AppCompatActivity() {
         brush = findViewById(R.id.Brush)
 
         capControl = findViewById(R.id.capControl)
-        capControl.setOnCapChangedListener{_, cap -> brush.setCap(cap)}
+        capControl.setOnCapChangedListener{_, cap ->
+            brush.setCap(cap)
+            capControl.invalidate()}
 
         joinSelect = findViewById(R.id.joinSelect)
         joinSelect.onItemSelectedListener = joinSelection
