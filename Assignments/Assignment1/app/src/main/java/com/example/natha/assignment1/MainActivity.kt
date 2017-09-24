@@ -149,12 +149,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        brush = findViewById(R.id.Brush)
-
         capControl = findViewById(R.id.capControl)
         capControl.setOnCapChangedListener{_, cap ->
             brush.setCap(cap)
             capControl.invalidate()}
+
+        brush = findViewById(R.id.Brush)
 
         joinSelect = findViewById(R.id.joinSelect)
         joinSelect.onItemSelectedListener = joinSelection
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                     if(widthValue.inputType == InputType.TYPE_CLASS_TEXT) widthValue.inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL
                     widthSlider.setProgress(number.toInt()*10)
                 }
-                catch(e : NumberFormatException){return}
+                catch(e : Throwable){return}
             }
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
             override fun afterTextChanged(p0: Editable?) {}

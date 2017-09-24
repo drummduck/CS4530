@@ -16,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_main.view.*
 class Brush : View {
     val paint : Paint = Paint()
     val path : Path = Path()
+    lateinit var canvas : Canvas
 
     constructor(context: Context?) : super(context) {
         paint.color = Color.BLACK
@@ -66,15 +67,15 @@ class Brush : View {
         if(canvas !is Canvas) return
 
         var line1 = object {
-            val startX = canvas.width - (canvas.width - canvas.width/5F)
+            val startX = canvas.width - (canvas.width - canvas.width/6F)
             val endX = canvas.width.toFloat() - canvas.width/2F
             val startY = canvas.height - canvas.height/2F
-            val endY = canvas.height - canvas.height/3F
+            val endY = canvas.height - canvas.height/4F
         }
 
         var line2 = object {
             val startX = canvas.width.toFloat() - canvas.width/2F
-            val endX = canvas.width.toFloat() - canvas.width/5F
+            val endX = canvas.width.toFloat() - canvas.width/6F
             val startY = canvas.height - canvas.height/3F
             val endY = canvas.height - canvas.height/2F
         }
@@ -85,6 +86,8 @@ class Brush : View {
 
 
         canvas.drawPath(path, paint)
+
+        this.canvas = canvas
     }
 }
 
