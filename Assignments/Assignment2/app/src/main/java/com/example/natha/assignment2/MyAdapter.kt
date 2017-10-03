@@ -37,8 +37,8 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
             MyAdadpterItemType.TITLED_IMAGE.ordinal -> {
                 TitledImageViewHolder(layoutInflater.inflate(R.layout. view_titled_image, parent, false) as TitledImageView).apply {
                     titledImageView.setOnClickListener { clickedView: View ->
-//                        Log.e("MyAdapter","Selected ${clickedView.javaClass.canonicalName} at position $adapterPosition. Notifying listener.")
-//                        onMyAdapterItemSelectedListener?.myAdapterItemSelected(dataset[])
+                        Log.e("MyAdapter","Selected ${clickedView.javaClass.canonicalName} at position $adapterPosition. Notifying listener.")
+                        onMyAdapterItemSelectedListener?.myAdapterItemSelected(dataset[adapterPosition])
                     }
                 }
             }

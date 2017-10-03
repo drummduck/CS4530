@@ -28,6 +28,7 @@
             <TextView
                 android:id="@+id/titleTextView"
                 android:fontFamily="sans-serif-black"
+                android:textSize="32sp"
                 android:gravity="start|center_vertical"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
