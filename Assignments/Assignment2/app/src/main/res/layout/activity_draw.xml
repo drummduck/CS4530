@@ -48,5 +48,21 @@
         app:layout_constraintEnd_toStartOf="@+id/undoButton"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/brushButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/drawingSpace"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:background="#00000000"
+        android:cropToPadding="false"
+        android:scaleType="fitXY"
+        android:src="@drawable/brush"
+        android:clickable="true"
+        app:layout_constraintEnd_toStartOf="@+id/redoButton"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

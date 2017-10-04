@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinnerItems">
+        <item>Miter</item>
+        <item>Bevel</item>
+        <item>Round</item>
+    </string-array>
+
+    <string-array name="spinnerItemValues" translatable="false">
+        <item>MITER</item>
+        <item>BEVEL</item>
+        <item>ROUND</item>
+    </string-array>
+</resources>

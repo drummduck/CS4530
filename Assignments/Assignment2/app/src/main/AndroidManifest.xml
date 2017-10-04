@@ -20,6 +20,9 @@
             android:name=".Draw"
             android:label="@string/title_activity_draw"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ColorPicker"
+            android:label="ColorPicker"/>
     </application>
 
 </manifest>
