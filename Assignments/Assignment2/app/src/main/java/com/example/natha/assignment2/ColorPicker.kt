@@ -1,5 +1,6 @@
 package com.example.natha.assignment2
 
+import android.content.Intent
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -30,6 +31,31 @@ class ColorPicker : AppCompatActivity() {
     lateinit var brush : Brush
 
     lateinit var capControl : CapControl
+
+    val clickListener = View.OnClickListener { view ->
+        when (view.getId()) {
+            R.id.ok -> {
+                intent = Intent(applicationContext, Draw::class.java)
+                intent.putExtra("rValue", redSlider.progress)
+                intent.putExtra("gValue", greenSlider.progress)
+                intent.putExtra("bValue", blueSlider.progress)
+                intent.putExtra("wValue", widthSlider.progress)
+                intent.putExtra("capValue", capControl.getCap())
+                startActivity(intent)
+            }
+            R.id.cancel -> {
+                intent = Intent(applicationContext, Draw::class.java)
+                intent.putExtra("rValue", redSlider.progress)
+                intent.putExtra("gValue", greenSlider.progress)
+                intent.putExtra("bValue", blueSlider.progress)
+                intent.putExtra("wValue", widthSlider.progress)
+                intent.putExtra("capValue", capControl.getCap())
+                startActivity(intent)
+                finish()
+            }
+        }
+    }
+
 
     val sliderListener = object : SeekBar.OnSeekBarChangeListener
     {

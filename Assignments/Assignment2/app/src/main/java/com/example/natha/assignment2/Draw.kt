@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.activity_file_selection.*
 
 class Draw : AppCompatActivity() {
 
-    lateinit var imageButton : ImageButton
+    lateinit var imageButton: ImageButton
 
     val clickListener = View.OnClickListener { view ->
         when (view.getId()) {
@@ -27,27 +27,5 @@ class Draw : AppCompatActivity() {
 
         imageButton = findViewById(R.id.brushButton)
         imageButton.setOnClickListener(clickListener)
-
-//        blueValue.addTextChangedListener(object : TextWatcher {
-//            override fun onTextChanged(character: CharSequence?, p1: Int, p2: Int, p3: Int) {
-//                try
-//                {
-//                    var number : Int = Integer.parseInt(character.toString())
-//                    if(number > 255)
-//                    {
-//                        number = 255
-//                        blueValue.setText(number.toString())
-//                    }
-//
-//                    if(blueValue.inputType == InputType.TYPE_CLASS_TEXT) blueValue.inputType = InputType.TYPE_CLASS_NUMBER
-//
-//                    blueSlider.setProgress(number)
-//                }
-//                catch(e : NumberFormatException){return}
-//            }
-//            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-//            override fun afterTextChanged(p0: Editable?) {}
-//        }
     }
 }
-

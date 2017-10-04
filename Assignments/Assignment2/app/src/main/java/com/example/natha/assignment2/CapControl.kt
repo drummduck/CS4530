@@ -203,4 +203,9 @@ class CapControl : View {
 //
 //        setMeasuredDimension(resolveSize(500, widthSize), resolveSize(500, heightSize))
 //    }
+
+    fun getCap() : Int
+    {
+        return currentCap.ordinal
+    }
 }
