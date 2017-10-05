@@ -7,7 +7,7 @@
     tools:context="com.example.natha.assignment2.Draw">
 
 
-    <Space
+    <com.example.natha.assignment2.DrawCanvas
         android:id="@+id/drawingSpace"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

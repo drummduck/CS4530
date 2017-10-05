@@ -55,6 +55,8 @@ class Brush : View {
         invalidate()
     }
 
+    fun getJoin() : String{return paint.strokeJoin.name}
+
     fun setCap(cap : Paint.Cap)
     {
         paint.strokeCap = cap

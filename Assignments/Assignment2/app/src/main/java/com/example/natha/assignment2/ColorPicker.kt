@@ -2,6 +2,7 @@ package com.example.natha.assignment2
 
 import android.content.Intent
 import android.graphics.Paint
+import android.media.Image
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -32,6 +33,9 @@ class ColorPicker : AppCompatActivity() {
 
     lateinit var capControl : CapControl
 
+    lateinit var okButton : Button
+    lateinit var cancelButton : Button
+
     val clickListener = View.OnClickListener { view ->
         when (view.getId()) {
             R.id.ok -> {
@@ -39,18 +43,12 @@ class ColorPicker : AppCompatActivity() {
                 intent.putExtra("rValue", redSlider.progress)
                 intent.putExtra("gValue", greenSlider.progress)
                 intent.putExtra("bValue", blueSlider.progress)
-                intent.putExtra("wValue", widthSlider.progress)
+                intent.putExtra("wValue", (widthSlider.progress/10).toFloat())
                 intent.putExtra("capValue", capControl.getCap())
+                intent.putExtra("joinValue", brush.getJoin())
                 startActivity(intent)
             }
             R.id.cancel -> {
-                intent = Intent(applicationContext, Draw::class.java)
-                intent.putExtra("rValue", redSlider.progress)
-                intent.putExtra("gValue", greenSlider.progress)
-                intent.putExtra("bValue", blueSlider.progress)
-                intent.putExtra("wValue", widthSlider.progress)
-                intent.putExtra("capValue", capControl.getCap())
-                startActivity(intent)
                 finish()
             }
         }
@@ -171,6 +169,11 @@ class ColorPicker : AppCompatActivity() {
 
         brush = findViewById(R.id.Brush)
 
+        okButton = findViewById(R.id.ok)
+        cancelButton = findViewById(R.id.cancel)
+        okButton.setOnClickListener(clickListener)
+        cancelButton.setOnClickListener(clickListener)
+
         capControl = findViewById(R.id.capControl)
         capControl.setOnCapChangedListener{_, cap ->
             brush.setCap(cap)
@@ -191,7 +194,6 @@ class ColorPicker : AppCompatActivity() {
 
         blueSlider = findViewById(R.id.blueSlider)
         blueValue = findViewById(R.id.blueValue)
-
 
         widthSlider.setOnSeekBarChangeListener(sliderListener)
         widthValue.setOnFocusChangeListener(focusTextListener)
@@ -303,5 +305,19 @@ class ColorPicker : AppCompatActivity() {
             override fun afterTextChanged(p0: Editable?) {}
         }
         )
+
+        intent = getIntent()
+        if(intent != null && intent.extras != null) {
+            for (i in intent.extras.keySet()) {
+                when (i) {
+                    "rValue" ->  redValue.setText((intent.getIntExtra(i, 0)).toString())
+                    "gValue" ->  greenValue.setText((intent.getIntExtra(i, 0)).toString())
+                    "bValue" ->  blueValue.setText((intent.getIntExtra(i, 0)).toString())
+                    "wValue" ->  widthValue.setText((intent.getFloatExtra(i, 20F)).toString())
+                    "capValue" ->  capControl.setCap(intent.getStringExtra("capValue"))
+                    "joinValue" ->  brush.setJoin(Paint.Join.valueOf(intent.getStringExtra("joinValue")))
+                }
+            }
+        }
     }
 }
