@@ -4,24 +4,76 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
+import android.R.attr.y
+import android.R.attr.x
+import java.nio.file.Files.size
+
+
 
 /**
  * Created by Natha on 10/4/2017.
  */
 class DrawCanvas : View {
 
-    lateinit var paint : Paint
+    var paint : Paint
 
-    constructor(context: Context?) : super(context){paint = Paint()}
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs){paint = Paint()}
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr){paint = Paint()}
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes){paint = Paint()}
+    var xPos : Float = 0F
+    var yPos : Float = 0F
+
+    var currentDrawing = ArrayList<Pair<Float,Float>>()
+
+    var path = Path()
+
+    constructor(context: Context?) : super(context)
+    {
+        paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.setStyle(Paint.Style.STROKE)
+    }
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    {
+        paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.setStyle(Paint.Style.STROKE)
+    }
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+    {
+        paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.setStyle(Paint.Style.STROKE)
+    }
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
+    {
+        paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.setStyle(Paint.Style.STROKE)
+    }
 
     override fun onDraw(canvas : Canvas?)
     {
         super.onDraw(canvas)
+
+        if(canvas !is Canvas) return
+
+        val path = Path()
+        var first = true
+        var i = 0
+        while (i < currentDrawing.size) {
+            val point = currentDrawing.get(i)
+            if (first) {
+                first = false
+                path.moveTo(point.first, point.second)
+            } else if (i < currentDrawing.size - 1) {
+                val next = currentDrawing.get(i + 1)
+                path.quadTo(point.first, point.second, next.first, next.second)
+            } else {
+                path.lineTo(point.first, point.second)
+            }
+            i += 2
+        }
+
+        canvas.drawPath(path, paint)
     }
 
     fun setColor(argb : IntArray) { paint.setARGB(255, argb[0],argb[1],argb[2]) }
@@ -35,4 +87,49 @@ class DrawCanvas : View {
 
     fun setJoin(joinValue : String) {paint.strokeJoin = Paint.Join.valueOf(joinValue)}
     fun getJoin() : String {return paint.strokeJoin.name}
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        if(event !is MotionEvent) return false
+        xPos = event.x
+        yPos = event.y
+
+        if(event.action == android.view.MotionEvent.ACTION_UP)
+        {
+            currentDrawing.add(Pair(xPos, yPos))
+            onTouchDrawListener?.onTouchDraw(this, x, y, true)
+            invalidate()
+        }
+        else
+        {
+            currentDrawing.add(Pair(xPos, yPos))
+            onTouchDrawListener?.onTouchDraw(this, x, y, false)
+            invalidate()
+        }
+
+        return true
+    }
+
+    interface OnTouchDrawListener
+    {
+        fun onTouchDraw(drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean)
+    }
+
+    private var onTouchDrawListener : OnTouchDrawListener?  = null
+
+    fun setOnTouchDrawListener(onTouchDrawListener : OnTouchDrawListener)
+    {
+        this.onTouchDrawListener  = onTouchDrawListener
+    }
+
+    fun setOnTouchDrawListener(onTouchDrawListener: ((drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean) -> Unit))
+    {
+        this.onTouchDrawListener = object : OnTouchDrawListener
+        {
+            override fun onTouchDraw(drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean)
+            {
+                onTouchDrawListener(drawCanvas, x, y, release)
+            }
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.example.natha.assignment2
 
 import android.content.Intent
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -13,11 +14,21 @@ import kotlinx.android.synthetic.main.activity_file_selection.*
 class Draw : AppCompatActivity() {
 
     lateinit var brushButton: ImageButton
+    lateinit var undoButton : ImageButton
+    lateinit var redoButton : ImageButton
     lateinit var drawCanvas : DrawCanvas
+
+    var redoEnabled = false
+    var undoEnabled = false
+
+    var undoArray = ArrayList<ArrayList<Pair<Float,Float>>>()
+    var redoArray = ArrayList<ArrayList<Pair<Float,Float>>>()
+    var currentDraw = ArrayList<Pair<Float,Float>>()
 
     val clickListener = View.OnClickListener { view ->
         when (view.getId()) {
-            R.id.brushButton -> {
+            R.id.brushButton ->
+            {
                 intent = Intent(applicationContext, ColorPicker::class.java)
                 intent.putExtra("rValue", drawCanvas.getColor()[0])
                 intent.putExtra("gValue", drawCanvas.getColor()[1])
@@ -26,6 +37,16 @@ class Draw : AppCompatActivity() {
                 intent.putExtra("capValue", drawCanvas.getCap())
                 intent.putExtra("joinValue", drawCanvas.getJoin())
                 startActivity(intent)
+            }
+
+            R.id.undoButton ->
+            {
+                
+            }
+
+            R.id.redoButton ->
+            {
+
             }
         }
     }
@@ -58,8 +79,17 @@ class Draw : AppCompatActivity() {
         }
 
         drawCanvas.setColor(intArrayOf(red, green, blue))
+        drawCanvas.setOnTouchDrawListener{_, x, y, release -> if(!release)currentDraw.add(Pair(x, y)) else undoArray.add(currentDraw) }
 
         brushButton = findViewById(R.id.brushButton)
         brushButton.setOnClickListener(clickListener)
+
+        undoButton = findViewById(R.id.undoButton)
+        undoButton.setColorFilter(Color.argb(180,255,255,255))
+        undoButton.setOnClickListener(clickListener)
+
+        redoButton = findViewById(R.id.redoButton)
+        redoButton.setColorFilter(Color.argb(180,255,255,255))
+        redoButton.setOnClickListener(clickListener)
     }
 }
