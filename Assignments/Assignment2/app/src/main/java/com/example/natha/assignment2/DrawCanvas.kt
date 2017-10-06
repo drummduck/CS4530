@@ -26,6 +26,7 @@ class DrawCanvas : View {
     var yPos : Float = 0F
 
     var currentDrawing = ArrayList<Pair<Float,Float>>()
+    var fullDrawing = ArrayList<ArrayList<Pair<Float, Float>>>()
 
     var path = Path()
 
@@ -55,25 +56,44 @@ class DrawCanvas : View {
         super.onDraw(canvas)
 
         if(canvas !is Canvas) return
+        val currentPath = Path()
+        val fullPath = Path()
 
-        val path = Path()
+        for(d in fullDrawing) {
+        var first = true
+        var i = 0
+        while (i < d.size) {
+            val point = d.get(i)
+            if (first) {
+                first = false
+                fullPath.moveTo(point.first, point.second)
+            } else if (i < d.size - 1) {
+                val next = d.get(i + 1)
+                fullPath.quadTo(point.first, point.second, next.first, next.second)
+            } else {
+                fullPath.lineTo(point.first, point.second)
+            }
+            i += 2
+        }
+    }
+
         var first = true
         var i = 0
         while (i < currentDrawing.size) {
             val point = currentDrawing.get(i)
             if (first) {
                 first = false
-                path.moveTo(point.first, point.second)
+                currentPath.moveTo(point.first, point.second)
             } else if (i < currentDrawing.size - 1) {
                 val next = currentDrawing.get(i + 1)
-                path.quadTo(point.first, point.second, next.first, next.second)
+                currentPath.quadTo(point.first, point.second, next.first, next.second)
             } else {
-                path.lineTo(point.first, point.second)
+                currentPath.lineTo(point.first, point.second)
             }
             i += 2
         }
-
-        canvas.drawPath(path, paint)
+        canvas.drawPath(fullPath, paint)
+        canvas.drawPath(currentPath, paint)
     }
 
     fun setColor(argb : IntArray) { paint.setARGB(255, argb[0],argb[1],argb[2]) }
@@ -97,22 +117,36 @@ class DrawCanvas : View {
         if(event.action == android.view.MotionEvent.ACTION_UP)
         {
             currentDrawing.add(Pair(xPos, yPos))
-            onTouchDrawListener?.onTouchDraw(this, x, y, true)
+            var tempCurrentDrawing = ArrayList<Pair<Float,Float>>()
+            for(i in currentDrawing) tempCurrentDrawing.add(i)
+            fullDrawing.add(tempCurrentDrawing)
+            onTouchDrawListener?.onTouchDraw(this, tempCurrentDrawing, true)
+            currentDrawing.clear()
             invalidate()
         }
         else
         {
             currentDrawing.add(Pair(xPos, yPos))
-            onTouchDrawListener?.onTouchDraw(this, x, y, false)
+            onTouchDrawListener?.onTouchDraw(this, currentDrawing, false)
             invalidate()
         }
 
         return true
     }
 
+    fun setCanvas(fullDrawing : ArrayList<ArrayList<Pair<Float,Float>>>)
+    {
+        this.fullDrawing.clear()
+        for(i in fullDrawing)
+        {
+            this.fullDrawing.add(i)
+        }
+        invalidate()
+    }
+
     interface OnTouchDrawListener
     {
-        fun onTouchDraw(drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean)
+        fun onTouchDraw(drawCanvas : DrawCanvas, currentDraw : ArrayList<Pair<Float, Float>>, release : Boolean)
     }
 
     private var onTouchDrawListener : OnTouchDrawListener?  = null
@@ -122,13 +156,13 @@ class DrawCanvas : View {
         this.onTouchDrawListener  = onTouchDrawListener
     }
 
-    fun setOnTouchDrawListener(onTouchDrawListener: ((drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean) -> Unit))
+    fun setOnTouchDrawListener(onTouchDrawListener: ((drawCanvas : DrawCanvas, currentDraw : ArrayList<Pair<Float, Float>>, release : Boolean) -> Unit))
     {
         this.onTouchDrawListener = object : OnTouchDrawListener
         {
-            override fun onTouchDraw(drawCanvas : DrawCanvas, x : Float, y : Float, release : Boolean)
+            override fun onTouchDraw(drawCanvas : DrawCanvas, currentDraw : ArrayList<Pair<Float, Float>>, release : Boolean)
             {
-                onTouchDrawListener(drawCanvas, x, y, release)
+                onTouchDrawListener(drawCanvas, currentDraw, release)
             }
         }
     }

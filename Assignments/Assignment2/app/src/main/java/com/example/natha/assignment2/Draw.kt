@@ -37,16 +37,30 @@ class Draw : AppCompatActivity() {
                 intent.putExtra("capValue", drawCanvas.getCap())
                 intent.putExtra("joinValue", drawCanvas.getJoin())
                 startActivity(intent)
+                finish()
             }
 
             R.id.undoButton ->
             {
-                
+                if(!undoArray.isEmpty()) {
+                    redoArray.add(undoArray[undoArray.size - 1])
+                    undoArray.removeAt(undoArray.size - 1)
+                    drawCanvas.setCanvas(undoArray)
+                    if (undoArray.isEmpty()) undoButton.setColorFilter(Color.argb(180, 255, 255, 255))
+                    redoButton.setColorFilter(Color.argb(0, 255, 255, 255))
+                }
             }
 
             R.id.redoButton ->
             {
-
+                if(!redoArray.isEmpty())
+                {
+                    undoArray.add(redoArray[redoArray.size - 1])
+                    redoArray.removeAt(redoArray.size - 1)
+                    drawCanvas.setCanvas(undoArray)
+                    if(redoArray.isEmpty()) redoButton.setColorFilter(Color.argb(180,225,225,225))
+                    undoButton.setColorFilter(Color.argb(0,255,255,255))
+                }
             }
         }
     }
@@ -79,7 +93,18 @@ class Draw : AppCompatActivity() {
         }
 
         drawCanvas.setColor(intArrayOf(red, green, blue))
-        drawCanvas.setOnTouchDrawListener{_, x, y, release -> if(!release)currentDraw.add(Pair(x, y)) else undoArray.add(currentDraw) }
+        drawCanvas.setOnTouchDrawListener { _, currentDrawing, release ->
+            if(release) {
+                undoArray.add(currentDrawing)
+                undoButton.setColorFilter(Color.argb(0, 255, 255, 255))
+            }
+            else
+            {
+                redoArray.clear()
+                redoButton.setColorFilter(Color.argb(180,255,255,255))
+            }
+        }
+
 
         brushButton = findViewById(R.id.brushButton)
         brushButton.setOnClickListener(clickListener)

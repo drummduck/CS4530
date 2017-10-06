@@ -47,8 +47,11 @@ class ColorPicker : AppCompatActivity() {
                 intent.putExtra("capValue", capControl.getCap())
                 intent.putExtra("joinValue", brush.getJoin())
                 startActivity(intent)
+                finish()
             }
             R.id.cancel -> {
+                intent = Intent(applicationContext, Draw::class.java)
+                startActivity(intent)
                 finish()
             }
         }
@@ -308,16 +311,44 @@ class ColorPicker : AppCompatActivity() {
 
         intent = getIntent()
         if(intent != null && intent.extras != null) {
+            var red : Int = 0
+            var green : Int  = 0
+            var blue : Int = 0
             for (i in intent.extras.keySet()) {
                 when (i) {
-                    "rValue" ->  redValue.setText((intent.getIntExtra(i, 0)).toString())
-                    "gValue" ->  greenValue.setText((intent.getIntExtra(i, 0)).toString())
-                    "bValue" ->  blueValue.setText((intent.getIntExtra(i, 0)).toString())
-                    "wValue" ->  widthValue.setText((intent.getFloatExtra(i, 20F)).toString())
-                    "capValue" ->  capControl.setCap(intent.getStringExtra("capValue"))
-                    "joinValue" ->  brush.setJoin(Paint.Join.valueOf(intent.getStringExtra("joinValue")))
+                    "rValue" ->
+                    {
+                        redValue.setText((intent.getIntExtra(i, 0)).toString())
+                        red = intent.getIntExtra(i, 0)
+                    }
+                    "gValue" ->
+                    {
+                        greenValue.setText((intent.getIntExtra(i, 0)).toString())
+                        green = intent.getIntExtra(i, 0)
+                    }
+                    "bValue" ->
+                    {
+                        blueValue.setText((intent.getIntExtra(i, 0)).toString())
+                        blue = intent.getIntExtra(i, 0)
+                    }
+                    "wValue" -> {
+                        widthValue.setText((intent.getFloatExtra(i, 20F)).toString())
+                        brush.setWidth(intent.getFloatExtra(i, 20F))
+                        brush.invalidate()
+                    }
+                    "capValue" ->
+                    {
+                        capControl.setCap(intent.getStringExtra("capValue"))
+                        capControl.invalidate()
+                    }
+                    "joinValue" ->
+                    {
+                        brush.setJoin(Paint.Join.valueOf(intent.getStringExtra("joinValue")))
+                        brush.invalidate()
+                    }
                 }
             }
+            brush.setColor(red, green, blue)
         }
     }
 }
