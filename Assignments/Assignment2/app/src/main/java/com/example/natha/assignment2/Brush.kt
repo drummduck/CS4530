@@ -86,7 +86,6 @@ class Brush : View {
         path.lineTo(line1.endX, line1.endY)
         path.lineTo(line2.endX, line2.endY)
 
-
         canvas.drawPath(path, paint)
 
         this.canvas = canvas

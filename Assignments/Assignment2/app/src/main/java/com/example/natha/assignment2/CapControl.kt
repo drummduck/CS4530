@@ -23,11 +23,8 @@ class CapControl : View {
     val linePaint = Paint()
     val rect = Rect()
     val rectPaint = Paint()
-    var firstDraw = true
     var currentCap = Paint.Cap.BUTT
     var timer = 0L
-
-    lateinit var canvas : Canvas
 
     constructor(context: Context?) : super(context)
     {
@@ -136,8 +133,6 @@ class CapControl : View {
         else if(currentCap == Paint.Cap.SQUARE)  rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 4) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
         else if(currentCap == Paint.Cap.ROUND) rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 6) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
         canvas.drawRect(rect, rectPaint)
-        firstDraw = false
-        this.canvas = canvas
     }
 
 

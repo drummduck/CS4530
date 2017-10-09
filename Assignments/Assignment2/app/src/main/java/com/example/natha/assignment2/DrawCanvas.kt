@@ -96,7 +96,7 @@ class DrawCanvas : View {
         canvas.drawPath(currentPath, paint)
     }
 
-    fun setColor(argb : IntArray) { paint.setARGB(255, argb[0],argb[1],argb[2]) }
+    fun setColor(rgb : IntArray) { paint.setARGB(255, rgb[0],rgb[1],rgb[2]) }
     fun getColor() : IntArray {return intArrayOf(Color.red(paint.color), Color.green(paint.color), Color.blue(paint.color))}
 
     fun setCap(capValue : String) {paint.strokeCap = Paint.Cap.valueOf(capValue)}

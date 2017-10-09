@@ -1,5 +1,6 @@
 package com.example.natha.assignment2
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Paint
 import android.media.Image
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
@@ -36,6 +38,15 @@ class ColorPicker : AppCompatActivity() {
     lateinit var okButton : Button
     lateinit var cancelButton : Button
 
+    var fileName = ""
+
+    var originalRed = 0
+    var originalGreen = 0
+    var originalBlue = 0
+    var originalwidth = 0F
+    var originalCap = ""
+    var originalJoin = ""
+
     val clickListener = View.OnClickListener { view ->
         when (view.getId()) {
             R.id.ok -> {
@@ -46,12 +57,18 @@ class ColorPicker : AppCompatActivity() {
                 intent.putExtra("wValue", (widthSlider.progress/10).toFloat())
                 intent.putExtra("capValue", capControl.getCap())
                 intent.putExtra("joinValue", brush.getJoin())
-                startActivity(intent)
+                setResult(Activity.RESULT_OK, intent)
                 finish()
             }
             R.id.cancel -> {
                 intent = Intent(applicationContext, Draw::class.java)
-                startActivity(intent)
+                intent.putExtra("rValue", originalRed)
+                intent.putExtra("gValue", originalGreen)
+                intent.putExtra("bValue", originalBlue)
+                intent.putExtra("wValue", (originalwidth))
+                intent.putExtra("capValue", originalCap)
+                intent.putExtra("joinValue", originalJoin)
+                setResult(Activity.RESULT_CANCELED, intent)
                 finish()
             }
         }
@@ -315,40 +332,59 @@ class ColorPicker : AppCompatActivity() {
             var green : Int  = 0
             var blue : Int = 0
             for (i in intent.extras.keySet()) {
+                Log.e("INTENT BITCH", "Intent extra string: " + i + ", Intent extra value: " + intent.extras.get(i))
                 when (i) {
                     "rValue" ->
                     {
                         redValue.setText((intent.getIntExtra(i, 0)).toString())
                         red = intent.getIntExtra(i, 0)
+                        originalRed = intent.getIntExtra(i, 0)
                     }
                     "gValue" ->
                     {
                         greenValue.setText((intent.getIntExtra(i, 0)).toString())
                         green = intent.getIntExtra(i, 0)
+                        originalGreen = intent.getIntExtra(i, 0)
                     }
                     "bValue" ->
                     {
                         blueValue.setText((intent.getIntExtra(i, 0)).toString())
                         blue = intent.getIntExtra(i, 0)
+                        originalBlue = intent.getIntExtra(i, 0)
                     }
                     "wValue" -> {
                         widthValue.setText((intent.getFloatExtra(i, 20F)).toString())
                         brush.setWidth(intent.getFloatExtra(i, 20F))
-                        brush.invalidate()
+                        originalwidth = intent.getFloatExtra(i, 20F)
                     }
                     "capValue" ->
                     {
                         capControl.setCap(intent.getStringExtra("capValue"))
-                        capControl.invalidate()
+                        originalCap = intent.getStringExtra("capValue")
                     }
                     "joinValue" ->
                     {
                         brush.setJoin(Paint.Join.valueOf(intent.getStringExtra("joinValue")))
-                        brush.invalidate()
+                        originalJoin = intent.getStringExtra("joinValue")
                     }
+                    "fileName" -> fileName = intent.getStringExtra("fileName")
                 }
             }
             brush.setColor(red, green, blue)
+            brush.invalidate()
+            capControl.invalidate()
         }
+    }
+
+    override fun onBackPressed() {
+        intent = Intent(applicationContext, Draw::class.java)
+        intent.putExtra("rValue", originalRed)
+        intent.putExtra("gValue", originalGreen)
+        intent.putExtra("bValue", originalBlue)
+        intent.putExtra("wValue", (originalwidth))
+        intent.putExtra("capValue", originalCap)
+        intent.putExtra("joinValue", originalJoin)
+        setResult(Activity.RESULT_CANCELED, intent)
+        finish()
     }
 }
