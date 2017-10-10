@@ -59,7 +59,7 @@ class FileSelection : AppCompatActivity() {
             val newItem : Drawable = getDrawable(R.drawable.plus)
             recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "New Project"))
             var dir : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/")
-            if(dir.exists()) dir.mkdirs()
+            if(!dir.exists()) dir.mkdirs()
             else {
                 numOfFiles = dir.listFiles().size
                 var count = 1

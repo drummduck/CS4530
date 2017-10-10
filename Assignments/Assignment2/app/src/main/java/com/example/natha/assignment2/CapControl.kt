@@ -120,18 +120,18 @@ class CapControl : View {
         super.onDraw(canvas)
 
         paint.strokeCap = Paint.Cap.BUTT
-        canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/8F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/8F, paint)
-        canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/8F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/8F, linePaint)
+        canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/5F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/5F, paint)
+        canvas.drawLine((canvas.width/7).toFloat(), canvas.height - canvas.height/5F ,((canvas.width/7)*2).toFloat(), canvas.height - canvas.height/5F, linePaint)
         paint.strokeCap = Paint.Cap.SQUARE
-        canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/8F, paint)
-        canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/8F, linePaint)
+        canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/5F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/5F, paint)
+        canvas.drawLine(((canvas.width/7)*3).toFloat(), canvas.height - canvas.height/5F, ((canvas.width/7)*4).toFloat(), canvas.height - canvas.height/5F, linePaint)
         paint.strokeCap = Paint.Cap.ROUND
-        canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, paint)
-        canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, linePaint)
+        canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/5F, (canvas.width/7)*6.toFloat(), canvas.height - canvas.height/5F, paint)
+        canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/5F, (canvas.width/7)*6.toFloat(), canvas.height - canvas.height/5F, linePaint)
 
-        if(currentCap == Paint.Cap.BUTT)  rect.set(canvas.width / 7 - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
-        else if(currentCap == Paint.Cap.SQUARE)  rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 4) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
-        else if(currentCap == Paint.Cap.ROUND) rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 6) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+        if(currentCap == Paint.Cap.BUTT)  rect.set(canvas.width / 7 - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) + paint.strokeWidth.toInt())
+        else if(currentCap == Paint.Cap.SQUARE)  rect.set(((canvas.width / 7) * 3) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 4) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) + paint.strokeWidth.toInt())
+        else if(currentCap == Paint.Cap.ROUND) rect.set(((canvas.width / 7) * 5) - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) - paint.strokeWidth.toInt(), (canvas.width/7)*6 + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 5) + paint.strokeWidth.toInt())
         canvas.drawRect(rect, rectPaint)
     }
 

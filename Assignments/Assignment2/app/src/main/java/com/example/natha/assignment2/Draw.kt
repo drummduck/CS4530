@@ -20,6 +20,9 @@ import android.widget.Toast
 import java.io.*
 import android.app.Activity
 import android.graphics.ColorFilter
+import java.nio.channels.FileChannel
+import java.nio.file.Files
+import java.nio.file.Paths
 
 
 class Draw : AppCompatActivity() {
@@ -130,7 +133,7 @@ class Draw : AppCompatActivity() {
                 drawCanvas.setColor(intArrayOf(0, 0, 0))
                 fromFileSelection = true
                 if (fileName.equals("New Project")) fileName = "Project" + (numOfFiles + 1)
-                readFromFile()
+                else readFromFile()
             }
 
             drawCanvas.setOnTouchDrawListener { _, currentDrawing, release ->
@@ -151,20 +154,18 @@ class Draw : AppCompatActivity() {
     fun writeToFile()
     {
         var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName)
+
         if(file.exists())
         {
             file.delete()
             file.createNewFile()
         }
 
-        //val fileout = openFileOutput(dir.path, Context.MODE_PRIVATE)
         val outputWriter = FileOutputStream(file)
         val outputStream = DataOutputStream(outputWriter)
+        Log.e("WRITE TO FILE", "size of undoArray: " + undoArray.size)
         outputStream.write(undoArray.size)
-        for(i in undoArray)
-        {
-            outputStream.write(i.size)
-        }
+        for(i in undoArray) outputStream.write(i.size)
         for(i in undoArray)
         {
             for(j in i)
@@ -175,10 +176,7 @@ class Draw : AppCompatActivity() {
         }
 
         outputStream.write(redoArray.size)
-        for(i in redoArray)
-        {
-            outputStream.write(i.size)
-        }
+        for(i in redoArray) outputStream.write(i.size)
         for(i in redoArray)
         {
             for(j in i)
@@ -196,38 +194,43 @@ class Draw : AppCompatActivity() {
     {
         Log.e("FILENAME", "Filename is: " + fileName)
         var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName)
-        if(file.isFile)
-        {
-            redoButton.setColorFilter(Color.argb(180,255,255,255))
-            undoButton.setColorFilter(Color.argb(180,255,255,255))
-            file.createNewFile()
-            return
-        }
-        //val fileout = openFileInput(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName)
+
         val inputFile = FileInputStream(file)
         val inputReader = DataInputStream(inputFile)
-        undoArray = ArrayList<ArrayList<Pair<Float,Float>>>(inputReader.readInt())
-        for(i in undoArray)
+        var undoArraySize = inputReader.readInt()
+        Log.e("READ FROM FILE", "undoArraySize is: " + undoArraySize)
+        var undoPairArraySize = ArrayList<Int>()
+        for(i in 1..undoArraySize) undoPairArraySize.add(inputReader.readInt())
+        for(i in undoPairArraySize)
         {
-            var pairArraySize = inputReader.readInt()
-            for(j in 0..pairArraySize-1)
+            var pairArray = ArrayList<Pair<Float,Float>>()
+            for(j in 1..i)
             {
-                var pairX = inputReader.readFloat()
-                var pairY = inputReader.readFloat()
-                i.add(Pair(pairX, pairY))
+                var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
+                pairArray.add(pair)
             }
+            undoArray.add(pairArray)
         }
         var redoArraySize = inputReader.readInt()
-        redoArray = ArrayList<ArrayList<Pair<Float,Float>>>(redoArraySize)
-        for(i in redoArray) for(j in 0..inputReader.readInt()-1) i.add(Pair(inputReader.readFloat(), inputReader.readFloat()))
-
-        inputFile.close()
-        inputReader.close()
+        var redoPairArraySize = ArrayList<Int>()
+        for(i in 1..redoArraySize) redoPairArraySize.add(inputReader.readInt())
+        for(i in 1..redoArraySize)
+        {
+            var pairArray = ArrayList<Pair<Float,Float>>()
+            for(j in redoPairArraySize)
+            {
+                var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
+                pairArray.add(pair)
+            }
+            redoArray.add(pairArray)
+        }
 
         if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
         if(undoArray.size > 0) undoButton.setColorFilter(Color.argb(0,255,255,255))
 
         drawCanvas.invalidate()
+        inputReader.close()
+        inputFile.close()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
@@ -248,7 +251,6 @@ class Draw : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
 
         if (requestCode == 1) {
-            Log.e(":LKSDJF:LKJSD:LKFJ", "FUCKAFUCKAFUCKAFUCKAYAAAAA!!!")
                 var red = 0
                 var green = 0
                 var blue = 0
