@@ -160,23 +160,29 @@ class Draw : AppCompatActivity() {
             file.delete()
             file.createNewFile()
         }
-
+        Log.e("WRITE TO FILE", "filePath is: " + file.absolutePath)
         val outputWriter = FileOutputStream(file)
         val outputStream = DataOutputStream(outputWriter)
         Log.e("WRITE TO FILE", "size of undoArray: " + undoArray.size)
-        outputStream.write(undoArray.size)
-        for(i in undoArray) outputStream.write(i.size)
+        outputStream.writeInt(undoArray.size)
+
+        for(i in undoArray)
+        {
+            Log.e("WRITE TO FILE", "size of PairArray is: " + i.size)
+            outputStream.writeInt(i.size)
+        }
         for(i in undoArray)
         {
             for(j in i)
             {
+                Log.e("WRITE TO FILE", "X: " + j.first + " Y: " + j.second)
                 outputStream.writeFloat(j.first)
                 outputStream.writeFloat(j.second)
             }
         }
 
-        outputStream.write(redoArray.size)
-        for(i in redoArray) outputStream.write(i.size)
+        outputStream.writeInt(redoArray.size)
+        for(i in redoArray) outputStream.writeInt(i.size)
         for(i in redoArray)
         {
             for(j in i)
@@ -192,15 +198,18 @@ class Draw : AppCompatActivity() {
 
     fun readFromFile()
     {
-        Log.e("FILENAME", "Filename is: " + fileName)
         var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName)
-
+        Log.e("FILENAME", "filePath is: " + file.absolutePath)
         val inputFile = FileInputStream(file)
         val inputReader = DataInputStream(inputFile)
         var undoArraySize = inputReader.readInt()
         Log.e("READ FROM FILE", "undoArraySize is: " + undoArraySize)
         var undoPairArraySize = ArrayList<Int>()
-        for(i in 1..undoArraySize) undoPairArraySize.add(inputReader.readInt())
+        for(i in 1..undoArraySize)
+        {
+            undoPairArraySize.add(inputReader.readInt())
+            Log.e("READ FROM FILE", "PairArray size is: " + undoPairArraySize[i-1])
+        }
         for(i in undoPairArraySize)
         {
             var pairArray = ArrayList<Pair<Float,Float>>()
@@ -208,9 +217,11 @@ class Draw : AppCompatActivity() {
             {
                 var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
                 pairArray.add(pair)
+                Log.e("READ FROM FILE", "pairArray X: " + pairArray[j-1].first + "pairArray Y: " + pairArray[j-1].second)
             }
             undoArray.add(pairArray)
         }
+        Log.e("READ FROM FILE", "undoArray size is: " + undoArray.size)
         var redoArraySize = inputReader.readInt()
         var redoPairArraySize = ArrayList<Int>()
         for(i in 1..redoArraySize) redoPairArraySize.add(inputReader.readInt())
@@ -228,6 +239,7 @@ class Draw : AppCompatActivity() {
         if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
         if(undoArray.size > 0) undoButton.setColorFilter(Color.argb(0,255,255,255))
 
+        drawCanvas.setCanvas(undoArray)
         drawCanvas.invalidate()
         inputReader.close()
         inputFile.close()
@@ -250,7 +262,7 @@ class Draw : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
 
-        if (requestCode == 1) {
+        if (resultCode == Activity.RESULT_OK) {
                 var red = 0
                 var green = 0
                 var blue = 0
@@ -260,12 +272,12 @@ class Draw : AppCompatActivity() {
                     Log.e("VALUESET", "VALUESET ACTIVITY RESULT VALUE: " + data.extras.get(i))
                     when(i)
                     {
-                        "rValue" -> red = intent.getIntExtra(i, 0)
-                        "gValue" -> green = intent.getIntExtra(i, 0)
-                        "bValue" -> blue = intent.getIntExtra(i, 0)
-                        "wValue" -> drawCanvas.setWidth(intent.getFloatExtra(i, 20F))
-                        "capValue" -> drawCanvas.setCap(intent.getStringExtra("capValue"))
-                        "joinValue" -> drawCanvas.setJoin(intent.getStringExtra("joinValue"))
+                        "rValue" -> red = data.getIntExtra(i, 0)
+                        "gValue" -> green = data.getIntExtra(i, 0)
+                        "bValue" -> blue = data.getIntExtra(i, 0)
+                        "wValue" -> drawCanvas.setWidth(data.getFloatExtra(i, 20F))
+                        "capValue" -> drawCanvas.setCap(data.getStringExtra("capValue"))
+                        "joinValue" -> drawCanvas.setJoin(data.getStringExtra("joinValue"))
                     }
                 }
 
