@@ -108,6 +108,7 @@ class Draw : AppCompatActivity() {
                 var green: Int = 0
                 var blue: Int = 0
                 for (i in savedInstanceState.keySet()) {
+                    Log.e("SAVED INSTANCE STATE", "keySet key is: " + i + " keySet value is: " + savedInstanceState.get(i))
                     when (i) {
                         "rValue" -> red = savedInstanceState.getInt(i, 0)
                         "gValue" -> green = savedInstanceState.getInt(i, 0)
@@ -119,6 +120,7 @@ class Draw : AppCompatActivity() {
                     }
                 }
                 drawCanvas.setColor(intArrayOf(red, green, blue))
+                readFromFile()
             }
             else if (intent != null && intent.extras != null) {
                 for (i in intent.extras.keySet()) {
@@ -245,7 +247,6 @@ class Draw : AppCompatActivity() {
             {
                 var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
                 pairArray.add(pair)
-                Log.e("READ FROM FILE", "pairArray X: " + pairArray[j-1].first + "pairArray Y: " + pairArray[j-1].second)
             }
             undoArray.add(Pair(undoPaintArray[num], pairArray))
             num++
@@ -267,7 +268,6 @@ class Draw : AppCompatActivity() {
             {
                 var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
                 pairArray.add(pair)
-                Log.e("READ FROM FILE", "pairArray X: " + pairArray[j-1].first + "pairArray Y: " + pairArray[j-1].second)
             }
             redoArray.add(Pair(redoPaintArray[num], pairArray))
             num++
@@ -311,8 +311,6 @@ class Draw : AppCompatActivity() {
                 var blue = 0
                 for(i in data.extras.keySet())
                 {
-                    Log.e("KEYSET", "KEYSET ACTIVITY RESULT VALUE: " + i)
-                    Log.e("VALUESET", "VALUESET ACTIVITY RESULT VALUE: " + data.extras.get(i))
                     when(i)
                     {
                         "rValue" -> red = data.getIntExtra(i, 0)
@@ -342,7 +340,6 @@ class Draw : AppCompatActivity() {
         while(true)
         {
             var readInChar = reader.readChar()
-            Log.e("READ STRING", "CHAR READ IN IS: " + readInChar)
             if(readInChar == '\t') return returnString
             else returnString = returnString + readInChar
         }

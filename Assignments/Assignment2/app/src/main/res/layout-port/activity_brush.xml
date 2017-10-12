@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    tools:context="com.example.natha.assignment2.FileSelection"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="81dp">
+
+    <com.example.natha.assignment2.CapControl
+        android:id="@+id/capControl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <SeekBar
+        android:id="@+id/redSlider"
+        android:layout_width="232dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:max="255"
+        android:progress="0"
+        android:thumbTint="@android:color/holo_red_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/redValue"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/redTitle"
+        android:layout_width="25dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="R:"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/redValue"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/redValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/back"
+        android:backgroundTint="@android:color/darker_gray"
+        android:ems="3"
+        android:imeOptions=""
+        android:inputType="number"
+        android:maxLength="3"
+        android:text="0"
+        android:textAlignment="textEnd"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/redSlider"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/redTitle"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <SeekBar
+        android:id="@+id/greenSlider"
+        android:layout_width="232dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:max="255"
+        android:progress="0"
+        android:thumbTint="@android:color/holo_green_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/greenValue"
+        app:layout_constraintTop_toBottomOf="@+id/redSlider" />
+
+    <TextView
+        android:id="@+id/greenTitle"
+        android:layout_width="25dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="G:"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/greenValue"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/redTitle" />
+
+    <EditText
+        android:id="@+id/greenValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/back"
+        android:backgroundTint="@android:color/darker_gray"
+        android:ems="3"
+        android:inputType="number"
+        android:maxLength="3"
+        android:text="0"
+        android:textAlignment="textEnd"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/greenSlider"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/greenTitle"
+        app:layout_constraintTop_toBottomOf="@+id/redValue" />
+
+    <SeekBar
+        android:id="@+id/blueSlider"
+        android:layout_width="232dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:max="255"
+        android:progress="0"
+        android:thumbTint="@android:color/holo_blue_light"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/blueValue"
+        app:layout_constraintTop_toBottomOf="@+id/greenSlider" />
+
+    <TextView
+        android:id="@+id/blueTitle"
+        android:layout_width="25dp"
+        android:layout_height="31dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="B:"
+        android:textColor="@android:color/holo_blue_light"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/blueValue"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/greenTitle" />
+
+    <EditText
+        android:id="@+id/blueValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/back"
+        android:backgroundTint="@android:color/darker_gray"
+        android:ems="3"
+        android:inputType="number"
+        android:maxLength="3"
+        android:text="0"
+        android:textAlignment="textEnd"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/blueSlider"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/blueTitle"
+        app:layout_constraintTop_toBottomOf="@+id/greenValue" />
+
+    <SeekBar
+        android:id="@+id/widthSlider"
+        android:layout_width="351dp"
+        android:layout_height="26dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:max="505"
+        android:maxHeight="20dp"
+        android:min="5"
+        android:minHeight="20dp"
+        android:thumbTint="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.428"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/widthValue" />
+
+    <TextView
+        android:id="@+id/widthTitle"
+        android:layout_width="69dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:text="Width:"
+        android:textColor="@android:color/black"
+        android:textSize="4mm"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider" />
+
+    <EditText
+        android:id="@+id/widthValue"
+        android:layout_width="82dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/back"
+        android:backgroundTint="@android:color/darker_gray"
+        android:ems="3"
+        android:inputType="number"
+        android:maxLength="4"
+        android:text="0"
+        android:textAlignment="textEnd"
+        android:textSize="4mm"
+        app:layout_constraintStart_toEndOf="@+id/widthTitle"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider" />
+
+    <TextView
+        android:id="@+id/joinTitle"
+        android:layout_width="59dp"
+        android:layout_height="37dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="40dp"
+        android:text="Join:"
+        android:textAlignment="textEnd"
+        android:textSize="4mm"
+        app:layout_constraintEnd_toStartOf="@+id/joinSelect"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider" />
+
+    <Spinner
+        android:id="@+id/joinSelect"
+        android:layout_width="105dp"
+        android:layout_height="35dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="40dp"
+        android:entries="@array/spinnerItems"
+        android:entryValues="@array/spinnerItemValues"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/blueSlider" />
+
+    <com.example.natha.assignment2.Brush
+        android:id="@+id/Brush"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/ok"
+        android:layout_width="78dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="120dp"
+        android:layout_marginStart="40dp"
+        android:text="Ok"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="78dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="120dp"
+        android:layout_marginEnd="40dp"
+        android:text="Cancel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
+</android.support.constraint.ConstraintLayout>

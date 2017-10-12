@@ -1,6 +1,7 @@
 package com.example.natha.assignment2
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.*
 import android.widget.TextView
 import android.util.AttributeSet
@@ -82,10 +83,18 @@ class Brush : View {
             val endY = canvas.height/3F
         }
 
-        path.setLastPoint(line1.startX, line1.startY)
-        path.lineTo(line1.endX, line1.endY)
-        path.lineTo(line2.endX, line2.endY)
+        if(resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            path.setLastPoint(line1.startX, line1.startY)
+            path.lineTo(line1.endX, line1.endY)
+            path.lineTo(line2.endX, line2.endY)
+        }
 
+        else if(resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+        {
+            path.setLastPoint(line1.startX, line1.endY - 200F)
+            path.lineTo(line1.endX, line1.endY)
+            path.lineTo(line2.endX, line1.endY - 200F)
+        }
         canvas.drawPath(path, paint)
 
         this.canvas = canvas
