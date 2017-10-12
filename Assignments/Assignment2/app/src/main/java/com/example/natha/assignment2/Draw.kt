@@ -35,8 +35,8 @@ class Draw : AppCompatActivity() {
     var redoEnabled = false
     var undoEnabled = false
 
-    var undoArray = ArrayList<ArrayList<Pair<Float,Float>>>()
-    var redoArray = ArrayList<ArrayList<Pair<Float,Float>>>()
+    var undoArray = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+    var redoArray = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
     var fileName : String = ""
     var numOfFiles : Int = 0
 
@@ -127,12 +127,15 @@ class Draw : AppCompatActivity() {
                         "numOfFiles" -> numOfFiles = intent.getIntExtra("numOfFiles", 0)
                     }
                 }
-                drawCanvas.setCap(Paint.Cap.BUTT.name)
-                drawCanvas.setJoin(Paint.Join.MITER.name)
-                drawCanvas.setWidth(20F)
-                drawCanvas.setColor(intArrayOf(0, 0, 0))
+
                 fromFileSelection = true
-                if (fileName.equals("New Project")) fileName = "Project" + (numOfFiles + 1)
+
+                if (fileName.equals("New Project"))
+                {
+                    fileName = "Project" + (numOfFiles + 1)
+                    writeToFile()
+                }
+
                 else readFromFile()
             }
 
@@ -160,37 +163,62 @@ class Draw : AppCompatActivity() {
             file.delete()
             file.createNewFile()
         }
-        Log.e("WRITE TO FILE", "filePath is: " + file.absolutePath)
         val outputWriter = FileOutputStream(file)
         val outputStream = DataOutputStream(outputWriter)
-        Log.e("WRITE TO FILE", "size of undoArray: " + undoArray.size)
-        outputStream.writeInt(undoArray.size)
 
+        outputStream.writeInt(undoArray.size)
         for(i in undoArray)
         {
-            Log.e("WRITE TO FILE", "size of PairArray is: " + i.size)
-            outputStream.writeInt(i.size)
+            outputStream.writeInt(i.first.color[0])
+            outputStream.writeInt(i.first.color[1])
+            outputStream.writeInt(i.first.color[2])
+            outputStream.writeFloat(i.first.width)
+            outputStream.writeChars(i.first.join)
+            outputStream.writeChars("\t")
+            outputStream.writeChars(i.first.cap)
+            outputStream.writeChars("\t")
+            outputStream.writeInt(i.second.size)
         }
         for(i in undoArray)
         {
-            for(j in i)
+            for(j in i.second)
             {
-                Log.e("WRITE TO FILE", "X: " + j.first + " Y: " + j.second)
                 outputStream.writeFloat(j.first)
                 outputStream.writeFloat(j.second)
             }
         }
 
         outputStream.writeInt(redoArray.size)
-        for(i in redoArray) outputStream.writeInt(i.size)
         for(i in redoArray)
         {
-            for(j in i)
+            outputStream.writeInt(i.first.color[0])
+            outputStream.writeInt(i.first.color[1])
+            outputStream.writeInt(i.first.color[2])
+            outputStream.writeFloat(i.first.width)
+            outputStream.writeChars(i.first.join)
+            outputStream.writeChars("\t")
+            outputStream.writeChars(i.first.cap)
+            outputStream.writeChars("\t")
+            outputStream.writeInt(i.second.size)
+        }
+        for(i in redoArray)
+        {
+            for(j in i.second)
             {
                 outputStream.writeFloat(j.first)
                 outputStream.writeFloat(j.second)
             }
         }
+
+        outputStream.writeInt(drawCanvas.getColor()[0])
+        outputStream.writeInt(drawCanvas.getColor()[1])
+        outputStream.writeInt(drawCanvas.getColor()[2])
+        outputStream.writeFloat(drawCanvas.getPaintWidth())
+        outputStream.writeChars(drawCanvas.getJoin())
+        outputStream.writeChars("\t")
+        outputStream.writeChars(drawCanvas.getCap())
+        outputStream.writeChars("\t")
+
         outputStream.flush()
         outputStream.close()
         outputWriter.close()
@@ -199,17 +227,17 @@ class Draw : AppCompatActivity() {
     fun readFromFile()
     {
         var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName)
-        Log.e("FILENAME", "filePath is: " + file.absolutePath)
         val inputFile = FileInputStream(file)
         val inputReader = DataInputStream(inputFile)
         var undoArraySize = inputReader.readInt()
-        Log.e("READ FROM FILE", "undoArraySize is: " + undoArraySize)
+        var undoPaintArray = ArrayList<Quadruple>()
         var undoPairArraySize = ArrayList<Int>()
         for(i in 1..undoArraySize)
         {
+            undoPaintArray.add(Quadruple(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()), inputReader.readFloat(), readString(inputReader), readString(inputReader)))
             undoPairArraySize.add(inputReader.readInt())
-            Log.e("READ FROM FILE", "PairArray size is: " + undoPairArraySize[i-1])
         }
+        var num = 0
         for(i in undoPairArraySize)
         {
             var pairArray = ArrayList<Pair<Float,Float>>()
@@ -219,25 +247,39 @@ class Draw : AppCompatActivity() {
                 pairArray.add(pair)
                 Log.e("READ FROM FILE", "pairArray X: " + pairArray[j-1].first + "pairArray Y: " + pairArray[j-1].second)
             }
-            undoArray.add(pairArray)
+            undoArray.add(Pair(undoPaintArray[num], pairArray))
+            num++
         }
-        Log.e("READ FROM FILE", "undoArray size is: " + undoArray.size)
+
         var redoArraySize = inputReader.readInt()
+        var redoPaintArray = ArrayList<Quadruple>()
         var redoPairArraySize = ArrayList<Int>()
-        for(i in 1..redoArraySize) redoPairArraySize.add(inputReader.readInt())
         for(i in 1..redoArraySize)
         {
+            redoPaintArray.add(Quadruple(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()), inputReader.readFloat(), readString(inputReader), readString(inputReader)))
+            redoPairArraySize.add(inputReader.readInt())
+        }
+        num = 0
+        for(i in redoPairArraySize)
+        {
             var pairArray = ArrayList<Pair<Float,Float>>()
-            for(j in redoPairArraySize)
+            for(j in 1..i)
             {
                 var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
                 pairArray.add(pair)
+                Log.e("READ FROM FILE", "pairArray X: " + pairArray[j-1].first + "pairArray Y: " + pairArray[j-1].second)
             }
-            redoArray.add(pairArray)
+            redoArray.add(Pair(redoPaintArray[num], pairArray))
+            num++
         }
 
         if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
         if(undoArray.size > 0) undoButton.setColorFilter(Color.argb(0,255,255,255))
+
+        drawCanvas.setColor(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
+        drawCanvas.setWidth(inputReader.readFloat())
+        drawCanvas.setJoin(readString(inputReader))
+        drawCanvas.setCap(readString(inputReader))
 
         drawCanvas.setCanvas(undoArray)
         drawCanvas.invalidate()
@@ -257,6 +299,7 @@ class Draw : AppCompatActivity() {
             savedInstanceState.putString("capValue", drawCanvas.getCap())
             savedInstanceState.putString("joinValue", drawCanvas.getJoin())
             savedInstanceState.putString("fileName", fileName)
+            writeToFile()
             super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -283,6 +326,7 @@ class Draw : AppCompatActivity() {
 
                 drawCanvas.setColor(intArrayOf(red, green, blue))
                 fromColorPicker = true
+                writeToFile()
             }
     }
 
@@ -290,5 +334,17 @@ class Draw : AppCompatActivity() {
         var intent = Intent(this, FileSelection::class.java)
         startActivity(intent)
         finish()
+    }
+
+    fun readString(reader : DataInputStream) : String
+    {
+        var returnString = ""
+        while(true)
+        {
+            var readInChar = reader.readChar()
+            Log.e("READ STRING", "CHAR READ IN IS: " + readInChar)
+            if(readInChar == '\t') return returnString
+            else returnString = returnString + readInChar
+        }
     }
 }
