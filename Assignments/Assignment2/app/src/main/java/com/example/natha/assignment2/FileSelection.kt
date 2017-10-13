@@ -15,7 +15,10 @@ import java.util.jar.Manifest
 import android.Manifest.permission
 import android.Manifest.permission.*
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.support.v4.content.ContextCompat
+import java.io.FilenameFilter
 import java.security.Permission
 import java.security.Permissions
 
@@ -55,8 +58,8 @@ class FileSelection : AppCompatActivity() {
 
         my_recycler_view.adapter = MyAdapter({
             val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-            val imageForTitledItems: Drawable = getDrawable(R.drawable.folder)
             val newItem : Drawable = getDrawable(R.drawable.plus)
+            val defaultImage : Drawable = getDrawable(R.drawable.folder)
             recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "New Project"))
             var dir : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/")
             if(!dir.exists()) dir.mkdirs()
@@ -65,8 +68,18 @@ class FileSelection : AppCompatActivity() {
                 var count = 1
                 for(i in dir.listFiles())
                 {
-                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(imageForTitledItems, "Project" + count))
-                    count++
+                    if(!i.absolutePath.contains("image"))
+                    {
+                        Log.e("FILE", i.absolutePath)
+
+                        var image: File = Environment.getExternalStoragePublicDirectory(i.absolutePath + "image")
+                        if (image.exists()) {
+                            var bitMap = BitmapFactory.decodeFile(image.absolutePath)
+                            var draw = BitmapDrawable(resources, bitMap)
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(draw, "Project" + count))
+                        } else recyclerViewDataset.add(MyAdapter.ImageWithTitle(defaultImage, "Project" + count))
+                        count++
+                    }
                 }
             }
 

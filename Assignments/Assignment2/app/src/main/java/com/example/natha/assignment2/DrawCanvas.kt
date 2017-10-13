@@ -1,16 +1,15 @@
 package com.example.natha.assignment2
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.R.attr.y
 import android.R.attr.x
+import android.graphics.*
+import android.os.Environment
+import java.io.FileOutputStream
 import java.nio.file.Files.size
 
 
@@ -21,8 +20,6 @@ import java.nio.file.Files.size
 class DrawCanvas : View {
     var currentDrawing = Pair<Quadruple, ArrayList<Pair<Float,Float>>>(Quadruple(intArrayOf(0,0,0), 20F, Paint.Join.MITER.name, Paint.Cap.BUTT.name), ArrayList<Pair<Float, Float>>())
     var fullDrawing = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
-
-    var path = Path()
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)

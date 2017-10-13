@@ -2,10 +2,13 @@ package com.example.natha.assignment2
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.Paint
 import android.media.Image
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -311,7 +314,6 @@ class ColorPicker : AppCompatActivity() {
         }
         )
 
-        intent = getIntent()
         if(intent != null && intent.extras != null) {
             var red : Int = 0
             var green : Int  = 0
@@ -345,6 +347,12 @@ class ColorPicker : AppCompatActivity() {
             brush.setColor(red, green, blue)
             brush.invalidate()
             capControl.invalidate()
+        }
+        else
+        {
+            brush.setColor(redSlider.progress, greenSlider.progress, blueSlider.progress)
+            brush.setWidth((widthSlider.progress/10).toFloat())
+            brush.setJoin(Paint.Join.valueOf(joinSelect.toString().toUpperCase()))
         }
     }
 

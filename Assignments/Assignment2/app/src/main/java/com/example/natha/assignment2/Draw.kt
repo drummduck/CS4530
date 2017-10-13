@@ -2,9 +2,6 @@ package com.example.natha.assignment2
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -19,7 +16,14 @@ import android.widget.TextView
 import android.widget.Toast
 import java.io.*
 import android.app.Activity
-import android.graphics.ColorFilter
+import android.content.res.Configuration
+import android.graphics.*
+import android.graphics.drawable.GradientDrawable
+import android.util.DisplayMetrics
+import com.example.natha.assignment2.R.drawable.canvas
+import com.example.natha.assignment2.R.drawable.undo
+import kotlinx.android.synthetic.main.activity_file_selection.view.*
+import kotlinx.android.synthetic.main.view_titled_image.view.*
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -42,6 +46,8 @@ class Draw : AppCompatActivity() {
 
     var fromColorPicker = false
     var fromFileSelection = false
+
+    var fromOrientation = false
 
     val clickListener = View.OnClickListener { view ->
         when (view.getId()) {
@@ -165,6 +171,7 @@ class Draw : AppCompatActivity() {
             file.delete()
             file.createNewFile()
         }
+        else file.createNewFile()
         val outputWriter = FileOutputStream(file)
         val outputStream = DataOutputStream(outputWriter)
 
@@ -185,8 +192,10 @@ class Draw : AppCompatActivity() {
         {
             for(j in i.second)
             {
-                outputStream.writeFloat(j.first)
-                outputStream.writeFloat(j.second)
+                var displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                outputStream.writeFloat(j.first / displayMetrics.widthPixels)
+                outputStream.writeFloat(j.second / displayMetrics.heightPixels)
             }
         }
 
@@ -207,8 +216,10 @@ class Draw : AppCompatActivity() {
         {
             for(j in i.second)
             {
-                outputStream.writeFloat(j.first)
-                outputStream.writeFloat(j.second)
+                var displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                outputStream.writeFloat(j.first/displayMetrics.widthPixels)
+                outputStream.writeFloat(j.second/displayMetrics.heightPixels)
             }
         }
 
@@ -224,6 +235,22 @@ class Draw : AppCompatActivity() {
         outputStream.flush()
         outputStream.close()
         outputWriter.close()
+
+        var fileImage : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName + "image")
+        if(fileImage.exists())
+        {
+            fileImage.delete()
+            fileImage.createNewFile()
+        }
+        else fileImage.createNewFile()
+
+        if(drawCanvas.rootView.height > 0 && drawCanvas.rootView.width > 0) {
+            var bitMap = viewToBitmap(drawCanvas.rootView)
+            var fos = FileOutputStream(fileImage)
+            bitMap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            fos.flush()
+            fos.close()
+        }
     }
 
     fun readFromFile()
@@ -239,18 +266,46 @@ class Draw : AppCompatActivity() {
             undoPaintArray.add(Quadruple(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()), inputReader.readFloat(), readString(inputReader), readString(inputReader)))
             undoPairArraySize.add(inputReader.readInt())
         }
+
         var num = 0
+        var undoScaleDifferent = false
+        var undoArrayNormal = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+        var undoArrayScaled = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         for(i in undoPairArraySize)
         {
-            var pairArray = ArrayList<Pair<Float,Float>>()
+            var pairArrayNormal = ArrayList<Pair<Float,Float>>()
+            var pairArrayScaled = ArrayList<Pair<Float,Float>>()
             for(j in 1..i)
             {
-                var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
-                pairArray.add(pair)
+                var displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                var xVal = inputReader.readFloat()
+                var yVal = inputReader.readFloat()
+                if(xVal*displayMetrics.heightPixels > displayMetrics.widthPixels || yVal*displayMetrics.widthPixels > displayMetrics.heightPixels) undoScaleDifferent = true
+                var pairScale = Pair(displayMetrics.widthPixels*xVal, displayMetrics.heightPixels*yVal)
+                var pairNormal = Pair(displayMetrics.widthPixels*yVal, displayMetrics.heightPixels*xVal)
+                pairArrayNormal.add(pairNormal)
+                pairArrayScaled.add(pairScale)
             }
-            undoArray.add(Pair(undoPaintArray[num], pairArray))
+            undoArrayNormal.add(Pair(undoPaintArray[num], pairArrayNormal))
+            undoArrayScaled.add(Pair(undoPaintArray[num], pairArrayScaled))
             num++
         }
+
+        if(undoArrayNormal.size > 0 || undoArrayNormal.size > 0)
+        {
+            if(undoScaleDifferent)
+            {
+                undoArray = undoArrayScaled
+                Log.e("SCALED ARRAY", "SCALED ARRAY")
+            }
+            else
+            {
+                undoArray = undoArrayNormal
+                Log.e("NORMAL ARRAY", "NORMAL ARRAY")
+            }
+        }
+
 
         var redoArraySize = inputReader.readInt()
         var redoPaintArray = ArrayList<Quadruple>()
@@ -260,21 +315,42 @@ class Draw : AppCompatActivity() {
             redoPaintArray.add(Quadruple(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()), inputReader.readFloat(), readString(inputReader), readString(inputReader)))
             redoPairArraySize.add(inputReader.readInt())
         }
+
         num = 0
+        var redoScaleDifferent = false
+        var redoArrayNormal = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+        var redoArrayScaled = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         for(i in redoPairArraySize)
         {
-            var pairArray = ArrayList<Pair<Float,Float>>()
+            var pairArrayNormal = ArrayList<Pair<Float,Float>>()
+            var pairArrayScaled = ArrayList<Pair<Float,Float>>()
             for(j in 1..i)
             {
-                var pair = Pair(inputReader.readFloat(), inputReader.readFloat())
-                pairArray.add(pair)
+                var displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                var xVal = inputReader.readFloat()
+                var yVal = inputReader.readFloat()
+                if(xVal*displayMetrics.heightPixels > displayMetrics.widthPixels || yVal*displayMetrics.widthPixels > displayMetrics.heightPixels) redoScaleDifferent = true
+                var pairScale = Pair(displayMetrics.widthPixels*xVal, displayMetrics.heightPixels*yVal)
+                var pairNormal = Pair(displayMetrics.widthPixels*yVal, displayMetrics.heightPixels*xVal)
+                pairArrayNormal.add(pairNormal)
+                pairArrayScaled.add(pairScale)
             }
-            redoArray.add(Pair(redoPaintArray[num], pairArray))
+            redoArrayNormal.add(Pair(redoPaintArray[num], pairArrayNormal))
+            redoArrayScaled.add(Pair(redoPaintArray[num], pairArrayScaled))
             num++
         }
 
+        if(redoArrayNormal.size > 0 || redoArrayScaled.size > 0)
+        {
+            if(redoScaleDifferent) redoArray = redoArrayScaled
+            else redoArray = redoArrayNormal
+        }
+
         if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
+        else redoButton.setColorFilter(Color.argb(180,255,255,255))
         if(undoArray.size > 0) undoButton.setColorFilter(Color.argb(0,255,255,255))
+        else undoButton.setColorFilter(Color.argb(180,255,255,255))
 
         drawCanvas.setColor(intArrayOf(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
         drawCanvas.setWidth(inputReader.readFloat())
@@ -299,7 +375,8 @@ class Draw : AppCompatActivity() {
             savedInstanceState.putString("capValue", drawCanvas.getCap())
             savedInstanceState.putString("joinValue", drawCanvas.getJoin())
             savedInstanceState.putString("fileName", fileName)
-            writeToFile()
+            if(!fromOrientation)writeToFile()
+            fromOrientation = false
             super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -343,5 +420,18 @@ class Draw : AppCompatActivity() {
             if(readInChar == '\t') return returnString
             else returnString = returnString + readInChar
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        fromOrientation = true
+        super.onConfigurationChanged(newConfig)
+    }
+
+    fun viewToBitmap(view : View) : Bitmap
+    {
+        var bitMap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        var canvas = Canvas(bitMap)
+        view.draw(canvas)
+        return bitMap
     }
 }
