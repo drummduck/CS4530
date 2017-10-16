@@ -24,6 +24,7 @@ class DrawCanvas : View {
     var currentDrawing = Pair<Quadruple, ArrayList<Pair<Float,Float>>>(Quadruple(intArrayOf(0,0,0), 20F, Paint.Join.MITER.name, Paint.Cap.BUTT.name), ArrayList<Pair<Float, Float>>())
     var fullDrawing = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
     var fileName = ""
+    var touchable = true
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -103,6 +104,8 @@ class DrawCanvas : View {
     fun getJoin() : String {return currentDrawing.first.join}
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        if(!touchable) return false
 
         if(event !is MotionEvent) return false
         var xPos = event.x

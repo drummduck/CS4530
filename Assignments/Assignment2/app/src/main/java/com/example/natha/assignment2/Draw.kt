@@ -19,9 +19,10 @@ import android.app.Activity
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.GradientDrawable
+import android.os.Handler
 import android.util.DisplayMetrics
-import com.example.natha.assignment2.R.drawable.canvas
-import com.example.natha.assignment2.R.drawable.undo
+import com.example.natha.assignment2.R.drawable.*
+import kotlinx.android.synthetic.main.activity_draw.*
 import kotlinx.android.synthetic.main.activity_file_selection.view.*
 import kotlinx.android.synthetic.main.view_titled_image.view.*
 import java.nio.channels.FileChannel
@@ -35,6 +36,7 @@ class Draw : AppCompatActivity() {
     lateinit var undoButton : ImageButton
     lateinit var redoButton : ImageButton
     lateinit var drawCanvas : DrawCanvas
+    lateinit var playButton : ImageButton
 
     var redoEnabled = false
     var undoEnabled = false
@@ -43,6 +45,8 @@ class Draw : AppCompatActivity() {
     var redoArray = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
     var fileName : String = ""
     var numOfFiles : Int = 0
+
+    var handler = Handler()
 
     var fromColorPicker = false
     var fromFileSelection = false
@@ -90,6 +94,40 @@ class Draw : AppCompatActivity() {
                     drawCanvas.saveThumbnail()
                 }
             }
+
+            R.id.playButton ->
+            {
+                redoButton.isClickable = false
+                undoButton.isClickable = false
+                playButton.isClickable = false
+                brushButton.isClickable = false
+                drawCanvas.touchable = false
+                undoButton.setColorFilter(Color.argb(180,255,255,255))
+                redoButton.setColorFilter(Color.argb(180,255,255,255))
+                brushButton.setColorFilter(Color.argb(180, 255, 255, 255))
+                var tempUndoArray = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+                drawCanvas.setCanvas(tempUndoArray)
+                var timer = 1
+                for(i in undoArray)
+                {
+                    Handler().postDelayed(Runnable {
+                        tempUndoArray.add(i)
+                    drawCanvas.setCanvas(tempUndoArray)
+                    if (tempUndoArray.size == undoArray.size)
+                    {
+                        redoButton.isClickable = true
+                        undoButton.isClickable = true
+                        playButton.isClickable = true
+                        brushButton.isClickable = true
+                        drawCanvas.touchable = true
+
+                        if(undoArray.size > 0) undoButton.setColorFilter(Color.argb(0,255,255,255))
+                        if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
+                        brushButton.setColorFilter(Color.argb(0, 255, 255, 255))
+                    }},500 * timer.toLong())
+                    timer++
+                }
+            }
         }
     }
 
@@ -108,6 +146,9 @@ class Draw : AppCompatActivity() {
 
             redoButton = findViewById(R.id.redoButton)
             redoButton.setOnClickListener(clickListener)
+
+            playButton = findViewById(R.id.playButton)
+            playButton.setOnClickListener(clickListener)
 
             var intent = getIntent()
 
@@ -258,12 +299,9 @@ class Draw : AppCompatActivity() {
         }
 
         var num = 0
-        var undoScaleDifferent = false
-        var undoArrayNormal = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         var undoArrayScaled = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         for(i in undoPairArraySize)
         {
-            var pairArrayNormal = ArrayList<Pair<Float,Float>>()
             var pairArrayScaled = ArrayList<Pair<Float,Float>>()
             for(j in 1..i)
             {
@@ -271,22 +309,16 @@ class Draw : AppCompatActivity() {
                 windowManager.defaultDisplay.getMetrics(displayMetrics)
                 var xVal = inputReader.readFloat()
                 var yVal = inputReader.readFloat()
-                if(xVal*displayMetrics.heightPixels > displayMetrics.widthPixels || yVal*displayMetrics.widthPixels > displayMetrics.heightPixels) undoScaleDifferent = true
                 var pairScale = Pair(displayMetrics.widthPixels*xVal, displayMetrics.heightPixels*yVal)
-                var pairNormal = Pair(displayMetrics.widthPixels*yVal, displayMetrics.heightPixels*xVal)
-                pairArrayNormal.add(pairNormal)
                 pairArrayScaled.add(pairScale)
             }
-            undoArrayNormal.add(Pair(undoPaintArray[num], pairArrayNormal))
             undoArrayScaled.add(Pair(undoPaintArray[num], pairArrayScaled))
             num++
         }
 
-        if(undoArrayNormal.size > 0 || undoArrayNormal.size > 0)
+        if(undoArrayScaled.size > 0)
         {
-            if(undoScaleDifferent) undoArray = undoArrayScaled
-
-            else undoArray = undoArrayNormal
+            undoArray = undoArrayScaled
         }
 
 
@@ -300,12 +332,9 @@ class Draw : AppCompatActivity() {
         }
 
         num = 0
-        var redoScaleDifferent = false
-        var redoArrayNormal = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         var redoArrayScaled = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
         for(i in redoPairArraySize)
         {
-            var pairArrayNormal = ArrayList<Pair<Float,Float>>()
             var pairArrayScaled = ArrayList<Pair<Float,Float>>()
             for(j in 1..i)
             {
@@ -313,21 +342,16 @@ class Draw : AppCompatActivity() {
                 windowManager.defaultDisplay.getMetrics(displayMetrics)
                 var xVal = inputReader.readFloat()
                 var yVal = inputReader.readFloat()
-                if(xVal*displayMetrics.heightPixels > displayMetrics.widthPixels || yVal*displayMetrics.widthPixels > displayMetrics.heightPixels) redoScaleDifferent = true
                 var pairScale = Pair(displayMetrics.widthPixels*xVal, displayMetrics.heightPixels*yVal)
-                var pairNormal = Pair(displayMetrics.widthPixels*yVal, displayMetrics.heightPixels*xVal)
-                pairArrayNormal.add(pairNormal)
                 pairArrayScaled.add(pairScale)
             }
-            redoArrayNormal.add(Pair(redoPaintArray[num], pairArrayNormal))
             redoArrayScaled.add(Pair(redoPaintArray[num], pairArrayScaled))
             num++
         }
 
-        if(redoArrayNormal.size > 0 || redoArrayScaled.size > 0)
+        if(redoArrayScaled.size > 0)
         {
-            if(redoScaleDifferent) redoArray = redoArrayScaled
-            else redoArray = redoArrayNormal
+            redoArray = redoArrayScaled
         }
 
         if(redoArray.size > 0) redoButton.setColorFilter(Color.argb(0,255,255,255))
