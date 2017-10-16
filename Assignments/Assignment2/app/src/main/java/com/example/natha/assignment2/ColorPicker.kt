@@ -331,6 +331,7 @@ class ColorPicker : AppCompatActivity() {
                     "joinValue" -> brush.setJoin(Paint.Join.valueOf(savedInstanceState.getString("joinValue")))
                 }
             }
+            capControl.setColor(red, green, blue)
             brush.setColor(red, green, blue)
             brush.invalidate()
             capControl.invalidate()
