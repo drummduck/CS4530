@@ -73,6 +73,7 @@ class Draw : AppCompatActivity() {
                     if (undoArray.isEmpty()) undoButton.setColorFilter(Color.argb(180, 255, 255, 255))
                     redoButton.setColorFilter(Color.argb(0, 255, 255, 255))
                     writeToFile()
+                    drawCanvas.saveThumbnail()
                 }
             }
 
@@ -86,6 +87,7 @@ class Draw : AppCompatActivity() {
                     if(redoArray.isEmpty()) redoButton.setColorFilter(Color.argb(180,225,225,225))
                     undoButton.setColorFilter(Color.argb(0,255,255,255))
                     writeToFile()
+                    drawCanvas.saveThumbnail()
                 }
             }
         }
@@ -114,7 +116,6 @@ class Draw : AppCompatActivity() {
                 var green: Int = 0
                 var blue: Int = 0
                 for (i in savedInstanceState.keySet()) {
-                    Log.e("SAVED INSTANCE STATE", "keySet key is: " + i + " keySet value is: " + savedInstanceState.get(i))
                     when (i) {
                         "rValue" -> red = savedInstanceState.getInt(i, 0)
                         "gValue" -> green = savedInstanceState.getInt(i, 0)
@@ -141,10 +142,15 @@ class Draw : AppCompatActivity() {
                 if (fileName.equals("New Project"))
                 {
                     fileName = "Project" + (numOfFiles + 1)
+                    drawCanvas.setFilename(fileName)
                     writeToFile()
                 }
 
-                else readFromFile()
+                else
+                {
+                    drawCanvas.setFilename(fileName)
+                    readFromFile()
+                }
             }
 
             drawCanvas.setOnTouchDrawListener { _, currentDrawing, release ->
@@ -235,22 +241,6 @@ class Draw : AppCompatActivity() {
         outputStream.flush()
         outputStream.close()
         outputWriter.close()
-
-        var fileImage : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName + "image")
-        if(fileImage.exists())
-        {
-            fileImage.delete()
-            fileImage.createNewFile()
-        }
-        else fileImage.createNewFile()
-
-        if(drawCanvas.rootView.height > 0 && drawCanvas.rootView.width > 0) {
-            var bitMap = viewToBitmap(drawCanvas.rootView)
-            var fos = FileOutputStream(fileImage)
-            bitMap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            fos.flush()
-            fos.close()
-        }
     }
 
     fun readFromFile()
@@ -294,16 +284,9 @@ class Draw : AppCompatActivity() {
 
         if(undoArrayNormal.size > 0 || undoArrayNormal.size > 0)
         {
-            if(undoScaleDifferent)
-            {
-                undoArray = undoArrayScaled
-                Log.e("SCALED ARRAY", "SCALED ARRAY")
-            }
-            else
-            {
-                undoArray = undoArrayNormal
-                Log.e("NORMAL ARRAY", "NORMAL ARRAY")
-            }
+            if(undoScaleDifferent) undoArray = undoArrayScaled
+
+            else undoArray = undoArrayNormal
         }
 
 
@@ -364,7 +347,6 @@ class Draw : AppCompatActivity() {
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
-        super.onSaveInstanceState(savedInstanceState)
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.

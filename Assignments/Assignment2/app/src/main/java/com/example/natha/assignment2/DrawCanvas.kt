@@ -9,9 +9,12 @@ import android.R.attr.y
 import android.R.attr.x
 import android.graphics.*
 import android.os.Environment
+import android.util.Log
 import java.io.FileOutputStream
 import java.nio.file.Files.size
-
+import android.graphics.Bitmap.CompressFormat
+import android.graphics.Bitmap
+import java.io.File
 
 
 /**
@@ -20,6 +23,7 @@ import java.nio.file.Files.size
 class DrawCanvas : View {
     var currentDrawing = Pair<Quadruple, ArrayList<Pair<Float,Float>>>(Quadruple(intArrayOf(0,0,0), 20F, Paint.Join.MITER.name, Paint.Cap.BUTT.name), ArrayList<Pair<Float, Float>>())
     var fullDrawing = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+    var fileName = ""
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -31,6 +35,7 @@ class DrawCanvas : View {
         super.onDraw(canvas)
 
         if(canvas !is Canvas) return
+
         val currentPath = Path()
         val fullPaintArray = ArrayList<Paint>()
 
@@ -114,6 +119,7 @@ class DrawCanvas : View {
             onTouchDrawListener?.onTouchDraw(this, tempCurrentDrawing, true)
             currentDrawing.second.clear()
             invalidate()
+            saveThumbnail()
         }
         else
         {
@@ -128,16 +134,36 @@ class DrawCanvas : View {
     fun setCanvas(fullDrawing : ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>)
     {
         this.fullDrawing.clear()
-        for(i in fullDrawing)
-        {
-            this.fullDrawing.add(i)
-        }
+        for(i in fullDrawing) this.fullDrawing.add(i)
         invalidate()
+    }
+
+    fun saveThumbnail()
+    {
+        if(!fileName.isEmpty()) {
+            var f: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/" + fileName + "image.png")
+            if (f.exists()) {
+                f.delete()
+                f.createNewFile()
+            } else f.createNewFile()
+            this.setDrawingCacheEnabled(true)
+            this.buildDrawingCache(true)
+            val out = FileOutputStream(f)
+            this.drawingCache.compress(Bitmap.CompressFormat.PNG, 90, out)
+            out.close()
+            this.setDrawingCacheEnabled(false)
+
+        }
     }
 
     interface OnTouchDrawListener
     {
         fun onTouchDraw(drawCanvas : DrawCanvas, currentDraw : Pair<Quadruple, ArrayList<Pair<Float,Float>>>, release : Boolean)
+    }
+
+    fun setFilename(fileName : String)
+    {
+        this.fileName = fileName
     }
 
     private var onTouchDrawListener : OnTouchDrawListener?  = null

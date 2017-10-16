@@ -15,9 +15,19 @@ import java.util.jar.Manifest
 import android.Manifest.permission
 import android.Manifest.permission.*
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.support.v4.content.ContextCompat
+import android.util.DisplayMetrics
+import android.view.View
+import android.widget.ImageView
+import com.example.natha.assignment2.R.drawable.canvas
+import kotlinx.android.synthetic.main.view_titled_image.view.*
+import java.io.DataInputStream
+import java.io.FileInputStream
 import java.io.FilenameFilter
 import java.security.Permission
 import java.security.Permissions
@@ -28,6 +38,8 @@ class FileSelection : AppCompatActivity() {
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
     var numOfFiles = 0
     val MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1
+    var drawing = ArrayList<Pair<Quadruple, ArrayList<Pair<Float,Float>>>>()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,20 +76,20 @@ class FileSelection : AppCompatActivity() {
             var dir : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Assignment2Draw/")
             if(!dir.exists()) dir.mkdirs()
             else {
-                numOfFiles = dir.listFiles().size
+                numOfFiles = dir.listFiles().size/2
                 var count = 1
                 for(i in dir.listFiles())
                 {
-                    if(!i.absolutePath.contains("image"))
-                    {
-                        Log.e("FILE", i.absolutePath)
-
-                        var image: File = Environment.getExternalStoragePublicDirectory(i.absolutePath + "image")
-                        if (image.exists()) {
-                            var bitMap = BitmapFactory.decodeFile(image.absolutePath)
-                            var draw = BitmapDrawable(resources, bitMap)
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(draw, "Project" + count))
-                        } else recyclerViewDataset.add(MyAdapter.ImageWithTitle(defaultImage, "Project" + count))
+                    if(!i.absolutePath.contains(".png")) {
+                        Log.e("FILES", "filePath is: " + i.absolutePath)
+                        var jeff = ImageView(this)
+                        var file = File(i.absolutePath + "image.png")
+                        if (!file.exists()) recyclerViewDataset.add(MyAdapter.ImageWithTitle(defaultImage, "Project" + count))
+                        else {
+                            var bitMap = BitmapFactory.decodeFile(file.absolutePath)
+                            jeff.setImageBitmap(bitMap)
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(jeff.drawable, "Project" + count))
+                        }
                         count++
                     }
                 }
@@ -141,5 +153,16 @@ class FileSelection : AppCompatActivity() {
             }
         }
         else setupFiles()
+    }
+
+    fun readString(reader : DataInputStream) : String
+    {
+        var returnString = ""
+        while(true)
+        {
+            var readInChar = reader.readChar()
+            if(readInChar == '\t') return returnString
+            else returnString = returnString + readInChar
+        }
     }
 }

@@ -314,11 +314,33 @@ class ColorPicker : AppCompatActivity() {
         }
         )
 
-        if(intent != null && intent.extras != null) {
+        if(savedInstanceState != null)
+        {
+            var red : Int = 0
+            var green : Int  = 0
+            var blue : Int = 0
+            for(i in savedInstanceState.keySet())
+            {
+                when(i)
+                {
+                    "rValue" -> red = savedInstanceState.getInt(i, 0)
+                    "gValue" -> green = savedInstanceState.getInt(i, 0)
+                    "bValue" -> blue = savedInstanceState.getInt(i, 0)
+                    "wValue" -> brush.setWidth(savedInstanceState.getFloat(i, 20F))
+                    "capValue" -> capControl.setCap(savedInstanceState.getString("capValue"))
+                    "joinValue" -> brush.setJoin(Paint.Join.valueOf(savedInstanceState.getString("joinValue")))
+                }
+            }
+            brush.setColor(red, green, blue)
+            brush.invalidate()
+            capControl.invalidate()
+        }
+        else if(intent != null && intent.extras != null && !intent.extras.isEmpty) {
             var red : Int = 0
             var green : Int  = 0
             var blue : Int = 0
             for (i in intent.extras.keySet()) {
+                Log.e("DUCKBUTTS", "KEYSET key " +  i + " KEYSET value: " + intent.extras.get(i))
                 when (i) {
                     "rValue" ->
                     {
@@ -353,7 +375,21 @@ class ColorPicker : AppCompatActivity() {
             brush.setColor(redSlider.progress, greenSlider.progress, blueSlider.progress)
             brush.setWidth((widthSlider.progress/10).toFloat())
             brush.setJoin(Paint.Join.valueOf(joinSelect.toString().toUpperCase()))
+            brush.invalidate()
         }
+
+    }
+
+
+    public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
+        if(savedInstanceState !is Bundle) return
+        savedInstanceState.putInt("rValue", redSlider.progress)
+        savedInstanceState.putInt("gValue", greenSlider.progress)
+        savedInstanceState.putInt("bValue", blueSlider.progress)
+        savedInstanceState.putFloat("wValue", widthSlider.progress/10F)
+        savedInstanceState.putString("capValue", capControl.getCap())
+        savedInstanceState.putString("joinValue", joinSelect.selectedItem.toString().toUpperCase())
+        super.onSaveInstanceState(savedInstanceState)
     }
 
     override fun onBackPressed() {
