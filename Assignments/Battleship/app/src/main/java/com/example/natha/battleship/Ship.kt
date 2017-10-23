@@ -6,13 +6,11 @@ package com.example.natha.battleship
 class Ship() {
 
     var size = 0
-    lateinit var pos : ArrayList<Pair<Int,Int>>
-    lateinit var hitOrMiss : ArrayList<Pair<Int,Int>>
+    lateinit var pos : ArrayList<Triple<Int,Int,Int>>
 
-    constructor(size : Int, pos : ArrayList<Pair<Int,Int>>, hitOrMiss : ArrayList<Pair<Int,Int>>) : this()
+    constructor(size : Int, pos : ArrayList<Triple<Int,Int,Int>>) : this()
     {
         this.size = size
         this.pos = pos
-        this.hitOrMiss = hitOrMiss
     }
 }

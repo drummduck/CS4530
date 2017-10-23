@@ -149,12 +149,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+         brush = findViewById(R.id.Brush)
+
         capControl = findViewById(R.id.capControl)
         capControl.setOnCapChangedListener{_, cap ->
             brush.setCap(cap)
-            capControl.invalidate()}
-
-        brush = findViewById(R.id.Brush)
+        capControl.invalidate()}
 
         joinSelect = findViewById(R.id.joinSelect)
         joinSelect.onItemSelectedListener = joinSelection

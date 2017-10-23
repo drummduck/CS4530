@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.example.natha.assignment2.TitledImageView
+<com.example.natha.battleship.TitledImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -39,4 +39,4 @@
 
     </android.support.v7.widget.CardView>
 
-</com.example.natha.assignment2.TitledImageView>
+</com.example.natha.battleship.TitledImageView>

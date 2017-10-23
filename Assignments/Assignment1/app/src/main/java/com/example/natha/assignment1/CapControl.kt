@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.icu.util.Measure
 import android.net.wifi.p2p.WifiP2pManager
 import android.util.AttributeSet
 import android.util.Log
@@ -26,7 +27,7 @@ class CapControl : View {
     var currentCap = Paint.Cap.BUTT
     var timer = 0L
 
-    var canvas : Canvas? = null
+    lateinit var canvas : Canvas
 
     constructor(context: Context?) : super(context)
     {
@@ -119,7 +120,6 @@ class CapControl : View {
     override fun onDraw(canvas: Canvas?) {
 
         if(canvas !is Canvas) return
-
         super.onDraw(canvas)
 
         paint.strokeCap = Paint.Cap.BUTT
@@ -132,10 +132,11 @@ class CapControl : View {
         canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, paint)
         canvas.drawLine(((canvas.width/7)*5).toFloat(), canvas.height - canvas.height/8F, ((canvas.width/7)*6).toFloat(), canvas.height - canvas.height/8F, linePaint)
 
-        if(firstDraw) rect.set(canvas.width / 7 - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+        if(firstDraw) {
+            rect.set(canvas.width / 7 - paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) - paint.strokeWidth.toInt(), ((canvas.width / 7) * 2) + paint.strokeWidth.toInt(), (canvas.height - canvas.height / 8) + paint.strokeWidth.toInt())
+        }
         canvas.drawRect(rect, rectPaint)
         firstDraw = false
-
         this.canvas = canvas
     }
 
@@ -169,6 +170,8 @@ class CapControl : View {
             else if(System.currentTimeMillis() - timer > 500) timer = 0L
 
         }
+
+
 //        if(event.getX() > (canvas.width/7).toFloat() && event.getX() < (canvas.width/7)*2F && event.getY() > canvas.height - canvas.height/8F - 80F && event.getY() < canvas.height - canvas.height/8F + 80F)
 //        {
 //            rect.set(canvas.width/7 - 80, (canvas.height - canvas.height/8) - 80, ((canvas.width/7)*2) + 80, (canvas.height - canvas.height/8) + 80)
@@ -190,5 +193,14 @@ class CapControl : View {
         return true
     }
 
-
+//    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+//
+//        val widthMode : Int = MeasureSpec.getMode(widthMeasureSpec)
+//        val heightMode : Int = MeasureSpec.getMode(heightMeasureSpec)
+//        val widthSize : Int = MeasureSpec.getSize(widthMeasureSpec)
+//        val heightSize : Int = MeasureSpec.getSize(heightMeasureSpec)
+//
+//        setMeasuredDimension(resolveSize(500, widthSize), resolveSize(500, heightSize))
+//    }
 }

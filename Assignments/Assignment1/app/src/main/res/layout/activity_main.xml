@@ -19,11 +19,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <SeekBar
         android:id="@+id/redSlider"
@@ -44,7 +40,6 @@
         android:layout_width="25dp"
         android:layout_height="31dp"
         android:layout_marginEnd="8dp"
-
         android:layout_marginTop="8dp"
         android:text="R:"
         android:textColor="@android:color/holo_red_light"
@@ -109,7 +104,6 @@
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/back"
-
         android:backgroundTint="@android:color/darker_gray"
         android:ems="3"
         android:inputType="number"
@@ -156,7 +150,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
-
         android:background="@drawable/back"
         android:backgroundTint="@android:color/darker_gray"
         android:ems="3"
@@ -203,7 +196,6 @@
         android:id="@+id/widthValue"
         android:layout_width="82dp"
         android:layout_height="33dp"
-
         android:layout_marginStart="8dp"
         android:layout_marginTop="40dp"
         android:background="@drawable/back"

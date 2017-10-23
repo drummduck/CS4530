@@ -1,6 +1,7 @@
 package com.example.natha.battleship
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
@@ -37,8 +38,7 @@ class Game : AppCompatActivity() {
         }
     }
 
-    fun setupFiles()
-    {
+    fun setupFiles() {
         recyclerViewLayoutManager = LinearLayoutManager(this)
 
         my_recycler_view.setHasFixedSize(true)
@@ -46,15 +46,14 @@ class Game : AppCompatActivity() {
 
         my_recycler_view.adapter = MyAdapter({
             val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-            val newItem : Drawable = getDrawable(R.drawable.plus)
+            val newItem: Drawable = getDrawable(R.drawable.plus)
             recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "New Game"))
-            var dir : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/")
-            if(!dir.exists()) dir.mkdirs()
+            var dir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/")
+            if (!dir.exists()) dir.mkdirs()
             else {
-                numOfFiles = dir.listFiles().size/2
+                numOfFiles = dir.listFiles().size / 2
                 var count = 1
-                for(i in dir.listFiles())
-                {
+                for (i in dir.listFiles()) {
                     recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "Game" + count))
                     count++
                 }
@@ -64,13 +63,17 @@ class Game : AppCompatActivity() {
             recyclerViewDataset.toTypedArray()
         }()).apply {
             setOnMyAdapterItemSelectedListener { myAdapterItem: MyAdapter.MyAdapterItem ->
-                when(myAdapterItem){
+                Log.e("FileSelection", "Listener notified of the item selection")
+
+                when (myAdapterItem) {
                     is MyAdapter.ImageWithTitle -> {
-//                        intent = Intent(applicationContext, Board::class.java)
+                        Log.e("FileSelection", "Selected item contained image of size (${myAdapterItem.image.bounds.width()} x ${myAdapterItem.image.bounds.height()}")
+                        Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
+                        intent = Intent(applicationContext, GameState::class.java)
 //                        intent.putExtra("fileName", myAdapterItem.title)
 //                        intent.putExtra("numOfFiles", numOfFiles)
-//                        startActivity(intent)
-//                        finish()
+                        startActivity(intent)
+                        finish()
                     }
                 }
             }
