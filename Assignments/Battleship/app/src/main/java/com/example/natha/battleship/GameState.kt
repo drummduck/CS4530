@@ -79,9 +79,21 @@ class GameState() : AppCompatActivity() {
             var yVal = Integer.parseInt(view.resources.getResourceName(view.id).substringAfter("/").substringBefore("_2").substring(1))
             var hit = false
             var sunk = false
-            if(state == gameState.PLAYER_ONE_TURN)
+            if(state == gameState.PLAYER_ONE_TURN || state == gameState.PLAYER_TWO_TURN)
             {
-                for(i in playerOne.ships)
+                var currentPlayer : Player
+                var opponentPlayer : Player
+                if(state == gameState.PLAYER_ONE_TURN)
+                {
+                    currentPlayer = playerOne
+                    opponentPlayer = playerTwo
+                }
+                else
+                {
+                    currentPlayer = playerTwo
+                    opponentPlayer = playerOne
+                }
+                for(i in opponentPlayer.ships)
                 {
                     var hitCount = 0
                     var pos = 0
@@ -91,8 +103,8 @@ class GameState() : AppCompatActivity() {
                         {
                             i.pos[pos] = Triple(xVal, yVal, 2)
                             if(view.text.isEmpty()) view.text = "Hit"
-                            playerTwo.oppAttacks.add(Triple(xVal,yVal,2))
-                            playerOne.myAttacks.add(Triple(xVal,yVal,2))
+                            opponentPlayer.oppAttacks.add(Triple(xVal,yVal,2))
+                            currentPlayer.myAttacks.add(Triple(xVal,yVal,2))
                             view.setBackgroundColor(Color.YELLOW)
                             view.isClickable = false
                             hitCount++
@@ -106,15 +118,15 @@ class GameState() : AppCompatActivity() {
                             for(k in i.pos)
                             {
                                 var pos2 = 0
-                                for(j in playerOne.myAttacks)
+                                for(j in currentPlayer.myAttacks)
                                 {
-                                    if(j.first == k.first && j.second == k.second) playerOne.myAttacks[pos2] = Triple(j.first, j.second, 3)
+                                    if(j.first == k.first && j.second == k.second) currentPlayer.myAttacks[pos2] = Triple(j.first, j.second, 3)
                                     pos2++
                                 }
                                 pos2 = 0
-                                for(j in playerTwo.oppAttacks)
+                                for(j in opponentPlayer.oppAttacks)
                                 {
-                                    if(j.first == k.first && j.second == k.second) playerTwo.oppAttacks[pos2] = Triple(j.first, j.second, 3)
+                                    if(j.first == k.first && j.second == k.second) opponentPlayer.oppAttacks[pos2] = Triple(j.first, j.second, 3)
                                     pos2++
                                 }
                                 i.pos[pos] = Triple(k.first, k.second, 3)
@@ -136,7 +148,7 @@ class GameState() : AppCompatActivity() {
                                 i.pos[k] = Triple(i.pos[k].first, i.pos[k].second, 3)
                             }
 
-                            for(i in playerTwo.ships)
+                            for(i in opponentPlayer.ships)
                             {
                                 var sinkCount = 0
                                 for(j in i.pos)
@@ -144,7 +156,8 @@ class GameState() : AppCompatActivity() {
                                     if(j.third == 3) sinkCount++
                                     if(sinkCount == i.size)
                                     {
-                                        state = gameState.GAME_OVER_PLAYER_ONE
+                                        if(state == gameState.PLAYER_ONE_TURN) state = gameState.GAME_OVER_PLAYER_ONE
+                                        else state = gameState.GAME_OVER_PLAYER_TWO
                                         var views = findViewById<ViewGroup>(R.id.buttons)
                                         for(i in 0..views.childCount-1)
                                         {
@@ -171,156 +184,38 @@ class GameState() : AppCompatActivity() {
                 if(!hit && !sunk)
                 {
                     view.setBackgroundColor(Color.WHITE)
-                    playerOne.oppAttacks.add(Triple(xVal, yVal, 1))
-                    playerTwo.myAttacks.add(Triple(xVal,yVal, 1))
+                    opponentPlayer.oppAttacks.add(Triple(xVal, yVal, 1))
+                    currentPlayer.myAttacks.add(Triple(xVal,yVal, 1))
                     view.setText("Miss")
                     view.setTextColor(Color.BLACK)
                     view.isClickable = false
                 }
 
-                Handler().postDelayed(Runnable {
-                    var views = findViewById<ViewGroup>(R.id.buttons)
-                    for(i in 0..views.childCount-1)
-                    {
-                        var view = views.getChildAt(i)
-                        if(view is LinearLayout)
-                        {
-                            for(j in 0..view.childCount-1)
-                            {
-                                var button = view.getChildAt(j)
-                                if(button is Button && button.id != R.id.Okay)
-                                {
-                                    button.setText("")
-                                    button.setBackgroundColor(Color.GRAY)
-                                    button.isClickable = false
-                                }
-                            }
-                        }
-                    }
-                    findViewById<Button>(R.id.Okay).setText("Switch to player two")
-                    state = gameState.SWITCH_TO_PLAYER_TWO
-                    },5000L)
-            }
-
-            if(state == gameState.PLAYER_TWO_TURN)
-            {
-                for(i in playerOne.ships)
-                {
-                    var hitCount = 0
-                    var pos = 0
-                    for(j in i.pos)
-                    {
-                        if(xVal == j.first && yVal == j.second && j.third != 2)
-                        {
-                            i.pos[pos] = Triple(xVal, yVal, 2)
-                            if(view.text.isEmpty()) view.text = "Hit"
-                            playerOne.oppAttacks.add(Triple(xVal,yVal,2))
-                            playerTwo.myAttacks.add(Triple(xVal,yVal,2))
-                            view.setBackgroundColor(Color.YELLOW)
-                            view.isClickable = false
-                            hitCount++
-                            hit = true
-                        }
-                        if(j.third == 2) hitCount++
-                        if(hitCount == i.size) sunk = true
-                        if(sunk)
-                        {
-                            pos = 0
-                            for(k in i.pos)
-                            {
-                                var pos2 = 0
-                                for(j in playerTwo.myAttacks)
-                                {
-                                    if(j.first == k.first && j.second == k.second) playerTwo.myAttacks[pos2] = Triple(j.first, j.second, 3)
-                                    pos2++
-                                }
-                                pos2 = 0
-                                for(j in playerOne.oppAttacks)
-                                {
-                                    if(j.first == k.first && j.second == k.second) playerTwo.oppAttacks[pos2] = Triple(j.first, j.second, 3)
-                                    pos2++
-                                }
-                                i.pos[pos] = Triple(k.first, k.second, 3)
-                                var buttons = findViewById<ViewGroup>(R.id.buttons)
-                                var row = buttons.getChildAt(k.first-1)
-                                if(row is LinearLayout)
-                                {
-                                    var button = row.getChildAt(k.second-1)
-                                    if(button is Button)
-                                    {
-                                        button.setBackgroundColor(Color.RED)
-                                        button.text = "Sunk"
-                                    }
-                                }
-                                pos++
-                            }
-                            for(k in 0..i.size-1)
-                            {
-                                i.pos[k] = Triple(i.pos[k].first, i.pos[k].second, 3)
-                            }
-                            for(i in playerTwo.ships)
-                            {
-                                var sinkCount = 0
-                                for(j in i.pos)
-                                {
-                                    if(j.third == 3) sinkCount++
-                                    if(sinkCount == i.size)
-                                    {
-                                        state = gameState.GAME_OVER_PLAYER_ONE
-                                        var views = findViewById<ViewGroup>(R.id.buttons)
-                                        for(i in 0..views.childCount-1)
+                var timer = 0L
+                for(i in  1..2) {
+                    Handler().postDelayed(Runnable {
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (i in 0..views.childCount - 1) {
+                            var view = views.getChildAt(i)
+                            if (view is LinearLayout) {
+                                for (j in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(j)
+                                    if (button is Button && button.id != R.id.Okay) {
+                                        if(timer == 0L) button.isClickable = false
+                                        else
                                         {
-                                            var view = views.getChildAt(i)
-                                            if(view is LinearLayout)
-                                            {
-                                                for(j in 0..view.childCount-1)
-                                                {
-                                                    var button = view.getChildAt(j)
-                                                    if(button is Button) button.isClickable = false
-
-                                                }
-                                            }
+                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                                            button.setText("")
+                                            findViewById<Button>(R.id.Okay).setText("Switch to player two")
+                                            state = gameState.SWITCH_TO_PLAYER_TWO
                                         }
                                     }
                                 }
                             }
-                            break
                         }
-                        pos++
-                    }
-                    if(sunk || hit) break
+                    }, timer * 1000)
+                    timer = 5L
                 }
-                if(!hit && !sunk)
-                {
-                    view.setBackgroundColor(Color.WHITE)
-                    playerOne.oppAttacks.add(Triple(xVal, yVal, 1))
-                    playerTwo.myAttacks.add(Triple(xVal,yVal, 1))
-                    view.setText("Miss")
-                    view.setTextColor(Color.BLACK)
-                    view.isClickable = false
-                }
-                Handler().postDelayed(Runnable {
-                    var views = findViewById<ViewGroup>(R.id.buttons)
-                    for(i in 0..views.childCount-1)
-                    {
-                        var view = views.getChildAt(i)
-                        if(view is LinearLayout)
-                        {
-                            for(j in 0..view.childCount-1)
-                            {
-                                var button = view.getChildAt(j)
-                                if(button is Button && button.id != R.id.Okay)
-                                {
-                                    button.setText("")
-                                    button.setBackgroundColor(Color.GRAY)
-                                    button.isClickable = false
-                                }
-                            }
-                        }
-                    }
-                    findViewById<Button>(R.id.Okay).setText("Switch to player one")
-                    state = gameState.SWITCH_TO_PLAYER_ONE
-                },5000L)
             }
         }
     }
@@ -443,7 +338,114 @@ class GameState() : AppCompatActivity() {
 
     fun setupPlayer(player : Player)
     {
+        for(i in player.ships)
+        {
+            for(j in 0..i.size-1)
+            {
+                var buttons = findViewById<ViewGroup>(R.id.buttons)
+                for(k in 0..buttons.childCount-1)
+                {
+                    var linearLayout = buttons.getChildAt(k)
+                    if(linearLayout is LinearLayout)
+                    {
+                        for(l in 0..linearLayout.childCount-1)
+                        {
+                            var button = linearLayout.getChildAt(l)
+                            for(m in i.pos)
+                            {
+                                if(m.first == k && m.second == l && button is Button)
+                                {
+                                    if(m.third == 3)
+                                    {
+                                        if(j == 0 || j == i.size-1) button.setText("-Sunk-")
+                                        else button.setText("Sunk")
+                                        button.setBackgroundColor(Color.RED)
+                                    }
+                                    else if(m.third == 2)
+                                    {
+                                        if(j == 0 || j == i.size-1) button.setText("-Hit-")
+                                        else button.setText("Hit")
+                                        button.setBackgroundColor(Color.YELLOW)
+                                    }
+                                    else if(j == 0 || j == i.size-1) button.setText("-")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
+
+        for(i in player.myAttacks)
+        {
+            var buttons = findViewById<ViewGroup>(R.id.buttons)
+            for(j in 0..buttons.childCount-1)
+            {
+                var linearLayout = buttons.getChildAt(j)
+                if(linearLayout is LinearLayout)
+                {
+                    for(k in 0..linearLayout.childCount-1)
+                    {
+                        var button = linearLayout.getChildAt(k)
+                        if(i.first == j && i.second == k && button is Button)
+                        {
+                            if(i.third == 3)
+                            {
+                                button.setText("Sunk")
+                                button.setBackgroundColor(Color.RED)
+                            }
+                            else if(i.third == 2)
+                            {
+                                button.setText("Hit")
+                                button.setBackgroundColor(Color.YELLOW)
+                            }
+                            else
+                            {
+                                button.setText("Miss")
+                                button.setBackgroundColor(Color.WHITE)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for(i in player.oppAttacks)
+        {
+            var buttons = findViewById<ViewGroup>(R.id.buttons)
+            for(j in 0..buttons.childCount-1)
+            {
+                var linearLayout = buttons.getChildAt(j)
+                if(linearLayout is LinearLayout)
+                {
+                    for(k in 0..linearLayout.childCount-1)
+                    {
+                        var button = linearLayout.getChildAt(k)
+                        if(i.first == j && i.second == k && button is Button)
+                        {
+                            if(i.third == 3)
+                            {
+                                if(button.text.contains("-")) button.setText("-Sunk-")
+                                else button.setText("Sunk")
+                                button.setBackgroundColor(Color.RED)
+                            }
+                            else if(i.third == 2)
+                            {
+                                if(button.text.contains("-")) button.setText("-Hit-")
+                                else button.setText("Hit")
+                                button.setBackgroundColor(Color.YELLOW)
+                            }
+                            else
+                            {
+                                button.setText("Miss")
+                                button.setBackgroundColor(Color.WHITE)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun setupCoordinateButtons()
