@@ -13,6 +13,10 @@ import android.widget.LinearLayout
 import com.example.natha.battleship.R.id.buttons
 import java.util.*
 import kotlin.collections.ArrayList
+import android.R.attr.button
+import android.graphics.drawable.ColorDrawable
+
+
 
 /**
  * Created by Natha on 10/20/2017.
@@ -42,7 +46,7 @@ class GameState() : AppCompatActivity() {
                     var count = 1
                     for(j in i.pos)
                     {
-                        var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+11)
+                        var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+10)
                         if(view is LinearLayout)
                         {
                             var button = view.getChildAt(j.second)
@@ -64,12 +68,14 @@ class GameState() : AppCompatActivity() {
             {
                 setupPlayer(playerTwo)
                 state = gameState.PLAYER_TWO_TURN
+                findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
             }
 
             else if(state == gameState.SWITCH_TO_PLAYER_ONE)
             {
                 setupPlayer(playerOne)
                 state = gameState.PLAYER_ONE_TURN
+                findViewById<Button>(R.id.Okay).setText("Player One's Turn")
             }
         }
 
@@ -99,7 +105,7 @@ class GameState() : AppCompatActivity() {
                     var pos = 0
                     for(j in i.pos)
                     {
-                        if(xVal == j.first && yVal == j.second && j.third != 2)
+                        if(xVal == j.first && yVal == j.second)
                         {
                             i.pos[pos] = Triple(xVal, yVal, 2)
                             if(view.text.isEmpty()) view.text = "Hit"
@@ -118,15 +124,15 @@ class GameState() : AppCompatActivity() {
                             for(k in i.pos)
                             {
                                 var pos2 = 0
-                                for(j in currentPlayer.myAttacks)
+                                for(l in currentPlayer.myAttacks)
                                 {
-                                    if(j.first == k.first && j.second == k.second) currentPlayer.myAttacks[pos2] = Triple(j.first, j.second, 3)
+                                    if(l.first == k.first && j.second == k.second) currentPlayer.myAttacks[pos2] = Triple(j.first, j.second, 3)
                                     pos2++
                                 }
                                 pos2 = 0
-                                for(j in opponentPlayer.oppAttacks)
+                                for(l in opponentPlayer.oppAttacks)
                                 {
-                                    if(j.first == k.first && j.second == k.second) opponentPlayer.oppAttacks[pos2] = Triple(j.first, j.second, 3)
+                                    if(l.first == k.first && j.second == k.second) opponentPlayer.oppAttacks[pos2] = Triple(j.first, j.second, 3)
                                     pos2++
                                 }
                                 i.pos[pos] = Triple(k.first, k.second, 3)
@@ -148,25 +154,25 @@ class GameState() : AppCompatActivity() {
                                 i.pos[k] = Triple(i.pos[k].first, i.pos[k].second, 3)
                             }
 
-                            for(i in opponentPlayer.ships)
+                            for(k in opponentPlayer.ships)
                             {
                                 var sinkCount = 0
-                                for(j in i.pos)
+                                for(l in k.pos)
                                 {
-                                    if(j.third == 3) sinkCount++
-                                    if(sinkCount == i.size)
+                                    if(l.third == 3) sinkCount++
+                                    if(sinkCount == opponentPlayer.ships.size)
                                     {
                                         if(state == gameState.PLAYER_ONE_TURN) state = gameState.GAME_OVER_PLAYER_ONE
                                         else state = gameState.GAME_OVER_PLAYER_TWO
                                         var views = findViewById<ViewGroup>(R.id.buttons)
-                                        for(i in 0..views.childCount-1)
+                                        for(m in 0..views.childCount-1)
                                         {
-                                            var view = views.getChildAt(i)
+                                            var view = views.getChildAt(m)
                                             if(view is LinearLayout)
                                             {
-                                                for(j in 0..view.childCount-1)
+                                                for(n in 0..view.childCount-1)
                                                 {
-                                                    var button = view.getChildAt(j)
+                                                    var button = view.getChildAt(n)
                                                     if(button is Button) button.isClickable = false
 
                                                 }
@@ -187,34 +193,44 @@ class GameState() : AppCompatActivity() {
                     opponentPlayer.oppAttacks.add(Triple(xVal, yVal, 1))
                     currentPlayer.myAttacks.add(Triple(xVal,yVal, 1))
                     view.setText("Miss")
-                    view.setTextColor(Color.BLACK)
                     view.isClickable = false
                 }
 
-                var timer = 0L
-                for(i in  1..2) {
+                var timer = 0
+                for(i in  1..3) {
                     Handler().postDelayed(Runnable {
                         var views = findViewById<ViewGroup>(R.id.buttons)
-                        for (i in 0..views.childCount - 1) {
-                            var view = views.getChildAt(i)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
                             if (view is LinearLayout) {
-                                for (j in 0..view.childCount - 1) {
-                                    var button = view.getChildAt(j)
-                                    if (button is Button && button.id != R.id.Okay) {
-                                        if(timer == 0L) button.isClickable = false
-                                        else
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        if(i == 1) button.isClickable = false
+                                        else if(i > 2 && button.id != R.id.Okay)
                                         {
                                             button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
                                             button.setText("")
-                                            findViewById<Button>(R.id.Okay).setText("Switch to player two")
-                                            state = gameState.SWITCH_TO_PLAYER_TWO
                                         }
                                     }
                                 }
                             }
                         }
-                    }, timer * 1000)
-                    timer = 5L
+                        if(state == gameState.PLAYER_ONE_TURN && i > 2)
+                        {
+                            findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
+                            state = gameState.SWITCH_TO_PLAYER_TWO
+                            findViewById<Button>(R.id.Okay).isClickable = true
+                        }
+                        else if(state == gameState.PLAYER_TWO_TURN && i > 2)
+                        {
+                            findViewById<Button>(R.id.Okay).setText("Switch to Player One")
+                            state = gameState.SWITCH_TO_PLAYER_ONE
+                            findViewById<Button>(R.id.Okay).isClickable = true
+                        }
+                    }, timer.toLong() * 1000)
+
+                    timer = 5
                 }
             }
         }
@@ -273,16 +289,7 @@ class GameState() : AppCompatActivity() {
                     playerOne = Player(ships, ArrayList<Triple<Int,Int,Int>>(), ArrayList<Triple<Int,Int,Int>>())
                     playerOneSetup = true
                 }
-                else {
-                    playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
-
-                    for (i in playerTwo.ships) {
-                        Log.e("SIZE", "Ship size is: " + i.size)
-                        for (j in i.pos) {
-                            Log.e("LOCATION", "Xpos: " + j.first + ", Ypos: " + j.second + ", Sunk? " + j.third)
-                        }
-                    }
-                }
+                else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
             }
         }
     }
@@ -340,109 +347,109 @@ class GameState() : AppCompatActivity() {
     {
         for(i in player.ships)
         {
-            for(j in 0..i.size-1)
+            var size = i.size
+            var count = 1
+            for(j in i.pos)
             {
-                var buttons = findViewById<ViewGroup>(R.id.buttons)
-                for(k in 0..buttons.childCount-1)
+                var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+10)
+                if(view is LinearLayout)
                 {
-                    var linearLayout = buttons.getChildAt(k)
-                    if(linearLayout is LinearLayout)
+                    var button = view.getChildAt(j.second-1)
+                    if(button is Button)
                     {
-                        for(l in 0..linearLayout.childCount-1)
+                        if(j.third == 3)
                         {
-                            var button = linearLayout.getChildAt(l)
-                            for(m in i.pos)
-                            {
-                                if(m.first == k && m.second == l && button is Button)
-                                {
-                                    if(m.third == 3)
-                                    {
-                                        if(j == 0 || j == i.size-1) button.setText("-Sunk-")
-                                        else button.setText("Sunk")
-                                        button.setBackgroundColor(Color.RED)
-                                    }
-                                    else if(m.third == 2)
-                                    {
-                                        if(j == 0 || j == i.size-1) button.setText("-Hit-")
-                                        else button.setText("Hit")
-                                        button.setBackgroundColor(Color.YELLOW)
-                                    }
-                                    else if(j == 0 || j == i.size-1) button.setText("-")
-                                }
-                            }
+                            if(count == 1 || count == size) button.setText("-Sunk-")
+                            else button.setText("Sunk")
+                            button.setBackgroundColor(Color.RED)
+                        }
+                        else if(j.third == 2)
+                        {
+                            if(count == 1 || count == size) button.setText("-Hit-")
+                            else button.setText("Hit")
+                            button.setBackgroundColor(Color.YELLOW)
+                        }
+                        else if(j.third == 0)
+                        {
+                            if(count == 1 || count == size) button.setText("-")
+                            button.setBackgroundColor(Color.GRAY)
                         }
                     }
                 }
+                count++
             }
         }
 
 
         for(i in player.myAttacks)
         {
-            var buttons = findViewById<ViewGroup>(R.id.buttons)
-            for(j in 0..buttons.childCount-1)
+            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first-1)
+            if(view is LinearLayout)
             {
-                var linearLayout = buttons.getChildAt(j)
-                if(linearLayout is LinearLayout)
+                var button = view.getChildAt(i.second-1)
+                if(button is Button)
                 {
-                    for(k in 0..linearLayout.childCount-1)
+                    if(i.third == 3)
                     {
-                        var button = linearLayout.getChildAt(k)
-                        if(i.first == j && i.second == k && button is Button)
-                        {
-                            if(i.third == 3)
-                            {
-                                button.setText("Sunk")
-                                button.setBackgroundColor(Color.RED)
-                            }
-                            else if(i.third == 2)
-                            {
-                                button.setText("Hit")
-                                button.setBackgroundColor(Color.YELLOW)
-                            }
-                            else
-                            {
-                                button.setText("Miss")
-                                button.setBackgroundColor(Color.WHITE)
-                            }
-                        }
+                        button.setText("Sunk")
+                        button.setBackgroundColor(Color.RED)
+                    }
+                    else if(i.third == 2)
+                    {
+                        button.setText("Hit")
+                        button.setBackgroundColor(Color.YELLOW)
+                    }
+                    else if(i.third == 1)
+                    {
+                        button.setText("Miss")
+                        button.setBackgroundColor(Color.WHITE)
                     }
                 }
             }
         }
 
+
         for(i in player.oppAttacks)
         {
-            var buttons = findViewById<ViewGroup>(R.id.buttons)
-            for(j in 0..buttons.childCount-1)
+            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first+10)
+            if(view is LinearLayout)
             {
-                var linearLayout = buttons.getChildAt(j)
-                if(linearLayout is LinearLayout)
+                var button = view.getChildAt(i.second-1)
+                if(button is Button)
                 {
-                    for(k in 0..linearLayout.childCount-1)
+                    if(i.third == 3)
                     {
-                        var button = linearLayout.getChildAt(k)
-                        if(i.first == j && i.second == k && button is Button)
-                        {
-                            if(i.third == 3)
-                            {
-                                if(button.text.contains("-")) button.setText("-Sunk-")
-                                else button.setText("Sunk")
-                                button.setBackgroundColor(Color.RED)
-                            }
-                            else if(i.third == 2)
-                            {
-                                if(button.text.contains("-")) button.setText("-Hit-")
-                                else button.setText("Hit")
-                                button.setBackgroundColor(Color.YELLOW)
-                            }
-                            else
-                            {
-                                button.setText("Miss")
-                                button.setBackgroundColor(Color.WHITE)
-                            }
-                        }
+                        if(button.text.contains("-"))button.setText("-Sunk-")
+                        else button.setText("Sunk")
+                        button.setBackgroundColor(Color.RED)
                     }
+                    else if(i.third == 2)
+                    {
+                        if(button.text.contains("-"))button.setText("-Hit-")
+                        else button.setText("Hit")
+                        button.setBackgroundColor(Color.YELLOW)
+                    }
+
+                    else if(i.third == 1)
+                    {
+                        button.setText("Miss")
+                        button.setBackgroundColor(Color.WHITE)
+                    }
+                }
+            }
+        }
+
+        for(i in 0..11)
+        {
+            var child = findViewById<ViewGroup>(R.id.buttons).getChildAt(i)
+            if(child is LinearLayout)
+            {
+                for(i in 0..child.childCount-1)
+                {
+                    var child2 = child.getChildAt(i)
+                    val buttonColor = child2.background as ColorDrawable
+
+                    if(child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light)) child2.setOnClickListener(clickListener)
                 }
             }
         }
