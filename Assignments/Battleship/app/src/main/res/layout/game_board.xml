@@ -24,6 +24,8 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:id="@+id/A1_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
 
         <Button
@@ -31,6 +33,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A2_2"
@@ -39,6 +43,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:text=""
@@ -46,6 +52,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
@@ -58,6 +66,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/A5_2"
@@ -67,6 +77,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A6_2"
             android:layout_margin="1dp"
@@ -78,9 +90,13 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/A7_2"
             android:layout_weight=".1" />
         <Button
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
@@ -94,6 +110,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:id="@+id/A9_2"
@@ -102,6 +120,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A10_2"
             android:textColor="@android:color/black"
@@ -122,6 +142,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B1_2"
@@ -130,6 +152,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
@@ -141,6 +165,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B3_2"
             android:layout_margin="1dp"
@@ -149,6 +175,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -156,6 +184,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
@@ -166,6 +196,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -175,6 +207,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -186,6 +220,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B8_2"
@@ -196,6 +232,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/B9_2"
             android:layout_weight=".1" />
@@ -206,6 +244,8 @@
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/B10_2"
             android:layout_weight=".1" />
     </LinearLayout>
@@ -221,6 +261,8 @@
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -230,6 +272,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
@@ -241,6 +285,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C3_2"
@@ -252,6 +298,8 @@
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C4_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_weight=".1" />
         <Button
@@ -261,6 +309,8 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/C5_2"
             android:layout_weight=".1" />
         <Button
@@ -268,6 +318,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/C6_2"
@@ -276,6 +328,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
@@ -284,6 +338,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -295,6 +351,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/C9_2"
@@ -306,6 +364,8 @@
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/C10_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
     </LinearLayout>
@@ -322,6 +382,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D1_2"
@@ -331,6 +393,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -342,6 +406,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D3_2"
             android:layout_weight=".1" />
@@ -352,6 +418,8 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/D4_2"
             android:layout_weight=".1" />
         <Button
@@ -360,6 +428,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/D5_2"
             android:layout_weight=".1" />
@@ -370,6 +440,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/D6_2"
             android:layout_weight=".1" />
         <Button
@@ -377,6 +449,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D7_2"
@@ -386,6 +460,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/D8_2"
@@ -397,6 +473,8 @@
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/D9_2"
             android:layout_weight=".1" />
         <Button
@@ -404,6 +482,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D10_2"
@@ -420,6 +500,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:text=""
@@ -432,6 +514,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E2_2"
@@ -443,6 +527,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/E3_2"
             android:layout_weight=".1" />
         <Button
@@ -452,6 +538,8 @@
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/E4_2"
             android:layout_weight=".1" />
         <Button
@@ -461,6 +549,8 @@
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/E5_2"
             android:layout_weight=".1" />
         <Button
@@ -468,6 +558,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E6_2"
@@ -477,6 +569,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E7_2"
@@ -486,6 +580,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E8_2"
@@ -496,6 +592,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/E9_2"
             android:layout_weight=".1" />
@@ -507,6 +605,8 @@
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E10_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
     </LinearLayout>
     <LinearLayout
@@ -523,6 +623,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/F1_2"
             android:layout_weight=".1" />
@@ -531,6 +633,8 @@
             android:textColor="@android:color/black"
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -540,6 +644,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -550,6 +656,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:id="@+id/F4_2"
@@ -562,9 +670,13 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:id="@+id/F5_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
@@ -576,6 +688,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/F7_2"
             android:textColor="@android:color/black"
@@ -587,6 +701,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/F8_2"
             android:layout_weight=".1" />
@@ -598,11 +714,15 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:id="@+id/F9_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -620,6 +740,8 @@
 
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
@@ -629,6 +751,8 @@
             android:layout_weight=".1" />
 
         <Button
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
@@ -642,6 +766,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G3_2"
@@ -651,6 +777,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G4_2"
@@ -661,6 +789,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G5_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
@@ -671,12 +801,16 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/G6_2"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -685,6 +819,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -694,6 +830,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -703,6 +841,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -724,6 +864,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/H1_2"
             android:layout_weight=".1" />
@@ -734,6 +876,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H2_2"
             android:layout_weight=".1" />
@@ -744,6 +888,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/H3_2"
             android:layout_weight=".1" />
         <Button
@@ -752,6 +898,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/H4_2"
             android:layout_weight=".1" />
@@ -760,6 +908,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H5_2"
@@ -770,6 +920,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/H6_2"
             android:layout_weight=".1" />
@@ -780,6 +932,8 @@
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H7_2"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
         <Button
@@ -788,6 +942,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H8_2"
             android:layout_weight=".1" />
@@ -795,6 +951,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
@@ -802,6 +960,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
@@ -824,6 +984,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/I1_2"
@@ -836,12 +998,16 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/I2_2"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -853,6 +1019,8 @@
             android:layout_margin="1dp"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/I4_2"
             android:layout_weight=".1" />
@@ -863,6 +1031,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/I5_2"
             android:layout_weight=".1" />
         <Button
@@ -871,6 +1041,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/I6_2"
             android:layout_weight=".1" />
@@ -880,6 +1052,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/I7_2"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
@@ -889,6 +1063,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/I8_2"
             android:layout_weight=".1" />
@@ -900,11 +1076,15 @@
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/I9_2"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
@@ -922,6 +1102,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -931,6 +1113,8 @@
 
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
@@ -941,6 +1125,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:text=""
@@ -954,6 +1140,8 @@
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/J4_2"
             android:layout_weight=".1" />
         <Button
@@ -961,6 +1149,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/J5_2"
@@ -970,6 +1160,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/J6_2"
@@ -980,6 +1172,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/J7_2"
             android:layout_weight=".1" />
@@ -988,6 +1182,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/J8_2"
@@ -995,6 +1191,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -1004,6 +1202,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -1043,6 +1243,8 @@
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A1"
@@ -1051,6 +1253,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:text=""
@@ -1062,6 +1266,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/A3"
@@ -1072,6 +1278,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/A4"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
@@ -1081,6 +1289,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A5"
             android:layout_weight=".1" />
@@ -1091,6 +1301,8 @@
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A6"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
         <Button
@@ -1099,6 +1311,8 @@
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A7"
             android:layout_weight=".1" />
@@ -1107,6 +1321,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A8"
@@ -1116,6 +1332,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/A9"
@@ -1127,6 +1345,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/A10"
             android:layout_weight=".1" />
     </LinearLayout>
@@ -1144,6 +1364,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B1"
@@ -1154,6 +1376,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B2"
@@ -1163,6 +1387,8 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B3"
@@ -1171,6 +1397,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
@@ -1180,6 +1408,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1191,6 +1421,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B6"
             android:layout_weight=".1" />
@@ -1198,6 +1430,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
@@ -1208,6 +1442,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/B8"
@@ -1218,6 +1454,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/B9"
             android:layout_weight=".1" />
@@ -1228,6 +1466,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/B10"
             android:layout_weight=".1" />
     </LinearLayout>
@@ -1245,6 +1485,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C1"
             android:layout_weight=".1" />
@@ -1255,6 +1497,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C2"
             android:layout_weight=".1" />
@@ -1263,6 +1507,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C3"
@@ -1271,6 +1517,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
@@ -1280,6 +1528,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
@@ -1290,6 +1540,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/C6"
@@ -1298,6 +1550,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
@@ -1307,6 +1561,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -1319,6 +1575,8 @@
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/C9"
             android:layout_weight=".1" />
         <Button
@@ -1326,6 +1584,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/C10"
@@ -1346,12 +1606,16 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/D1"
             android:layout_weight=".1" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:text=""
@@ -1361,6 +1625,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:text=""
@@ -1369,6 +1635,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
@@ -1379,6 +1647,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:text=""
             android:layout_margin="1dp"
@@ -1389,6 +1659,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D6"
@@ -1400,6 +1672,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D7"
             android:layout_weight=".1" />
@@ -1408,6 +1682,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/D8"
@@ -1416,6 +1692,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
@@ -1426,6 +1704,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/D10"
             android:textColor="@android:color/black"
@@ -1441,6 +1721,8 @@
 
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
@@ -1452,6 +1734,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:text=""
@@ -1463,6 +1747,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E3"
@@ -1473,6 +1759,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/E4"
             android:layout_weight=".1" />
@@ -1481,6 +1769,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/E5"
@@ -1491,6 +1781,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/E6"
             android:layout_weight=".1" />
@@ -1499,6 +1791,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/E7"
@@ -1506,6 +1800,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1514,6 +1810,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
@@ -1523,6 +1821,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
@@ -1542,6 +1842,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:text=""
@@ -1552,6 +1854,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:text=""
@@ -1561,6 +1865,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
@@ -1574,6 +1880,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/F4"
             android:layout_weight=".1" />
         <Button
@@ -1581,6 +1889,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/F5"
@@ -1589,6 +1899,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1596,6 +1908,8 @@
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -1609,6 +1923,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/F8"
             android:layout_margin="1dp"
             android:layout_weight=".1" />
@@ -1619,12 +1935,16 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/F9"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
@@ -1645,6 +1965,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G1"
             android:layout_weight=".1" />
@@ -1654,6 +1976,8 @@
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G2"
@@ -1663,6 +1987,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G3"
@@ -1672,6 +1998,8 @@
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G4"
@@ -1680,6 +2008,8 @@
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G5"
@@ -1689,6 +2019,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1700,6 +2032,8 @@
             android:textColor="@android:color/black"
             android:text=""
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G7"
             android:layout_weight=".1" />
@@ -1710,6 +2044,8 @@
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/G8"
             android:layout_weight=".1" />
         <Button
@@ -1720,6 +2056,8 @@
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
             android:id="@+id/G9"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
@@ -1727,6 +2065,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/G10"
             android:layout_weight=".1" />
@@ -1743,6 +2083,8 @@
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -1752,6 +2094,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
@@ -1761,6 +2105,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1772,6 +2118,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H4"
             android:layout_margin="1dp"
@@ -1784,6 +2132,8 @@
             android:textColor="@android:color/black"
             android:id="@+id/H5"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
@@ -1791,6 +2141,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H6"
             android:layout_weight=".1" />
@@ -1800,6 +2152,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H7"
             android:layout_weight=".1" />
@@ -1809,6 +2163,8 @@
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/H8"
             android:layout_weight=".1" />
@@ -1820,6 +2176,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:id="@+id/H9"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
@@ -1828,6 +2186,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/H10"
             android:layout_weight=".1" />
     </LinearLayout>
@@ -1841,6 +2201,8 @@
 
         <Button
             android:layout_width="wrap_content"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
             android:text=""
@@ -1852,6 +2214,8 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:textColor="@android:color/black"
@@ -1863,6 +2227,8 @@
             android:layout_margin="1dp"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/I3"
@@ -1873,6 +2239,8 @@
             android:text=""
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/I4"
             android:textColor="@android:color/black"
             android:layout_weight=".1" />
@@ -1882,6 +2250,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/I5"
             android:layout_weight=".1" />
@@ -1891,6 +2261,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/I6"
             android:layout_weight=".1" />
@@ -1900,6 +2272,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/I7"
             android:textColor="@android:color/black"
             android:layout_weight=".1" />
@@ -1907,6 +2281,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
@@ -1915,6 +2291,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -1929,6 +2307,8 @@
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/I10"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
     </LinearLayout>
     <LinearLayout
@@ -1942,6 +2322,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:background="@android:color/holo_blue_light"
@@ -1952,6 +2334,8 @@
         <Button
             android:layout_width="wrap_content"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_height="wrap_content"
             android:text=""
             android:layout_margin="1dp"
@@ -1962,6 +2346,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text=""
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
             android:background="@android:color/holo_blue_light"
@@ -1973,6 +2359,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/J4"
             android:layout_weight=".1" />
@@ -1982,6 +2370,8 @@
             android:text=""
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_margin="1dp"
             android:id="@+id/J5"
             android:layout_weight=".1" />
@@ -1991,6 +2381,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:layout_margin="1dp"
+            android:textSize="1mm"
+            android:gravity="center"
             android:textColor="@android:color/black"
             android:id="@+id/J6"
             android:layout_weight=".1" />
@@ -2001,6 +2393,8 @@
             android:text=""
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
+            android:textSize="1mm"
+            android:gravity="center"
             android:id="@+id/J7"
             android:layout_weight=".1" />
         <Button
@@ -2011,6 +2405,8 @@
             android:background="@android:color/holo_blue_light"
             android:textColor="@android:color/black"
             android:id="@+id/J8"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"
@@ -2020,6 +2416,8 @@
             android:textColor="@android:color/black"
             android:background="@android:color/holo_blue_light"
             android:id="@+id/J9"
+            android:textSize="1mm"
+            android:gravity="center"
             android:layout_weight=".1" />
         <Button
             android:layout_width="wrap_content"

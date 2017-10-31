@@ -32,7 +32,6 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater: LayoutInflater = LayoutInflater.from(parent.context)
-
         return when(viewType) {
             MyAdadpterItemType.TITLED_IMAGE.ordinal -> {
                 TitledImageViewHolder(layoutInflater.inflate(R.layout. view_titled_image, parent, false) as TitledImageView).apply {

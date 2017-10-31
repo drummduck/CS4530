@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import com.example.natha.battleship.R.id.my_recycler_view
 import kotlinx.android.synthetic.main.game_selection.*
 import java.io.File
 
