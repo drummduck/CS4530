@@ -52,7 +52,7 @@ class Game : AppCompatActivity() {
             var dir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/")
             if (!dir.exists()) dir.mkdirs()
             else {
-                numOfFiles = dir.listFiles().size / 2
+                numOfFiles = dir.listFiles().size
                 var count = 1
                 for (i in dir.listFiles()) {
                     recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "Game" + count))
@@ -71,8 +71,8 @@ class Game : AppCompatActivity() {
                         Log.e("FileSelection", "Selected item contained image of size (${myAdapterItem.image.bounds.width()} x ${myAdapterItem.image.bounds.height()}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                         intent = Intent(applicationContext, GameState::class.java)
-//                        intent.putExtra("fileName", myAdapterItem.title)
-//                        intent.putExtra("numOfFiles", numOfFiles)
+                        intent.putExtra("fileName", myAdapterItem.title)
+                        intent.putExtra("numOfFiles", numOfFiles)
                         startActivity(intent)
                         finish()
                     }
