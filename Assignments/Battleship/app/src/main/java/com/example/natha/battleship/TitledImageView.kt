@@ -1,13 +1,16 @@
 package com.example.natha.battleship
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.os.Environment
 import android.util.AttributeSet
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.View
+import android.widget.*
+import kotlinx.android.synthetic.main.view_titled_image.view.*
+import java.io.File
 
-import kotlinx.android.synthetic.main.view_titled_image.view.imageView as importedImageView
+import kotlinx.android.synthetic.main.view_titled_image.view.buttonView as importedButtonView
 import kotlinx.android.synthetic.main.view_titled_image.view.titleTextView as importedTitledTextView
 
 /**
@@ -19,20 +22,21 @@ class TitledImageView : FrameLayout {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
-    var image: Drawable
-        get() = imageView.drawable
-        set(newimage){imageView.setImageDrawable(newimage)}
+    var button: Int
+        get() = buttonView.id
+        set(newimage){buttonView.setBackgroundResource(newimage)}
 
     var title: String
         get() = titleTextView.text.toString()
         set(newTitle) { titleTextView.text = newTitle}
 
-    private var imageView: ImageView = ImageView(context)
-    private var titleTextView = TextView(context)
+    var buttonView: ImageButton = ImageButton(context)
+    var titleTextView = TextView(context)
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        imageView = importedImageView
+        buttonView = importedButtonView
         titleTextView = importedTitledTextView
     }
 }
+

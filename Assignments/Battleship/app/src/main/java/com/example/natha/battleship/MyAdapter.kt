@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 
 
@@ -24,7 +25,7 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
             MyAdadpterItemType.TITLED_IMAGE.ordinal -> {
                 val dataSetItem: MyAdapterItem = dataset[position]
                 if (holder !is TitledImageViewHolder || dataSetItem !is ImageWithTitle) throw AssertionError("Invalid ViewHolder was supplied for binding, or the dataset contained an unexpected value.")
-                holder.titledImageView.image = dataSetItem.image
+                holder.titledImageView.button = dataSetItem.button
                 holder.titledImageView.title = dataSetItem.title
             }
         }
@@ -60,7 +61,7 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
         val adapterItemType : MyAdadpterItemType
     }
 
-    data class ImageWithTitle(val image: Drawable, val title: String ) : MyAdapterItem {
+    data class ImageWithTitle(val button: Int, val title: String ) : MyAdapterItem {
         override val adapterItemType: MyAdadpterItemType = MyAdadpterItemType.TITLED_IMAGE
     }
 
@@ -77,7 +78,6 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
             override fun myAdapterItemSelected(myAdapterItem: MyAdapterItem) {
                 onMyAdapterItemSelectedListener(myAdapterItem)
             }
-
         }
     }
 }

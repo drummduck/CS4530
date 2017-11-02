@@ -812,6 +812,9 @@ class GameState() : AppCompatActivity() {
                 findViewById<Button>(R.id.Okay).isClickable = true
             }
         }
+
+        inputReader.close()
+        inputFile.close()
     }
 
     override fun onBackPressed() {

@@ -11,9 +11,12 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.view.View
 import com.example.natha.battleship.R.id.my_recycler_view
 import kotlinx.android.synthetic.main.game_selection.*
+import java.io.DataInputStream
 import java.io.File
+import java.io.FileInputStream
 
 class Game : AppCompatActivity() {
 
@@ -47,15 +50,14 @@ class Game : AppCompatActivity() {
 
         my_recycler_view.adapter = MyAdapter({
             val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-            val newItem: Drawable = getDrawable(R.drawable.plus)
-            recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "New Game"))
+            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.plus, "New Game"))
             var dir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/")
             if (!dir.exists()) dir.mkdirs()
             else {
                 numOfFiles = dir.listFiles().size
                 var count = 1
                 for (i in dir.listFiles()) {
-                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(newItem, "Game" + count))
+                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, setGameSelectionText(i, count)))
                     count++
                 }
 
@@ -68,10 +70,11 @@ class Game : AppCompatActivity() {
 
                 when (myAdapterItem) {
                     is MyAdapter.ImageWithTitle -> {
-                        Log.e("FileSelection", "Selected item contained image of size (${myAdapterItem.image.bounds.width()} x ${myAdapterItem.image.bounds.height()}")
+                        Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                         intent = Intent(applicationContext, GameState::class.java)
-                        intent.putExtra("fileName", myAdapterItem.title)
+                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("fileName", "New Game")
+                        else intent.putExtra("fileName", myAdapterItem.title.split("\\s+".toRegex())[0])
                         intent.putExtra("numOfFiles", numOfFiles)
                         startActivity(intent)
                         finish()
@@ -121,4 +124,67 @@ class Game : AppCompatActivity() {
         else setupFiles()
     }
 
+    fun setGameSelectionText(file : File, count : Int) : String
+    {
+        val inputFile = FileInputStream(file)
+        val inputReader = DataInputStream(inputFile)
+        var state = inputReader.readInt()
+
+        for(i in 0..4)
+        {
+            var shipSize = inputReader.readInt()
+            for(i in 0..shipSize-1)
+            {
+                inputReader.readInt()
+                inputReader.readInt()
+                inputReader.readInt()
+            }
+        }
+        var playerOneShipsLeft = inputReader.readInt()
+        var myAttackSize = inputReader.readInt()
+        //myattacks
+        if(myAttackSize != 0) {
+            for (i in 0..myAttackSize - 1) {
+                inputReader.readInt()
+                inputReader.readInt()
+                inputReader.readInt()
+            }
+        }
+            //oppAttacks
+        var oppAttackSize = inputReader.readInt()
+        //myattacks
+        if(oppAttackSize != 0) {
+            for (i in 0..oppAttackSize - 1) {
+                inputReader.readInt()
+                inputReader.readInt()
+                inputReader.readInt()
+            }
+        }
+        for(i in 0..4)
+        {
+            var shipSize = inputReader.readInt()
+            for(i in 0..shipSize-1)
+            {
+                inputReader.readInt()
+                inputReader.readInt()
+                inputReader.readInt()
+            }
+        }
+        var playerTwoShipsLeft = inputReader.readInt()
+        //Game# (in progress, started, Player # won) (Player (one/two)'s turn) PlayerOne Ships: # PlayerTwo Ships: #
+        var returnString = ""
+        when(state)
+        {
+            0 -> {returnString = "Game" + count + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            1,3 -> {returnString = "Game" + count + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            2,4 -> {returnString = "Game" + count + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            5 -> {returnString = "Game" + count + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
+            6 -> {returnString = "Game" + count + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
+        }
+
+        inputReader.close()
+        inputFile.close()
+
+        return returnString
+    }
 }
