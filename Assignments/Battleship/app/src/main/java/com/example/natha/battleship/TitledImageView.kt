@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Environment
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.*
 import kotlinx.android.synthetic.main.view_titled_image.view.*
@@ -33,10 +34,13 @@ class TitledImageView : FrameLayout {
     var buttonView: ImageButton = ImageButton(context)
     var titleTextView = TextView(context)
 
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         buttonView = importedButtonView
         titleTextView = importedTitledTextView
     }
+
+
 }
 

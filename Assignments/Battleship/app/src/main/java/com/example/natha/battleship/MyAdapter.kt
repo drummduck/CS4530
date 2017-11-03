@@ -1,6 +1,9 @@
 package com.example.natha.battleship
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.os.Environment
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.view.menu.MenuView
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -8,7 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
+import kotlinx.android.synthetic.main.view_titled_image.view.*
+import java.io.File
 
 
 /**
@@ -27,6 +34,7 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
                 if (holder !is TitledImageViewHolder || dataSetItem !is ImageWithTitle) throw AssertionError("Invalid ViewHolder was supplied for binding, or the dataset contained an unexpected value.")
                 holder.titledImageView.button = dataSetItem.button
                 holder.titledImageView.title = dataSetItem.title
+                holder.titledImageView.buttonView.setOnClickListener(clickListener)
             }
         }
     }
@@ -64,7 +72,6 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
     data class ImageWithTitle(val button: Int, val title: String ) : MyAdapterItem {
         override val adapterItemType: MyAdadpterItemType = MyAdadpterItemType.TITLED_IMAGE
     }
-
     class TitledImageViewHolder(val titledImageView: TitledImageView) : RecyclerView.ViewHolder(titledImageView)
 
     private var onMyAdapterItemSelectedListener : OnMyAdapterItemSelectedListener? = null
@@ -77,6 +84,24 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
         this.onMyAdapterItemSelectedListener = object : OnMyAdapterItemSelectedListener {
             override fun myAdapterItemSelected(myAdapterItem: MyAdapterItem) {
                 onMyAdapterItemSelectedListener(myAdapterItem)
+            }
+        }
+    }
+
+    val clickListener = View.OnClickListener { view ->
+        Log.e("BITCH", "BITCH")
+        var parent = view.parent
+        if(parent is LinearLayout)
+        {
+            Log.e("YOU", "YOU")
+            var child = parent.getChildAt(1)
+            if(child is TextView)
+            {
+                Log.e("SUCK", "SUCK")
+                var file: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + child.text.split("\\s".toRegex())[0])
+                file.delete()
+                var intent = Intent(view.context, Game::class.java)
+                view.context.startActivity(intent)
             }
         }
     }

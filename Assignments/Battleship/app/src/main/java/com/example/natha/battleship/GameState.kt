@@ -266,20 +266,33 @@ class GameState() : AppCompatActivity() {
         }
         else if(intent != null && intent.extras != null && !intent.extras.isEmpty)
         {
-            var numOfFiles = 0
+            var newGame = false
+            fileName = ""
+            var fileCount = 0
             for(i in intent.extras.keySet())
             {
                 when(i)
                 {
+                    "New Game" ->
+                    {
+                        fileCount = intent.getIntExtra("New Game",0)
+                        while(!newGame)
+                        {
+                            if(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/Game" + fileCount.toString()).exists())
+                                fileCount++
+                            else {
+                                fileName = "Game" + fileCount.toString()
+                                newGame = true
+                            }
+                        }
+                    }
                     "fileName" -> fileName = intent.getStringExtra(i)
-                    "numOfFiles" -> numOfFiles = intent.getIntExtra(i,0)
                 }
             }
 
-            if(!fileName.equals("New Game")) loadGame()
+            if(!newGame) loadGame()
 
             else {
-                fileName = "Game" + (numOfFiles+1).toString()
                 var playerOneSetup = false
                 for (i in 1..2) {
                     var shipSize = 2

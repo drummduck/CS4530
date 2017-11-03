@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.media.Image
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -12,6 +13,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import com.example.natha.battleship.R.id.my_recycler_view
 import kotlinx.android.synthetic.main.game_selection.*
 import java.io.DataInputStream
@@ -57,7 +59,7 @@ class Game : AppCompatActivity() {
                 numOfFiles = dir.listFiles().size
                 var count = 1
                 for (i in dir.listFiles()) {
-                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, setGameSelectionText(i, count)))
+                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, setGameSelectionText(i, i.name)))
                     count++
                 }
 
@@ -73,7 +75,7 @@ class Game : AppCompatActivity() {
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                         intent = Intent(applicationContext, GameState::class.java)
-                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("fileName", "New Game")
+                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", itemCount)
                         else intent.putExtra("fileName", myAdapterItem.title.split("\\s+".toRegex())[0])
                         intent.putExtra("numOfFiles", numOfFiles)
                         startActivity(intent)
@@ -124,7 +126,7 @@ class Game : AppCompatActivity() {
         else setupFiles()
     }
 
-    fun setGameSelectionText(file : File, count : Int) : String
+    fun setGameSelectionText(file : File, name : String) : String
     {
         val inputFile = FileInputStream(file)
         val inputReader = DataInputStream(inputFile)
@@ -175,11 +177,11 @@ class Game : AppCompatActivity() {
         var returnString = ""
         when(state)
         {
-            0 -> {returnString = "Game" + count + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            1,3 -> {returnString = "Game" + count + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            2,4 -> {returnString = "Game" + count + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            5 -> {returnString = "Game" + count + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
-            6 -> {returnString = "Game" + count + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
+            0 -> {returnString = name + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            1,3 -> {returnString = name + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            2,4 -> {returnString = name + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+            5 -> {returnString = name + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
+            6 -> {returnString = name + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
         }
 
         inputReader.close()
