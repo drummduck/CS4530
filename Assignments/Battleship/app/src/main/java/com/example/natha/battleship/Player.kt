@@ -1,9 +1,11 @@
 package com.example.natha.battleship
 
+import java.io.Serializable
+
 /**
- * Created by Natha on 10/20/2017.
+ * Created by Nathan on 10/20/2017.
  */
-class Player() {
+class Player() : Serializable{
     var ships = ArrayList<Ship>()
     var oppAttacks = ArrayList<Triple<Int,Int,Int>>()
     var myAttacks = ArrayList<Triple<Int,Int,Int>>()

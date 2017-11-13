@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    >
+
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="FireBattle"
+    android:textSize="10mm"
+    android:textAllCaps="false"
+    android:gravity="center"
+    android:layout_weight="1"
+    />
+
+    <TextView
+        android:id="@+id/errorMessage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textAllCaps="false"
+        android:layout_weight="1.15"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight=".4"
+            android:hint="Email:"
+            android:ems="10"
+            android:inputType="textEmailAddress" />
+
+    </LinearLayout>
+
+<LinearLayout
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_weight="1"
+    android:gravity="center"
+    android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".4"
+        android:hint="Password:"
+        android:ems="10"
+        android:inputType="textPassword" />
+</LinearLayout>
+
+    <Button
+        android:id="@+id/loginRegister"
+        android:textAllCaps="false"
+        android:text="Login/Register"
+        android:layout_width="200dp"
+        android:layout_height="500dp"
+        android:layout_weight="1"/>
+    <TextView
+        android:id="@+id/forgot"
+        android:text="Forot Passord?"
+        android:gravity="center_horizontal"
+        android:textAllCaps="false"
+        android:layout_width="200dp"
+        android:layout_height="500dp"
+        android:layout_weight="1"/>
+
+</LinearLayout>

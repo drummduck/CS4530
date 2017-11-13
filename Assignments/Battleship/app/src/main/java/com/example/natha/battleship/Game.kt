@@ -15,10 +15,13 @@ import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import com.example.natha.battleship.R.id.my_recycler_view
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.game_selection.*
-import java.io.DataInputStream
-import java.io.File
-import java.io.FileInputStream
+import java.io.*
+
+
 
 class Game : AppCompatActivity() {
 
@@ -152,7 +155,7 @@ class Game : AppCompatActivity() {
                 inputReader.readInt()
             }
         }
-            //oppAttacks
+        //oppAttacks
         var oppAttackSize = inputReader.readInt()
         //myattacks
         if(oppAttackSize != 0) {

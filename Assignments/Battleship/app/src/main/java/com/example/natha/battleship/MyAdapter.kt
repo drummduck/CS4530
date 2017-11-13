@@ -89,19 +89,24 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
     }
 
     val clickListener = View.OnClickListener { view ->
-        Log.e("BITCH", "BITCH")
         var parent = view.parent
         if(parent is LinearLayout)
         {
-            Log.e("YOU", "YOU")
             var child = parent.getChildAt(1)
             if(child is TextView)
             {
-                Log.e("SUCK", "SUCK")
-                var file: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + child.text.split("\\s".toRegex())[0])
-                file.delete()
-                var intent = Intent(view.context, Game::class.java)
-                view.context.startActivity(intent)
+                var intent : Intent
+                if(child.text.equals("New Game")) {
+                    intent = Intent(view.context, GameState::class.java)
+                    intent.putExtra("New Game", itemCount)
+                    view.context.startActivity(intent)
+                }
+                else {
+                    var file: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + child.text.split("\\s".toRegex())[0])
+                    file.delete()
+                    intent = Intent(view.context, Game::class.java)
+                    view.context.startActivity(intent)
+                }
             }
         }
     }

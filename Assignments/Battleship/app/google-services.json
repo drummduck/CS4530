@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "671998360409",
+    "firebase_url": "https://firebattle-be74f.firebaseio.com",
+    "project_id": "firebattle-be74f",
+    "storage_bucket": "firebattle-be74f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671998360409:android:e02f7eed70b244c9",
+        "android_client_info": {
+          "package_name": "com.example.natha.battleship"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671998360409-fjtco4do9rlkrjj3q3223eu1o3ck7s85.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.natha.battleship",
+            "certificate_hash": "34c1302847ecfa53e98514bc20a6fe62e90b47bd"
+          }
+        },
+        {
+          "client_id": "671998360409-rnkn6dst08vt7e1sejlskc7rsvc0f2ef.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcX_PBZ84xtK8ocD4NmLR4JoCyW3ZqfZs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671998360409-rnkn6dst08vt7e1sejlskc7rsvc0f2ef.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
