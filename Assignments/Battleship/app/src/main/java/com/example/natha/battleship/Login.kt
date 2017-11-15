@@ -3,6 +3,7 @@ package com.example.natha.battleship
 import android.content.ContentValues.TAG
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.NonNull
@@ -30,11 +31,12 @@ class Login : AppCompatActivity() {
     lateinit var errorField : TextView
     lateinit var loginButton : Button
     lateinit var registerButton : Button
-    lateinit var forgotPassword : TextView
+    lateinit var cancel : TextView
     lateinit var title : TextView
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
     lateinit var task : Task<AuthResult>
+    var handler = Handler()
     var loginState = LoginState.STARTED
 
 
@@ -48,12 +50,12 @@ class Login : AppCompatActivity() {
         errorField = findViewById(R.id.errorMessage)
         loginButton = findViewById(R.id.login)
         registerButton = findViewById(R.id.register)
-        forgotPassword = findViewById(R.id.forgot)
+        cancel = findViewById(R.id.cancel)
         title = findViewById(R.id.title)
 
         loginButton.setOnClickListener(clickListener)
         registerButton.setOnClickListener(clickListener)
-        forgotPassword.setOnClickListener(clickListener)
+        cancel.setOnClickListener(clickListener)
         auth = FirebaseAuth.getInstance()
         if(auth != null && auth.currentUser != null)
         {
@@ -110,27 +112,28 @@ class Login : AppCompatActivity() {
                         errorField.setText("Password and Email fields must not be empty")
                     else
                         errorField.setText("Password requires 1 or more capital letters, digits, and non-alphanumeric symbols and must be at least 8 characters")
-                }            }
-
-            R.id.forgot ->
-            {
-                if(forgotPassword.text.equals("Cancel"))
-                {
-                    emailField.text.clear()
-                    emailField.hint = "Email:"
-                    emailField.gravity = Gravity.LEFT
-                    emailField.isFocusable = true
-                    passwordField.text.clear()
-                    passwordField.hint = "Password:"
-                    forgotPassword.text = "Forgot Password?"
-                    errorField.setText("Email verifcation not completed.")
-                    errorField.visibility = View.VISIBLE
-                    passwordField.visibility = View.VISIBLE
-                    title.visibility = View.VISIBLE
-                    loginButton.visibility = View.VISIBLE
-                    registerButton.visibility = View.VISIBLE
                 }
-                //else do forgot password shit
+            }
+
+            R.id.cancel ->
+            {
+                emailField.text.clear()
+                emailField.hint = "Email:"
+                emailField.gravity = Gravity.LEFT
+                emailField.isFocusable = true
+                emailField.isFocusableInTouchMode = true
+                emailField.isClickable = true
+                emailField.isEnabled = true
+                passwordField.text.clear()
+                passwordField.hint = "Password:"
+                cancel.visibility = View.INVISIBLE
+                errorField.setBackgroundColor(android.R.attr.editTextBackground)
+                errorField.text = ""
+                errorField.visibility = View.VISIBLE
+                passwordField.visibility = View.VISIBLE
+                title.visibility = View.VISIBLE
+                loginButton.visibility = View.VISIBLE
+                registerButton.visibility = View.VISIBLE
             }
         }
     }
@@ -138,10 +141,10 @@ class Login : AppCompatActivity() {
     val onCompleteListener = OnCompleteListener<AuthResult>{ task ->
 
         if(task.isSuccessful) {
-            Log.e("Login", "Successful login or creation")
+            Log.e("Login", "login or creation")
             auth = FirebaseAuth.getInstance()
             if (auth != null && auth.currentUser != null) {
-                Log.e("LOGIN", "User exists on successful login or creation")
+                Log.e("LOGIN", "User exists on login or creation")
                 currentUser = auth.currentUser!!
             }
 
@@ -154,10 +157,13 @@ class Login : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    emailField.setText("Please verify your email.")
+                    emailField.setText("Email sent out, please verify your email.")
+                    emailField.isFocusableInTouchMode = false
                     emailField.gravity = Gravity.CENTER
                     emailField.isFocusable = false
-                    forgotPassword.setText("Cancel")
+                    emailField.isClickable = false
+                    emailField.isEnabled = false;
+                    cancel.visibility = View.VISIBLE
                     errorField.visibility = View.INVISIBLE
                     loginButton.visibility = View.INVISIBLE
                     registerButton.visibility = View.INVISIBLE
@@ -165,18 +171,25 @@ class Login : AppCompatActivity() {
                     title.visibility = View.INVISIBLE
                     sendVerificationEmail()
                     var timer = 0
-                    for(i in 1..300) {
+                    for(i in 1..301) {
                         Handler().postDelayed(Runnable {
-                            if (timer >= 300 && forgotPassword.text.equals("Cancel")) {
+
+                            if(cancel.visibility == View.INVISIBLE) handler.removeCallbacks(null)
+
+                            else if (timer >= 300 && cancel.visibility == View.VISIBLE) {
                                 Log.e("LOGIN", "Times up, kicking back to login screen")
                                 emailField.text.clear()
                                 emailField.hint = "Email:"
                                 emailField.gravity = Gravity.LEFT
                                 emailField.isFocusable = true
+                                emailField.isFocusableInTouchMode = true
+                                emailField.isClickable = true
+                                emailField.isEnabled = true
                                 passwordField.text.clear()
                                 passwordField.hint = "Password:"
-                                forgotPassword.text = "Forgot Password?"
-                                errorField.setText("Email verifcation not completed.")
+                                cancel.visibility = View.INVISIBLE
+                                errorField.setBackgroundColor(Color.RED)
+                                errorField.setText("Email verifcation not completed, check email or internet connection.")
                                 errorField.visibility = View.VISIBLE
                                 passwordField.visibility = View.VISIBLE
                                 title.visibility = View.VISIBLE
@@ -185,6 +198,7 @@ class Login : AppCompatActivity() {
 
                                 auth.signOut()
                             } else {
+                                Log.e("LOGIN", "Timer is at: " + timer)
                                 if (currentUser.isEmailVerified) {
                                     Log.e("LOGIN", "Email is verified, take to main screen")
                                     intent = Intent(applicationContext, Game::class.java)
@@ -194,34 +208,43 @@ class Login : AppCompatActivity() {
                                     finish()
                                 }
                             }
-                        }, timer.toLong() * 1000)
-                        timer = timer++
-                        if(!forgotPassword.text.equals("Cancel")) break
+                            timer++
+                        }, i.toLong() * 1000)
                     }
                 }
             } else if (loginState == LoginState.CREATING) {
-                emailField.setText("Please verify your email.")
+                emailField.setText("Email sent out, please verify your email.")
                 emailField.isFocusable = false
+                emailField.isFocusableInTouchMode = false
+                emailField.isClickable = false
+                emailField.isEnabled = false
                 emailField.gravity = Gravity.CENTER
-                forgotPassword.setText("Cancel")
+                cancel.visibility = View.VISIBLE
                 errorField.visibility = View.INVISIBLE
                 loginButton.visibility = View.INVISIBLE
                 registerButton.visibility = View.INVISIBLE
                 passwordField.visibility = View.INVISIBLE
                 title.visibility = View.INVISIBLE
                 var timer = 0
-                for(i in 1..300) {
-                    Handler().postDelayed(Runnable {
-                        if (timer >= 300 && forgotPassword.text.equals("Cancel")) {
+                for(i in 1..301) {
+                    handler.postDelayed(Runnable {
+
+                        if(cancel.visibility == View.INVISIBLE) handler.removeCallbacks(null)
+
+                        else if (timer >= 300 && cancel.visibility == View.VISIBLE) {
                             Log.e("LOGIN", "Times up, kicking back to login screen")
                             emailField.text.clear()
                             emailField.hint = "Email:"
                             emailField.gravity = Gravity.LEFT
                             emailField.isFocusable = true
+                            emailField.isFocusableInTouchMode = true
+                            emailField.isClickable = true
+                            emailField.isEnabled = true
                             passwordField.text.clear()
                             passwordField.hint = "Password:"
-                            forgotPassword.text = "Forgot Password?"
-                            errorField.setText("Email verifcation not completed.")
+                            cancel.visibility = View.INVISIBLE
+                            errorField.setBackgroundColor(Color.RED)
+                            errorField.setText("Email verifcation not completed, check email or internet connection.")
                             errorField.visibility = View.VISIBLE
                             passwordField.visibility = View.VISIBLE
                             title.visibility = View.VISIBLE
@@ -230,6 +253,7 @@ class Login : AppCompatActivity() {
 
                             auth.signOut()
                         } else {
+                            Log.e("LOGIN", "Timer is at: " + timer)
                             if (currentUser.isEmailVerified) {
                                 Log.e("LOGIN", "Email is verified, take to main screen")
                                 intent = Intent(applicationContext, Game::class.java)
@@ -239,9 +263,8 @@ class Login : AppCompatActivity() {
                                 finish()
                             }
                         }
-                    }, timer.toLong() * 1000)
-                    timer = timer++
-                    if(!forgotPassword.text.equals("Cancel")) break
+                        timer++
+                    }, i.toLong() * 1000)
                 }
             }
         }
@@ -250,6 +273,7 @@ class Login : AppCompatActivity() {
         {
             auth.signOut()
             errorField.text = "Authentication failed"
+            errorField.setBackgroundColor(Color.RED)
             if(loginState == LoginState.SIGNING_IN) errorField.text = errorField.text.toString() + ", user may not exist or check internet settings."
             else if(loginState == LoginState.CREATING)  errorField.text = errorField.text.toString() + ", check internet settings."
         }
@@ -261,32 +285,37 @@ class Login : AppCompatActivity() {
         loginState = LoginState.VERIFYING
         if(currentUser != null)currentUser.sendEmailVerification().addOnCompleteListener(OnCompleteListener() { task ->
 
-            if(!task.isSuccessful && forgotPassword.text.equals("Cancel"))
-            {
+            if(!task.isSuccessful && cancel.visibility == View.INVISIBLE) {
                 errorField.text = "Email verification failed to send, check your internet settings."
                 emailField.text.clear()
                 emailField.hint = "Email:"
                 emailField.gravity = Gravity.LEFT
                 emailField.isFocusable = true
+                emailField.isFocusableInTouchMode = true
+                emailField.isClickable = true
+                emailField.isEnabled = true
                 passwordField.text.clear()
                 passwordField.hint = "Password:"
-                forgotPassword.text = "Forgot Password?"
+                cancel.visibility = View.VISIBLE
                 errorField.visibility = View.VISIBLE
+                errorField.setBackgroundColor(android.R.attr.editTextBackground)
                 passwordField.visibility = View.VISIBLE
                 title.visibility = View.VISIBLE
                 loginButton.visibility = View.VISIBLE
                 registerButton.visibility = View.VISIBLE
 
             }
+
+            else Log.e("LOGIN", "EMAIL SUCCEEDED ON SEND")
         })
     }
 
-    public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
-        if(savedInstanceState !is Bundle) return
-        Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
-        savedInstanceState.putString("loginState", fileName)
-        super.onSaveInstanceState(savedInstanceState)
-    }
+//    public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
+//        if(savedInstanceState !is Bundle) return
+//        Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
+//        savedInstanceState.putString("loginState", fileName)
+//        super.onSaveInstanceState(savedInstanceState)
+//    }
 }
 
 
