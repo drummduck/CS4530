@@ -13,8 +13,10 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageButton
 import com.example.natha.battleship.R.id.my_recycler_view
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -25,9 +27,32 @@ import java.io.*
 
 class Game : AppCompatActivity() {
 
+    lateinit var logout : Button
+    lateinit var uid : String
+    lateinit var email : String
+    lateinit var auth : FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_selection)
+        auth = FirebaseAuth.getInstance()
+        logout = findViewById(R.id.logout)
+        logout.setOnClickListener(View.OnClickListener {
+            auth.signOut()
+            startActivity(Intent(applicationContext, Login::class.java))
+            finish()
+        })
+        if(intent != null && intent.extras != null)
+        {
+            for(i in intent.extras.keySet())
+            {
+                when(i)
+                {
+                    "userEmail" -> email = intent.getStringExtra(i)
+                    "userUID" -> uid = intent.getStringExtra(i)
+                }
+            }
+        }
         requestPermissions()
     }
 
@@ -42,6 +67,8 @@ class Game : AppCompatActivity() {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.size > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.e("GAME", "Permission Granted, setting up files!")
+                    setupFiles()
                 }
             }
         }
@@ -77,7 +104,7 @@ class Game : AppCompatActivity() {
                     is MyAdapter.ImageWithTitle -> {
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
-                        intent = Intent(applicationContext, GameState::class.java)
+                            intent = Intent(applicationContext, GameState::class.java)
                         if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", itemCount)
                         else intent.putExtra("fileName", myAdapterItem.title.split("\\s+".toRegex())[0])
                         intent.putExtra("numOfFiles", numOfFiles)

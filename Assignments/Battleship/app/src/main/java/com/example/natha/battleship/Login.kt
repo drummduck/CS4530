@@ -35,9 +35,8 @@ class Login : AppCompatActivity() {
     lateinit var title : TextView
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
-    lateinit var task : Task<AuthResult>
     var handler = Handler()
-    var loginState = LoginState.STARTED
+    lateinit var loginState : LoginState
 
 
 
@@ -57,6 +56,7 @@ class Login : AppCompatActivity() {
         registerButton.setOnClickListener(clickListener)
         cancel.setOnClickListener(clickListener)
         auth = FirebaseAuth.getInstance()
+        loginState = LoginState.STARTED
         if(auth != null && auth.currentUser != null)
         {
             Log.e("LOGIN", "Current user is logged in")
@@ -68,6 +68,7 @@ class Login : AppCompatActivity() {
             intent = Intent(applicationContext, Game::class.java)
             intent.putExtra("userEmail", currentUser.email)
             intent.putExtra("userUID", currentUser.uid)
+            loginState = LoginState.DONE
             startActivity(intent)
             finish()
         }
@@ -134,6 +135,9 @@ class Login : AppCompatActivity() {
                 title.visibility = View.VISIBLE
                 loginButton.visibility = View.VISIBLE
                 registerButton.visibility = View.VISIBLE
+                handler.removeCallbacksAndMessages(null)
+                handler = Handler()
+                loginState = LoginState.STARTED
             }
         }
     }
@@ -154,12 +158,14 @@ class Login : AppCompatActivity() {
                     intent = Intent(applicationContext, Game::class.java)
                     intent.putExtra("userEmail", currentUser!!.email)
                     intent.putExtra("userUID", currentUser!!.uid)
+                    loginState = LoginState.DONE
                     startActivity(intent)
                     finish()
                 } else {
                     emailField.setText("Email sent out, please verify your email.")
                     emailField.isFocusableInTouchMode = false
                     emailField.gravity = Gravity.CENTER
+                    loginState = LoginState.VERIFYING
                     emailField.isFocusable = false
                     emailField.isClickable = false
                     emailField.isEnabled = false;
@@ -172,9 +178,15 @@ class Login : AppCompatActivity() {
                     sendVerificationEmail()
                     var timer = 0
                     for(i in 1..301) {
-                        Handler().postDelayed(Runnable {
+                        handler.postDelayed(Runnable {
 
-                            if(cancel.visibility == View.INVISIBLE) handler.removeCallbacks(null)
+                            if(timer % 5 == 0) currentUser.reload()
+
+                            if(cancel.visibility == View.INVISIBLE)
+                            {
+                                handler.removeCallbacksAndMessages(null)
+                                handler = Handler()
+                            }
 
                             else if (timer >= 300 && cancel.visibility == View.VISIBLE) {
                                 Log.e("LOGIN", "Times up, kicking back to login screen")
@@ -195,15 +207,21 @@ class Login : AppCompatActivity() {
                                 title.visibility = View.VISIBLE
                                 loginButton.visibility = View.VISIBLE
                                 registerButton.visibility = View.VISIBLE
+                                handler.removeCallbacksAndMessages(null)
+                                handler = Handler()
+                                loginState = LoginState.STARTED
 
                                 auth.signOut()
                             } else {
-                                Log.e("LOGIN", "Timer is at: " + timer)
+                                Log.e("LOGIN", "Timer is at: " + timer + " in sign-in")
                                 if (currentUser.isEmailVerified) {
                                     Log.e("LOGIN", "Email is verified, take to main screen")
                                     intent = Intent(applicationContext, Game::class.java)
                                     intent.putExtra("userEmail", currentUser!!.email)
                                     intent.putExtra("userUID", currentUser!!.uid)
+                                    handler.removeCallbacksAndMessages(null)
+                                    handler = Handler()
+                                    loginState = LoginState.DONE
                                     startActivity(intent)
                                     finish()
                                 }
@@ -225,11 +243,19 @@ class Login : AppCompatActivity() {
                 registerButton.visibility = View.INVISIBLE
                 passwordField.visibility = View.INVISIBLE
                 title.visibility = View.INVISIBLE
+                loginState = LoginState.VERIFYING
+                sendVerificationEmail()
                 var timer = 0
                 for(i in 1..301) {
                     handler.postDelayed(Runnable {
 
-                        if(cancel.visibility == View.INVISIBLE) handler.removeCallbacks(null)
+                        if(timer % 5 == 0) currentUser.reload()
+
+                        if(cancel.visibility == View.INVISIBLE)
+                        {
+                            handler.removeCallbacksAndMessages(null)
+                            handler = Handler()
+                        }
 
                         else if (timer >= 300 && cancel.visibility == View.VISIBLE) {
                             Log.e("LOGIN", "Times up, kicking back to login screen")
@@ -250,15 +276,21 @@ class Login : AppCompatActivity() {
                             title.visibility = View.VISIBLE
                             loginButton.visibility = View.VISIBLE
                             registerButton.visibility = View.VISIBLE
+                            handler.removeCallbacksAndMessages(null)
+                            handler = Handler()
+                            loginState = LoginState.STARTED
 
                             auth.signOut()
                         } else {
-                            Log.e("LOGIN", "Timer is at: " + timer)
+                            Log.e("LOGIN", "Timer is at: " + timer + " in creation")
                             if (currentUser.isEmailVerified) {
                                 Log.e("LOGIN", "Email is verified, take to main screen")
+                                loginState = LoginState.DONE
                                 intent = Intent(applicationContext, Game::class.java)
                                 intent.putExtra("userEmail", currentUser!!.email)
                                 intent.putExtra("userUID", currentUser!!.uid)
+                                handler.removeCallbacksAndMessages(null)
+                                handler = Handler()
                                 startActivity(intent)
                                 finish()
                             }
@@ -275,17 +307,17 @@ class Login : AppCompatActivity() {
             errorField.text = "Authentication failed"
             errorField.setBackgroundColor(Color.RED)
             if(loginState == LoginState.SIGNING_IN) errorField.text = errorField.text.toString() + ", user may not exist or check internet settings."
-            else if(loginState == LoginState.CREATING)  errorField.text = errorField.text.toString() + ", check internet settings."
+            else if(loginState == LoginState.CREATING)  errorField.text = errorField.text.toString() + ", user may already exist or check internet settings."
+            loginState = LoginState.STARTED
         }
     }
 
-    private fun sendVerificationEmail()
-    {
+    private fun sendVerificationEmail() {
         Log.e("LOGIN", "Sending verification email")
         loginState = LoginState.VERIFYING
-        if(currentUser != null)currentUser.sendEmailVerification().addOnCompleteListener(OnCompleteListener() { task ->
+        if (currentUser != null) currentUser.sendEmailVerification().addOnCompleteListener(OnCompleteListener() { task ->
 
-            if(!task.isSuccessful && cancel.visibility == View.INVISIBLE) {
+            if (!task.isSuccessful && cancel.visibility == View.INVISIBLE) {
                 errorField.text = "Email verification failed to send, check your internet settings."
                 emailField.text.clear()
                 emailField.hint = "Email:"
@@ -303,19 +335,36 @@ class Login : AppCompatActivity() {
                 title.visibility = View.VISIBLE
                 loginButton.visibility = View.VISIBLE
                 registerButton.visibility = View.VISIBLE
-
-            }
-
-            else Log.e("LOGIN", "EMAIL SUCCEEDED ON SEND")
+                loginState = LoginState.STARTED
+            } else Log.e("LOGIN", "EMAIL SUCCEEDED ON SEND")
         })
     }
-
-//    public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
-//        if(savedInstanceState !is Bundle) return
-//        Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
-//        savedInstanceState.putString("loginState", fileName)
-//        super.onSaveInstanceState(savedInstanceState)
-//    }
+    override fun onBackPressed() {
+        if(loginState == LoginState.VERIFYING)
+        {
+            emailField.text.clear()
+            emailField.hint = "Email:"
+            emailField.gravity = Gravity.LEFT
+            emailField.isFocusable = true
+            emailField.isFocusableInTouchMode = true
+            emailField.isClickable = true
+            emailField.isEnabled = true
+            passwordField.text.clear()
+            passwordField.hint = "Password:"
+            cancel.visibility = View.INVISIBLE
+            errorField.setBackgroundColor(android.R.attr.editTextBackground)
+            errorField.text = ""
+            errorField.visibility = View.VISIBLE
+            passwordField.visibility = View.VISIBLE
+            title.visibility = View.VISIBLE
+            loginButton.visibility = View.VISIBLE
+            registerButton.visibility = View.VISIBLE
+            handler.removeCallbacksAndMessages(null)
+            handler = Handler()
+            loginState = LoginState.STARTED
+        }
+        else super.onBackPressed()
+    }
 }
 
 
