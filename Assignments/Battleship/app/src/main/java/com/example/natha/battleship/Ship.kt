@@ -8,7 +8,7 @@ import java.io.Serializable
 class Ship() : Serializable {
 
     var size = 0
-    lateinit var pos : ArrayList<Triple<Int,Int,Int>>
+    var pos = ArrayList<Triple<Int,Int,Int>>()
 
     constructor(size : Int, pos : ArrayList<Triple<Int,Int,Int>>) : this()
     {

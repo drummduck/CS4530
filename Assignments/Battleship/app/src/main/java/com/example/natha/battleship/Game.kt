@@ -158,65 +158,90 @@ class Game : AppCompatActivity() {
 
     fun setGameSelectionText(file : File, name : String) : String
     {
-        val inputFile = FileInputStream(file)
-        val inputReader = DataInputStream(inputFile)
-        var state = inputReader.readInt()
+        Log.e("JSON READ", String.fromFile(file.path))
 
-        for(i in 0..4)
+        var stateOfGame = 0
+        var playerOne : Player
+        var playerTwo : Player
+
+        var gson = GsonBuilder().setPrettyPrinting().create()
+
+        var game = String.fromFile(file.path)
+
+        var gameState : Triple<*, *, *>? = gson.fromJson(game, Triple::class.javaObjectType)
+
+        if(gameState == null) return ""
+        if(gameState.first != null && gameState.first is Int) stateOfGame = gameState.first as Int
+
+        Log.e("JSON READ", "Game state is: " + stateOfGame)
+        if(gameState.second != null && gameState.second is Player)
         {
-            var shipSize = inputReader.readInt()
-            for(i in 0..shipSize-1)
+            for(i in (gameState.second as Player).ships)
             {
-                inputReader.readInt()
-                inputReader.readInt()
-                inputReader.readInt()
+                Log.e("JSON READ", "Ship size is: " + i.size)
             }
-        }
-        var playerOneShipsLeft = inputReader.readInt()
-        var myAttackSize = inputReader.readInt()
-        //myattacks
-        if(myAttackSize != 0) {
-            for (i in 0..myAttackSize - 1) {
-                inputReader.readInt()
-                inputReader.readInt()
-                inputReader.readInt()
-            }
-        }
-        //oppAttacks
-        var oppAttackSize = inputReader.readInt()
-        //myattacks
-        if(oppAttackSize != 0) {
-            for (i in 0..oppAttackSize - 1) {
-                inputReader.readInt()
-                inputReader.readInt()
-                inputReader.readInt()
-            }
-        }
-        for(i in 0..4)
-        {
-            var shipSize = inputReader.readInt()
-            for(i in 0..shipSize-1)
-            {
-                inputReader.readInt()
-                inputReader.readInt()
-                inputReader.readInt()
-            }
-        }
-        var playerTwoShipsLeft = inputReader.readInt()
-        //Game# (in progress, started, Player # won) (Player (one/two)'s turn) PlayerOne Ships: # PlayerTwo Ships: #
-        var returnString = ""
-        when(state)
-        {
-            0 -> {returnString = name + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            1,3 -> {returnString = name + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            2,4 -> {returnString = name + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-            5 -> {returnString = name + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
-            6 -> {returnString = name + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
         }
 
-        inputReader.close()
-        inputFile.close()
+//        val inputFile = FileInputStream(file)
+//        val inputReader = DataInputStream(inputFile)
+//        var state = inputReader.readInt()
+//
+//        for(i in 0..4)
+//        {
+//            var shipSize = inputReader.readInt()
+//            for(i in 0..shipSize-1)
+//            {
+//                inputReader.readInt()
+//                inputReader.readInt()
+//                inputReader.readInt()
+//            }
+//        }
+//        var playerOneShipsLeft = inputReader.readInt()
+//        var myAttackSize = inputReader.readInt()
+//        //myattacks
+//        if(myAttackSize != 0) {
+//            for (i in 0..myAttackSize - 1) {
+//                inputReader.readInt()
+//                inputReader.readInt()
+//                inputReader.readInt()
+//            }
+//        }
+//        //oppAttacks
+//        var oppAttackSize = inputReader.readInt()
+//        //myattacks
+//        if(oppAttackSize != 0) {
+//            for (i in 0..oppAttackSize - 1) {
+//                inputReader.readInt()
+//                inputReader.readInt()
+//                inputReader.readInt()
+//            }
+//        }
+//        for(i in 0..4)
+//        {
+//            var shipSize = inputReader.readInt()
+//            for(i in 0..shipSize-1)
+//            {
+//                inputReader.readInt()
+//                inputReader.readInt()
+//                inputReader.readInt()
+//            }
+//        }
+//        var playerTwoShipsLeft = inputReader.readInt()
+//        //Game# (in progress, started, Player # won) (Player (one/two)'s turn) PlayerOne Ships: # PlayerTwo Ships: #
+//        var returnString = ""
+//        when(state)
+//        {
+//            0 -> {returnString = name + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+//            1,3 -> {returnString = name + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+//            2,4 -> {returnString = name + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
+//            5 -> {returnString = name + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
+//            6 -> {returnString = name + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
+//        }
+//
+//        inputReader.close()
+//        inputFile.close()
 
-        return returnString
+        return ""
+//        return returnString
     }
 }

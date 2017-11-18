@@ -1218,9 +1218,31 @@
         android:layout_height="0dp"
         android:baselineAligned="false"
         android:layout_weight=".03">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Waiting for player..."
+            android:textAllCaps="false"
+            android:id="@+id/enemyName"
+            android:gravity="left"
+            android:autoSizeTextType="uniform"
+            android:background="@android:color/black"
+            android:textScaleX="2"
+            android:layout_weight="1">
+        </TextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:baselineAligned="false"
+        android:layout_weight=".03">
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:textColor="@android:color/black"
             android:text="Start"
             android:id="@+id/Okay"
             android:autoSizeTextType="uniform"
@@ -1228,6 +1250,26 @@
             android:textScaleX="2"
             android:layout_weight="1">
         </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:baselineAligned="false"
+        android:layout_weight=".03">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textAllCaps="false"
+            android:id="@+id/myName"
+            android:gravity="right"
+            android:autoSizeTextType="uniform"
+            android:background="@android:color/black"
+            android:textScaleX="2"
+            android:layout_weight="1">
+        </TextView>
     </LinearLayout>
 
     <LinearLayout
