@@ -12,13 +12,16 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
+import android.util.Log.i
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import com.example.natha.battleship.R.id.my_recycler_view
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonStreamParser
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.game_selection.*
 import java.io.*
@@ -31,10 +34,25 @@ class Game : AppCompatActivity() {
     lateinit var uid : String
     lateinit var email : String
     lateinit var auth : FirebaseAuth
+    lateinit var mDbRoot : FirebaseDatabase
+    lateinit var mDbRootRef : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_selection)
+        mDbRoot = FirebaseDatabase.getInstance()
+        mDbRootRef = mDbRoot.getReference()
+        mDbRootRef.addValueEventListener(object : ValueEventListener
+        {
+            override fun onDataChange(p0: DataSnapshot?) {
+
+            }
+
+            override fun onCancelled(p0: DatabaseError?) {
+
+            }
+        })
+        readDatabase()
         auth = FirebaseAuth.getInstance()
         logout = findViewById(R.id.logout)
         logout.setOnClickListener(View.OnClickListener {
@@ -53,26 +71,12 @@ class Game : AppCompatActivity() {
                 }
             }
         }
-        requestPermissions()
+
+        setupFiles()
     }
 
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
     var numOfFiles = 0
-    val MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1
-
-    override fun onRequestPermissionsResult(requestCode : Int,
-                                            stringArray : Array<String>, grantResults : IntArray) {
-        when(requestCode) {
-            MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE -> {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.size > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.e("GAME", "Permission Granted, setting up files!")
-                    setupFiles()
-                }
-            }
-        }
-    }
 
     fun setupFiles() {
         recyclerViewLayoutManager = LinearLayoutManager(this)
@@ -83,17 +87,6 @@ class Game : AppCompatActivity() {
         my_recycler_view.adapter = MyAdapter({
             val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.plus, "New Game"))
-            var dir: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/")
-            if (!dir.exists()) dir.mkdirs()
-            else {
-                numOfFiles = dir.listFiles().size
-                var count = 1
-                for (i in dir.listFiles()) {
-                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, setGameSelectionText(i, i.name)))
-                    count++
-                }
-
-            }
 
             recyclerViewDataset.toTypedArray()
         }()).apply {
@@ -105,9 +98,8 @@ class Game : AppCompatActivity() {
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                             intent = Intent(applicationContext, GameState::class.java)
-                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", itemCount)
-                        else intent.putExtra("fileName", myAdapterItem.title.split("\\s+".toRegex())[0])
-                        intent.putExtra("numOfFiles", numOfFiles)
+                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", "")
+                        else intent.putExtra("gameId", myAdapterItem.title.split("\\s+".toRegex())[0])
                         startActivity(intent)
                         finish()
                     }
@@ -116,132 +108,10 @@ class Game : AppCompatActivity() {
         }
     }
 
-    fun requestPermissions() {
-        var state = Environment.getExternalStorageState()
-        if (!Environment.MEDIA_MOUNTED.equals(state)) {
-            Log.d("FileSelection", "Error: external storage is unavailable")
-            return
-        }
-        if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.d("FileSelection", "Error: external storage is read only.")
-            return
-        }
-        Log.d("FileSelection", "External storage is not read only or unavailable")
-
-        if (ContextCompat.checkSelfPermission(this, // request permission when it is not granted.
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d("FileSelection", "permission:WRITE_EXTERNAL_STORAGE: NOT granted!");
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-                var stringArray = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                ActivityCompat.requestPermissions(this,
-                        stringArray,
-                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-        else setupFiles()
-    }
-
-    fun setGameSelectionText(file : File, name : String) : String
+    fun readDatabase()
     {
-        Log.e("JSON READ", String.fromFile(file.path))
-
-        var stateOfGame = 0
-        var playerOne : Player
-        var playerTwo : Player
-
-        var gson = GsonBuilder().setPrettyPrinting().create()
-
-        var game = String.fromFile(file.path)
-
-        var gameState : Triple<*, *, *>? = gson.fromJson(game, Triple::class.javaObjectType)
-
-        if(gameState == null) return ""
-        if(gameState.first != null && gameState.first is Int) stateOfGame = gameState.first as Int
-
-        Log.e("JSON READ", "Game state is: " + stateOfGame)
-        if(gameState.second != null && gameState.second is Player)
-        {
-            for(i in (gameState.second as Player).ships)
-            {
-                Log.e("JSON READ", "Ship size is: " + i.size)
-            }
-        }
-
-//        val inputFile = FileInputStream(file)
-//        val inputReader = DataInputStream(inputFile)
-//        var state = inputReader.readInt()
-//
-//        for(i in 0..4)
-//        {
-//            var shipSize = inputReader.readInt()
-//            for(i in 0..shipSize-1)
-//            {
-//                inputReader.readInt()
-//                inputReader.readInt()
-//                inputReader.readInt()
-//            }
-//        }
-//        var playerOneShipsLeft = inputReader.readInt()
-//        var myAttackSize = inputReader.readInt()
-//        //myattacks
-//        if(myAttackSize != 0) {
-//            for (i in 0..myAttackSize - 1) {
-//                inputReader.readInt()
-//                inputReader.readInt()
-//                inputReader.readInt()
-//            }
-//        }
-//        //oppAttacks
-//        var oppAttackSize = inputReader.readInt()
-//        //myattacks
-//        if(oppAttackSize != 0) {
-//            for (i in 0..oppAttackSize - 1) {
-//                inputReader.readInt()
-//                inputReader.readInt()
-//                inputReader.readInt()
-//            }
-//        }
-//        for(i in 0..4)
-//        {
-//            var shipSize = inputReader.readInt()
-//            for(i in 0..shipSize-1)
-//            {
-//                inputReader.readInt()
-//                inputReader.readInt()
-//                inputReader.readInt()
-//            }
-//        }
-//        var playerTwoShipsLeft = inputReader.readInt()
-//        //Game# (in progress, started, Player # won) (Player (one/two)'s turn) PlayerOne Ships: # PlayerTwo Ships: #
-//        var returnString = ""
-//        when(state)
-//        {
-//            0 -> {returnString = name + " Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-//            1,3 -> {returnString = name + " In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-//            2,4 -> {returnString = name + " In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipsLeft + "\nPlayer Two Ships Left: " + playerTwoShipsLeft}
-//            5 -> {returnString = name + " Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipsLeft}
-//            6 -> {returnString = name + " Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipsLeft}
-//        }
-//
-//        inputReader.close()
-//        inputFile.close()
-
-        return ""
-//        return returnString
+//        var gamesRef = mDbRoot.getReference("Games")
+//        var messageId = gamesRef.push().key
+//        gamesRef.child(messageId).setValue("Game")
     }
 }

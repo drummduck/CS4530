@@ -3,25 +3,20 @@ package com.example.natha.battleship
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
-import android.os.PersistableBundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
-import com.example.natha.battleship.R.id.buttons
 import java.util.*
 import kotlin.collections.ArrayList
-import android.R.attr.button
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.widget.TextView
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import kotlinx.android.synthetic.main.game_board.view.*
-import java.io.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 
 /**
@@ -38,8 +33,10 @@ class GameState() : AppCompatActivity() {
     lateinit var playerTwo : Player
     lateinit var myNameDisplay : TextView
     lateinit var enemyNameDisplay : TextView
+    lateinit var mDbRoot : FirebaseDatabase
+    lateinit var mDbRootRef : DatabaseReference
     var state = gameState.STARTED
-    var fileName = ""
+    var gameId = ""
 
 
     val clickListener = View.OnClickListener { view ->
@@ -55,7 +52,7 @@ class GameState() : AppCompatActivity() {
                     var count = 1
                     for(j in i.pos)
                     {
-                        var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+10)
+                        var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+12)
                         if(view is LinearLayout)
                         {
                             var button = view.getChildAt(j.second-1)
@@ -71,7 +68,6 @@ class GameState() : AppCompatActivity() {
                 }
                 setupCoordinateButtons()
                 state = gameState.PLAYER_ONE_TURN
-                saveGame()
             }
 
             else if(state == gameState.SWITCH_TO_PLAYER_TWO)
@@ -79,7 +75,6 @@ class GameState() : AppCompatActivity() {
                 state = gameState.PLAYER_TWO_TURN
                 setupPlayer(playerTwo)
                 findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
-                saveGame()
             }
 
             else if(state == gameState.SWITCH_TO_PLAYER_ONE)
@@ -87,7 +82,6 @@ class GameState() : AppCompatActivity() {
                 state = gameState.PLAYER_ONE_TURN
                 setupPlayer(playerOne)
                 findViewById<Button>(R.id.Okay).setText("Player One's Turn")
-                saveGame()
             }
         }
 
@@ -211,12 +205,10 @@ class GameState() : AppCompatActivity() {
                                 findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
                                 state = gameState.SWITCH_TO_PLAYER_TWO
                                 findViewById<Button>(R.id.Okay).isClickable = true
-                                saveGame()
                             } else if (state == gameState.PLAYER_TWO_TURN && i > 2) {
                                 findViewById<Button>(R.id.Okay).setText("Switch to Player One")
                                 state = gameState.SWITCH_TO_PLAYER_ONE
                                 findViewById<Button>(R.id.Okay).isClickable = true
-                                saveGame()
                             }
                         }, timer.toLong() * 1000)
 
@@ -224,14 +216,15 @@ class GameState() : AppCompatActivity() {
                     }
                 }
             }
-            saveGame()
+            updateDatabase(false)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_board)
-
+        mDbRoot = FirebaseDatabase.getInstance()
+        mDbRootRef = mDbRoot.getReference()
         myNameDisplay = findViewById(R.id.myName)
         enemyNameDisplay = findViewById(R.id.enemyName)
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
@@ -241,73 +234,60 @@ class GameState() : AppCompatActivity() {
 
             for (i in savedInstanceState.keySet()) {
                 when (i) {
-                    "fileName" -> fileName = savedInstanceState.getString("fileName")
+                    "gameId" -> gameId = savedInstanceState.getString("gameId")
                 }
             }
-            loadGame()
         }
         else if(intent != null && intent.extras != null && !intent.extras.isEmpty)
         {
-            var newGame = false
-            fileName = ""
-            var fileCount = 0
+            gameId = ""
             for(i in intent.extras.keySet())
             {
-                when(i)
-                {
+                when(i) {
+
+                    "gameId" ->
+                    {
+                        gameId = intent.getStringExtra("gameId")
+                        updateDatabase(false)
+                    }
+
                     "New Game" ->
                     {
-                        fileCount = intent.getIntExtra("New Game",0)
-                        while(!newGame)
-                        {
-                            if(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/Game" + fileCount.toString()).exists())
-                                fileCount++
-                            else {
-                                fileName = "Game" + fileCount.toString()
-                                newGame = true
-                            }
-                        }
-                    }
-                    "fileName" -> fileName = intent.getStringExtra(i)
-                }
-            }
+                        gameId = intent.getStringExtra(i)
+                        var playerOneSetup = false
+                        for (i in 1..2) {
+                            var shipSize = 2
+                            var ships = ArrayList<Ship>()
+                            for (i in 1..5) {
+                                var placementOkay = false
+                                while (!placementOkay) {
+                                    var placement = shipPlacement(shipSize)
+                                    placementOkay = true
 
-            if(!newGame) loadGame()
-
-            else {
-                var playerOneSetup = false
-                for (i in 1..2) {
-                    var shipSize = 2
-                    var ships = ArrayList<Ship>()
-                    for (i in 1..5) {
-                        var placementOkay = false
-                        while (!placementOkay) {
-                            var placement = shipPlacement(shipSize)
-                            placementOkay = true
-
-                            for (i in ships) {
-                                for (j in i.pos) {
-                                    for (k in placement) {
-                                        if (k.first == j.first && k.second == j.second) placementOkay = false
+                                    for (i in ships) {
+                                        for (j in i.pos) {
+                                            for (k in placement) {
+                                                if (k.first == j.first && k.second == j.second) placementOkay = false
+                                            }
+                                        }
+                                    }
+                                    if (placementOkay) {
+                                        ships.add(Ship(shipSize, placement))
+                                        if (i != 2) shipSize++
                                     }
                                 }
                             }
-                            if (placementOkay) {
-                                ships.add(Ship(shipSize, placement))
-                                if (i != 2) shipSize++
-                            }
-                        }
-                    }
 
-                    if (!playerOneSetup) {
-                        playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
-                        playerOneSetup = true
-                    } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
+                            if (!playerOneSetup) {
+                                playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
+                                playerOneSetup = true
+                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
+                        }
+                        updateDatabase(true)
+                    }
                 }
-                saveGame()
             }
         }
-
     }
 
     fun shipPlacement(size : Int) : ArrayList<Triple<Int,Int,Int>>
@@ -367,7 +347,7 @@ class GameState() : AppCompatActivity() {
             var count = 1
             for(j in i.pos)
             {
-                var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+10)
+                var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+12)
                 if(view is LinearLayout)
                 {
                     var button = view.getChildAt(j.second-1)
@@ -439,7 +419,7 @@ class GameState() : AppCompatActivity() {
 
         for(i in player.oppAttacks)
         {
-            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first+10)
+            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first+12)
             if(view is LinearLayout)
             {
                 var button = view.getChildAt(i.second-1)
@@ -500,373 +480,6 @@ class GameState() : AppCompatActivity() {
         }
     }
 
-    fun saveGame()
-    {
-        var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + fileName)
-
-        if(file.exists())
-        {
-            file.delete()
-            file.createNewFile()
-        }
-        else file.createNewFile()
-
-        var gson = GsonBuilder().setPrettyPrinting().create()
-
-        var game : Triple<Int, Player, Player> = Triple(state.ordinal, playerOne, playerTwo)
-
-        var gameJson = gson.toJson(game)
-        gameJson.toFile(file.path, false)
-        Log.e("JSON WRITE", gameJson)
-
-
-        //gson.toJson(state.ordinal).toFile(file.path, false)
-
-//        for(i in playerOne.ships)
-//        {
-//            gson.toJson(i.size).toFile(file.path, true)
-//            for(j in i.pos)
-//            {
-//                var shipPos = j.toList()
-//                gson.toJson(shipPos).toFile(file.path, true)
-//            }
-//        }
-//
-//        for(i in playerOne.myAttacks)
-//        {
-//            var myAttack = i.toList()
-//            gson.toJson(myAttack).toFile(file.path, true)
-//        }
-//
-//        for(i in playerOne.oppAttacks)
-//        {
-//            var oppAttack = i.toList()
-//            gson.toJson(oppAttack).toFile(file.path, true)
-//        }
-//
-//        for(i in playerTwo.ships)
-//        {
-//            gson.toJson(i.size).toFile(file.path, true)
-//            for(j in i.pos)
-//            {
-//                var shipPos = j.toList()
-//                gson.toJson(shipPos).toFile(file.path, true)
-//            }
-//        }
-//
-//        for(i in playerTwo.myAttacks)
-//        {
-//            var myAttack = i.toList()
-//            gson.toJson(myAttack).toFile(file.path, true)
-//        }
-//
-//        for(i in playerTwo.oppAttacks)
-//        {
-//            var oppAttack = i.toList()
-//            gson.toJson(oppAttack).toFile(file.path, true)
-//        }
-
-//        val outputWriter = FileOutputStream(file)
-//        val outputStream = DataOutputStream(outputWriter)
-//
-//        //gameState
-//        Log.e("GAMESTATE", "Gamestate integer value is: " + state.ordinal.toString())
-//        outputStream.writeInt(state.ordinal)
-//
-//
-//        Log.e("SHIPS", "Player one ship count is: " + playerOne.ships.size + ", Player two ship count is: " + playerTwo.ships.size)
-//        for(i in playerOne.ships)
-//        {
-//            for(j in i.pos)
-//            {
-//                Log.e("POSITIONS", "Xpos is: " + j.first + ",Ypos is: " + j.second + ", Hit/Miss" + j.third)
-//            }
-//        }
-//        //PlayerOne
-//        //Ships
-//        var shipsLeft = 5
-//        for(i in playerOne.ships)
-//        {
-//            if(i.pos.first().third == 3) shipsLeft--
-//            //ShipSize
-//            outputStream.writeInt(i.size)
-//            for(j in i.pos)
-//            {
-//                //Positions and Hits
-//                outputStream.writeInt(j.first)
-//                outputStream.writeInt(j.second)
-//                outputStream.writeInt(j.third)
-//            }
-//        }
-//        //Ships Left
-//        outputStream.writeInt(shipsLeft)
-//
-//        outputStream.writeInt(playerOne.myAttacks.size)
-//        //My Attacks
-//        for(i in playerOne.myAttacks)
-//        {
-//            outputStream.writeInt(i.first)
-//            outputStream.writeInt(i.second)
-//            outputStream.writeInt(i.third)
-//        }
-//
-//        outputStream.writeInt(playerOne.oppAttacks.size)
-//        //Opp Attacks
-//        for(i in playerOne.oppAttacks)
-//        {
-//            outputStream.writeInt(i.first)
-//            outputStream.writeInt(i.second)
-//            outputStream.writeInt(i.third)
-//        }
-//
-//
-//
-//        //PlayerTwo
-//        //Ships
-//        shipsLeft = 5
-//        for(i in playerTwo.ships)
-//        {
-//            if(i.pos.first().third == 3) shipsLeft--
-//            //ShipSize
-//            outputStream.writeInt(i.size)
-//            for(j in i.pos)
-//            {
-//                //Positions and Hits
-//                outputStream.writeInt(j.first)
-//                outputStream.writeInt(j.second)
-//                outputStream.writeInt(j.third)
-//            }
-//        }
-//        //Ships Left
-//        outputStream.writeInt(shipsLeft)
-//
-//        outputStream.writeInt(playerTwo.myAttacks.size)
-//        //My Attacks
-//        for(i in playerTwo.myAttacks)
-//        {
-//            outputStream.writeInt(i.first)
-//            outputStream.writeInt(i.second)
-//            outputStream.writeInt(i.third)
-//        }
-//
-//        outputStream.writeInt(playerTwo.oppAttacks.size)
-//        //Opp Attacks
-//        for(i in playerTwo.oppAttacks)
-//        {
-//            outputStream.writeInt(i.first)
-//            outputStream.writeInt(i.second)
-//            outputStream.writeInt(i.third)
-//        }
-//
-//        outputStream.flush()
-//        outputStream.close()
-//        outputWriter.close()
-    }
-
-    fun loadGame()
-    {
-        Log.e("LOAD", "Loading Game")
-        var file : File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + fileName)
-        val inputFile = FileInputStream(file)
-        val inputReader = DataInputStream(inputFile)
-        playerOne = Player()
-        playerTwo = Player()
-        var ships = ArrayList<Ship>()
-
-        when(inputReader.readInt())
-        {
-            0 -> state = gameState.STARTED
-            1 -> state = gameState.SWITCH_TO_PLAYER_ONE
-            2 -> state = gameState.SWITCH_TO_PLAYER_TWO
-            3 -> state = gameState.PLAYER_ONE_TURN
-            4 -> state = gameState.PLAYER_TWO_TURN
-            5 -> state = gameState.GAME_OVER_PLAYER_ONE
-            6 -> state = gameState.GAME_OVER_PLAYER_TWO
-        }
-
-        Log.e("GAMESTATE", "Gamestate integer value is: " + state.ordinal.toString())
-
-
-        for(i in 0..4)
-        {
-            var shipSize = inputReader.readInt()
-            var positions = ArrayList<Triple<Int,Int,Int>>()
-            Log.e("SHIP SIZE", "Ship size is: " + shipSize)
-            for(i in 0..shipSize-1)
-            {
-                positions.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-                Log.e("SHIP POSITION", "X pos is: " + positions.last().first + ", Y pos is: " + positions.last().second + ", Hit or Sink: " + positions.last().third)
-            }
-
-            playerOne.ships.add(Ship(shipSize, positions))
-        }
-
-        //throwing away how many ships left, just for first screen
-        inputReader.readInt()
-
-        var myAttackSize = inputReader.readInt()
-        //myattacks
-        if(myAttackSize != 0) for(i in 0..myAttackSize-1) playerOne.myAttacks.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-
-        //oppAttacks
-        var oppAttackSize = inputReader.readInt()
-        if(oppAttackSize != 0) for(i in 0..oppAttackSize-1) playerOne.oppAttacks.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-
-        for(i in 0..4)
-        {
-            var shipSize = inputReader.readInt()
-            var positions = ArrayList<Triple<Int,Int,Int>>()
-            Log.e("SHIP SIZE", "Ship size is: " + shipSize)
-            for(i in 0..shipSize-1)
-            {
-                positions.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-                Log.e("SHIP POSITION", "X pos is: " + positions.last().first + ", Y pos is: " + positions.last().second + ", Hit or Sink: " + positions.last().third)
-            }
-            playerTwo.ships.add(Ship(shipSize, positions))
-        }
-
-        //throwing away how many ships left, just for first screen
-        inputReader.readInt()
-
-        myAttackSize = inputReader.readInt()
-        //myattacks
-        for(i in 0..myAttackSize-1) playerTwo.myAttacks.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-
-        oppAttackSize = inputReader.readInt()
-        //oppAttacks
-        for(i in 0..oppAttackSize-1) playerTwo.oppAttacks.add(Triple(inputReader.readInt(), inputReader.readInt(), inputReader.readInt()))
-
-        Log.e("SHIPS", "Player one ship count is: " + playerOne.ships.size + ", Player two ship count is: " + playerTwo.ships.size)
-        for(i in playerOne.ships)
-        {
-            for(j in i.pos)
-            {
-                Log.e("POSITIONS", "Xpos is: " + j.first + ",Ypos is: " + j.second + ", Hit/Miss" + j.third)
-            }
-        }
-        for(i in playerTwo.ships)
-        {
-            for(j in i.pos)
-            {
-                Log.e("POSITIONS", "Xpos is: " + j.first + ",Ypos is: " + j.second + ", Hit/Miss" + j.third)
-            }
-        }
-        setupCoordinateButtons()
-        when(state)
-        {
-            gameState.PLAYER_ONE_TURN ->
-            {
-                setupPlayer(playerOne)
-                findViewById<Button>(R.id.Okay).setText("Player One's Turn")
-                findViewById<Button>(R.id.Okay).isClickable = true
-            }
-            gameState.PLAYER_TWO_TURN ->
-            {
-                setupPlayer(playerTwo)
-                findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
-                findViewById<Button>(R.id.Okay).isClickable = true
-            }
-            gameState.SWITCH_TO_PLAYER_ONE -> {
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (j in 0..views.childCount - 1) {
-                    var view = views.getChildAt(j)
-                    if (view is LinearLayout) {
-                        for (k in 0..view.childCount - 1) {
-                            var button = view.getChildAt(k)
-                            if (button is Button) {
-                                button.isClickable = false
-                                if (button.id != R.id.Okay) {
-                                    button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                    button.setText("")
-                                }
-                            }
-                        }
-                    }
-                }
-                findViewById<Button>(R.id.Okay).setText("Switch to Player One")
-                findViewById<Button>(R.id.Okay).isClickable = true
-            }
-            gameState.SWITCH_TO_PLAYER_TWO ->
-            {
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (j in 0..views.childCount - 1) {
-                    var view = views.getChildAt(j)
-                    if (view is LinearLayout) {
-                        for (k in 0..view.childCount - 1) {
-                            var button = view.getChildAt(k)
-                            if (button is Button) {
-                                button.isClickable = false
-                                if (button.id != R.id.Okay) {
-                                    button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                    button.setText("")
-                                }
-                            }
-                        }
-                    }
-                }
-                findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
-                findViewById<Button>(R.id.Okay).isClickable = true
-            }
-            gameState.GAME_OVER_PLAYER_ONE ->
-            {
-                setupPlayer(playerOne)
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (j in 0..views.childCount - 1) {
-                    var view = views.getChildAt(j)
-                    if (view is LinearLayout) {
-                        for (k in 0..view.childCount - 1) {
-                            var button = view.getChildAt(k)
-                            if (button is Button) {
-                                button.isClickable = false
-                            }
-                        }
-                    }
-                }
-                findViewById<Button>(R.id.Okay).setText("Player One Wins!")
-            }
-            gameState.GAME_OVER_PLAYER_TWO ->
-            {
-                setupPlayer(playerTwo)
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (j in 0..views.childCount - 1) {
-                    var view = views.getChildAt(j)
-                    if (view is LinearLayout) {
-                        for (k in 0..view.childCount - 1) {
-                            var button = view.getChildAt(k)
-                            if (button is Button) {
-                                button.isClickable = false
-                            }
-                        }
-                    }
-                }
-                findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
-            }
-            gameState.STARTED ->
-            {
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (j in 0..views.childCount - 1) {
-                    var view = views.getChildAt(j)
-                    if (view is LinearLayout) {
-                        for (k in 0..view.childCount - 1) {
-                            var button = view.getChildAt(k)
-                            if (button is Button) {
-                                button.isClickable = false
-                                if (button.id != R.id.Okay) {
-                                    button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                    button.setText("")
-                                }
-                            }
-                        }
-                    }
-                }
-                findViewById<Button>(R.id.Okay).setText("Start")
-                findViewById<Button>(R.id.Okay).isClickable = true
-            }
-        }
-
-        inputReader.close()
-        inputFile.close()
-    }
 
     override fun onBackPressed() {
         var intent = Intent(this, Game::class.java)
@@ -877,8 +490,29 @@ class GameState() : AppCompatActivity() {
     public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
         if(savedInstanceState !is Bundle) return
         Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
-        savedInstanceState.putString("fileName", fileName)
+        savedInstanceState.putString("gameId", gameId)
         super.onSaveInstanceState(savedInstanceState)
     }
 
+    fun updateDatabase(newGame : Boolean)
+    {
+        if(newGame)
+        {
+            var gamesRef = mDbRoot.getReference("Games")
+            gameId = gamesRef.push().key
+            gamesRef.child(gameId).setValue("Game")
+            gamesRef.child(gameId).child("Game State").setValue(state)
+            gamesRef.child(gameId).child("Player One").setValue(playerOne)
+            gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+        }
+
+        else
+        {
+            var gamesRef = mDbRoot.getReference("Games")
+            gamesRef.child(gameId).setValue("Game")
+            gamesRef.child(gameId).child("Game State").setValue(state)
+            gamesRef.child(gameId).child("Player One").setValue(playerOne)
+            gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+        }
+    }
 }
