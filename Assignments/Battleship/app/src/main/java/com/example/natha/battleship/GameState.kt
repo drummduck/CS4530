@@ -15,6 +15,8 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.widget.TextView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
@@ -35,6 +37,8 @@ class GameState() : AppCompatActivity() {
     lateinit var enemyNameDisplay : TextView
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
+    lateinit var auth : FirebaseAuth
+    lateinit var currentUser : FirebaseUser
     var state = gameState.STARTED
     var gameId = ""
 
@@ -116,7 +120,11 @@ class GameState() : AppCompatActivity() {
                             hit = true
                         }
                         if (j.third == 2) hitCount++
-                        if (hitCount == i.size) sunk = true
+                        if (hitCount == i.size)
+                        {
+                            sunk = true
+                            opponentPlayer.shipCount--
+                        }
                         if (sunk) {
                             pos = 0
                             for (k in i.pos) {
@@ -144,26 +152,22 @@ class GameState() : AppCompatActivity() {
                                 }
                                 pos++
                             }
-                            var sinkCount = 0
-                            for (k in opponentPlayer.ships) {
-                                if (k.pos[0].third == 3) sinkCount++
 
-                                if (sinkCount == opponentPlayer.ships.size) {
-                                    if (state == gameState.PLAYER_ONE_TURN) {
-                                        state = gameState.GAME_OVER_PLAYER_ONE
-                                        findViewById<Button>(R.id.Okay).setText("Player One Wins!")
-                                    } else {
-                                        state = gameState.GAME_OVER_PLAYER_TWO
-                                        findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
-                                    }
-                                    var views = findViewById<ViewGroup>(R.id.buttons)
-                                    for (l in 0..views.childCount - 1) {
-                                        var view = views.getChildAt(l)
-                                        if (view is LinearLayout) {
-                                            for (m in 0..view.childCount - 1) {
-                                                var button = view.getChildAt(m)
-                                                if (button is Button) button.isClickable = false
-                                            }
+                            if (opponentPlayer.shipCount == 0) {
+                                if (state == gameState.PLAYER_ONE_TURN) {
+                                    state = gameState.GAME_OVER_PLAYER_ONE
+                                    findViewById<Button>(R.id.Okay).setText("Player One Wins!")
+                                } else {
+                                    state = gameState.GAME_OVER_PLAYER_TWO
+                                    findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
+                                }
+                                var views = findViewById<ViewGroup>(R.id.buttons)
+                                for (l in 0..views.childCount - 1) {
+                                    var view = views.getChildAt(l)
+                                    if (view is LinearLayout) {
+                                        for (m in 0..view.childCount - 1) {
+                                            var button = view.getChildAt(m)
+                                            if (button is Button) button.isClickable = false
                                         }
                                     }
                                 }
@@ -227,6 +231,8 @@ class GameState() : AppCompatActivity() {
         mDbRootRef = mDbRoot.getReference()
         myNameDisplay = findViewById(R.id.myName)
         enemyNameDisplay = findViewById(R.id.enemyName)
+        auth = FirebaseAuth.getInstance()
+        if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
         if(savedInstanceState != null) {
 
@@ -279,9 +285,9 @@ class GameState() : AppCompatActivity() {
                             }
 
                             if (!playerOneSetup) {
-                                playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
+                                playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), currentUser.email!!)
                                 playerOneSetup = true
-                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>())
+                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "Player Two")
                         }
                         updateDatabase(true)
                     }

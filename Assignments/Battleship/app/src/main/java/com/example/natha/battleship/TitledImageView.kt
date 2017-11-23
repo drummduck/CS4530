@@ -34,7 +34,6 @@ class TitledImageView : FrameLayout {
     var buttonView: ImageButton = ImageButton(context)
     var titleTextView = TextView(context)
 
-
     override fun onFinishInflate() {
         super.onFinishInflate()
         buttonView = importedButtonView

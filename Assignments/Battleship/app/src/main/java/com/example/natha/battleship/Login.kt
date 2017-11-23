@@ -66,8 +66,6 @@ class Login : AppCompatActivity() {
         {
             Log.e("LOGIN", "Current user exists and has email verified ")
             intent = Intent(applicationContext, Game::class.java)
-            intent.putExtra("userEmail", currentUser.email)
-            intent.putExtra("userUID", currentUser.uid)
             loginState = LoginState.DONE
             startActivity(intent)
             finish()
@@ -156,8 +154,6 @@ class Login : AppCompatActivity() {
                 if (currentUser.isEmailVerified) {
                     Log.e("LOGIN", "Email is verified on sign in, take to main screen")
                     intent = Intent(applicationContext, Game::class.java)
-                    intent.putExtra("userEmail", currentUser!!.email)
-                    intent.putExtra("userUID", currentUser!!.uid)
                     loginState = LoginState.DONE
                     startActivity(intent)
                     finish()
@@ -217,8 +213,6 @@ class Login : AppCompatActivity() {
                                 if (currentUser.isEmailVerified) {
                                     Log.e("LOGIN", "Email is verified, take to main screen")
                                     intent = Intent(applicationContext, Game::class.java)
-                                    intent.putExtra("userEmail", currentUser!!.email)
-                                    intent.putExtra("userUID", currentUser!!.uid)
                                     handler.removeCallbacksAndMessages(null)
                                     handler = Handler()
                                     loginState = LoginState.DONE
@@ -287,8 +281,6 @@ class Login : AppCompatActivity() {
                                 Log.e("LOGIN", "Email is verified, take to main screen")
                                 loginState = LoginState.DONE
                                 intent = Intent(applicationContext, Game::class.java)
-                                intent.putExtra("userEmail", currentUser!!.email)
-                                intent.putExtra("userUID", currentUser!!.uid)
                                 handler.removeCallbacksAndMessages(null)
                                 handler = Handler()
                                 startActivity(intent)

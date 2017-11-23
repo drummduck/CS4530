@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import com.example.natha.battleship.R.id.my_recycler_view
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -25,15 +26,20 @@ import com.google.gson.JsonStreamParser
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.game_selection.*
 import java.io.*
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.FirebaseDatabase
+
+
 
 
 
 class Game : AppCompatActivity() {
 
     lateinit var logout : Button
-    lateinit var uid : String
-    lateinit var email : String
     lateinit var auth : FirebaseAuth
+    lateinit var currentUser : FirebaseUser
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
 
@@ -52,25 +58,14 @@ class Game : AppCompatActivity() {
 
             }
         })
-        readDatabase()
         auth = FirebaseAuth.getInstance()
+        if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         logout = findViewById(R.id.logout)
         logout.setOnClickListener(View.OnClickListener {
             auth.signOut()
             startActivity(Intent(applicationContext, Login::class.java))
             finish()
         })
-        if(intent != null && intent.extras != null)
-        {
-            for(i in intent.extras.keySet())
-            {
-                when(i)
-                {
-                    "userEmail" -> email = intent.getStringExtra(i)
-                    "userUID" -> uid = intent.getStringExtra(i)
-                }
-            }
-        }
 
         setupFiles()
     }
@@ -86,7 +81,97 @@ class Game : AppCompatActivity() {
 
         my_recycler_view.adapter = MyAdapter({
             val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.plus, "New Game"))
+            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.plus, "New Game", ""))
+            FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
+            {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                        var gameId = ""
+
+                        for (game in dataSnapshot.children) {
+                            Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
+
+                            var gameId = game.key
+                            var playerOneShipCount = -1
+                            var playerTwoShipCount = -1
+                            var playerOneName = ""
+                            var playerTwoName = ""
+                            var state = ""
+
+                            if(game.hasChild("Game State"))
+                            {
+                                state = game.child("Game State").value as String
+                                Log.e("GAME STATE", state)
+                            }
+                            if(game.hasChild("Player One") && game.child("Player One").hasChild("shipCount"))
+                            {
+                                Log.e("PLAYER ONE SHIP COUNT", game.child("Player One").child("shipCount").value.toString())
+                                playerOneShipCount = Integer.parseInt(game.child("Player One").child("shipCount").value.toString())
+                            }
+                            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("shipCount"))
+                            {
+                                Log.e("PLAYER TWO SHIP COUNT", game.child("Player Two").child("shipCount").value.toString())
+                                playerTwoShipCount = Integer.parseInt(game.child("Player Two").child("shipCount").value.toString())
+                            }
+                            if(game.hasChild("Player One") && game.child("Player One").hasChild("name"))
+                            {
+                                Log.e("PLAYER ONE NAME", game.child("Player One").child("name").value.toString())
+                                playerOneName = game.child("Player One").child("name").value.toString()
+                            }
+                            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
+                            {
+                                Log.e("PLAYER TWO NAME", game.child("Player Two").child("name").value.toString())
+                                playerTwoName = game.child("Player Two").child("name").value.toString()
+                            }
+
+                            if(gameId.equals("") || playerOneShipCount == -1 || playerTwoShipCount == -1 || playerOneName.equals("") || state.equals(""))
+                            {
+                                Log.e("RECYCLER VIEW","DATA IS NOT VALID, CANT HAVE EMPTY DATA")
+                                return
+                            }
+
+                            if(state != GameState.gameState.STARTED.name && playerTwoName.isEmpty())
+                            {
+                                Log.e("RECYCLER VIEW", "DATA IS NOT VALID, PLAYER 2 CANT BE EMPTY WITH THE GAME STARTED")
+                                return
+                            }
+
+                            if(state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name &&
+                                    !playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two"))
+                            {
+                                Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
+                                return
+                            }
+
+                            var dataString = ""
+
+                            when(state) {
+                                GameState.gameState.STARTED.name -> {
+                                    dataString = "Game Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
+                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.started, dataString, gameId))
+                                }
+                                GameState.gameState.PLAYER_ONE_TURN.name -> {
+                                    dataString = "Game In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
+                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                                }
+                                GameState.gameState.PLAYER_TWO_TURN.name -> {
+                                    dataString = "Game In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
+                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                                }
+                                GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
+                                    dataString = "Game Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipCount
+                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                                }
+                                GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
+                                    dataString = "Game Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipCount
+                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {}
+                })
 
             recyclerViewDataset.toTypedArray()
         }()).apply {
@@ -106,12 +191,5 @@ class Game : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    fun readDatabase()
-    {
-//        var gamesRef = mDbRoot.getReference("Games")
-//        var messageId = gamesRef.push().key
-//        gamesRef.child(messageId).setValue("Game")
     }
 }

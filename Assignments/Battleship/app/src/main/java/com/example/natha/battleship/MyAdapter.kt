@@ -14,6 +14,10 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.view_titled_image.view.*
 import java.io.File
 
@@ -34,7 +38,9 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
                 if (holder !is TitledImageViewHolder || dataSetItem !is ImageWithTitle) throw AssertionError("Invalid ViewHolder was supplied for binding, or the dataset contained an unexpected value.")
                 holder.titledImageView.button = dataSetItem.button
                 holder.titledImageView.title = dataSetItem.title
+                holder.titledImageView.buttonView.setTag(dataSetItem.gameId)
                 holder.titledImageView.buttonView.setOnClickListener(clickListener)
+
             }
         }
     }
@@ -69,7 +75,7 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
         val adapterItemType : MyAdadpterItemType
     }
 
-    data class ImageWithTitle(val button: Int, val title: String ) : MyAdapterItem {
+    data class ImageWithTitle(val button: Int, val title: String, val gameId : String) : MyAdapterItem {
         override val adapterItemType: MyAdadpterItemType = MyAdadpterItemType.TITLED_IMAGE
     }
     class TitledImageViewHolder(val titledImageView: TitledImageView) : RecyclerView.ViewHolder(titledImageView)
@@ -101,11 +107,33 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
                     intent.putExtra("New Game", itemCount)
                     view.context.startActivity(intent)
                 }
-                else {
-                    var file: File = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/Battleship/" + child.text.split("\\s".toRegex())[0])
-                    file.delete()
-                    intent = Intent(view.context, Game::class.java)
+
+                else if(child.text.contains("Game Started"))
+                {
+                    intent = Intent(view.context, GameState::class.java)
+                    intent.putExtra("gameId", child.getTag().toString())
                     view.context.startActivity(intent)
+                }
+
+                else if(child.text.contains("Game In Progress"))
+                {
+                    intent = Intent(view.context, GameState::class.java)
+                    intent.putExtra("gameId", child.getTag().toString())
+                    view.context.startActivity(intent)
+                }
+
+                else if(child.text.contains("Game Over")) {
+                    FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
+                    {
+                    override fun onDataChange(datasnapshot: DataSnapshot?) {
+                        if(datasnapshot != null && datasnapshot.hasChild(view.getTag().toString())) datasnapshot.ref.child(view.getTag().toString()).removeValue()
+                        else Log.e("MYADAPTER", "REMOVAL OF VALUE FAILED")
+                        }
+
+                        override fun onCancelled(p0: DatabaseError?) {
+                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                        }
+                    })
                 }
             }
         }
