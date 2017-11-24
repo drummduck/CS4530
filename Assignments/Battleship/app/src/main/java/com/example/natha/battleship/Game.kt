@@ -16,6 +16,7 @@ import android.util.Log.i
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.RelativeLayout
 import com.example.natha.battleship.R.id.my_recycler_view
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -48,16 +49,6 @@ class Game : AppCompatActivity() {
         setContentView(R.layout.game_selection)
         mDbRoot = FirebaseDatabase.getInstance()
         mDbRootRef = mDbRoot.getReference()
-        mDbRootRef.addValueEventListener(object : ValueEventListener
-        {
-            override fun onDataChange(p0: DataSnapshot?) {
-
-            }
-
-            override fun onCancelled(p0: DatabaseError?) {
-
-            }
-        })
         auth = FirebaseAuth.getInstance()
         if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         logout = findViewById(R.id.logout)
@@ -67,113 +58,114 @@ class Game : AppCompatActivity() {
             finish()
         })
 
-        setupFiles()
+        val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
+        FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                var gameId = ""
+
+                for (game in dataSnapshot.children) {
+                    Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
+
+                    gameId = game.key
+                    var playerOneShipCount = -1
+                    var playerTwoShipCount = -1
+                    var playerOneName = ""
+                    var playerTwoName = ""
+                    var state = ""
+
+                    if(game.hasChild("Game State"))
+                    {
+                        state = game.child("Game State").value as String
+                        Log.e("GAME STATE", state)
+                    }
+                    if(game.hasChild("Player One") && game.child("Player One").hasChild("shipCount"))
+                    {
+                        Log.e("PLAYER ONE SHIP COUNT", game.child("Player One").child("shipCount").value.toString())
+                        playerOneShipCount = Integer.parseInt(game.child("Player One").child("shipCount").value.toString())
+                    }
+                    if(game.hasChild("Player Two") && game.child("Player Two").hasChild("shipCount"))
+                    {
+                        Log.e("PLAYER TWO SHIP COUNT", game.child("Player Two").child("shipCount").value.toString())
+                        playerTwoShipCount = Integer.parseInt(game.child("Player Two").child("shipCount").value.toString())
+                    }
+                    if(game.hasChild("Player One") && game.child("Player One").hasChild("name"))
+                    {
+                        Log.e("PLAYER ONE NAME", game.child("Player One").child("name").value.toString())
+                        playerOneName = game.child("Player One").child("name").value.toString()
+                    }
+                    if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
+                    {
+                        Log.e("PLAYER TWO NAME", game.child("Player Two").child("name").value.toString())
+                        playerTwoName = game.child("Player Two").child("name").value.toString()
+                    }
+
+                    if(gameId.equals("") || playerOneShipCount == -1 || playerTwoShipCount == -1 || playerOneName.equals("") || state.equals(""))
+                    {
+                        Log.e("RECYCLER VIEW","DATA IS NOT VALID, CANT HAVE EMPTY DATA")
+                        return
+                    }
+
+                    if(state != GameState.gameState.STARTED.name && playerTwoName.isEmpty())
+                    {
+                        Log.e("RECYCLER VIEW", "DATA IS NOT VALID, PLAYER 2 CANT BE EMPTY WITH THE GAME STARTED")
+                        return
+                    }
+
+                    if(state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name &&
+                            !playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two"))
+                    {
+                        Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
+                        return
+                    }
+
+                    var dataString : String
+
+                    when(state) {
+                        GameState.gameState.STARTED.name -> {
+                            if(playerTwoName.isEmpty())dataString = "Game Started\n" + playerOneName + " is waiting for player to join"
+                            dataString = "Game Started\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.start, dataString, gameId))
+                        }
+                        GameState.gameState.PLAYER_ONE_TURN.name -> {
+                            dataString = "Game In Progress\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                        }
+                        GameState.gameState.PLAYER_TWO_TURN.name -> {
+                            dataString = "Game In Progress\n" + playerTwoName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                        }
+                        GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
+                            dataString = "Game Over\n" + playerOneName + " wins!\n" + "Ships left: " + playerOneShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                        }
+                        GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
+                            dataString = "Game Over\n" + playerTwoName + " wins!\n" + "Ships left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                        }
+                    }
+                }
+                findViewById<RelativeLayout>(R.id.loadingPanel).setVisibility(View.GONE)
+                setupFiles(recyclerViewDataset)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
     var numOfFiles = 0
 
-    fun setupFiles() {
+    fun setupFiles(databaseList : MutableList<MyAdapter.MyAdapterItem>) {
         recyclerViewLayoutManager = LinearLayoutManager(this)
 
         my_recycler_view.setHasFixedSize(true)
         my_recycler_view.layoutManager = recyclerViewLayoutManager
 
         my_recycler_view.adapter = MyAdapter({
-            val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.plus, "New Game", ""))
-            FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
-            {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-                        var gameId = ""
-
-                        for (game in dataSnapshot.children) {
-                            Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
-
-                            var gameId = game.key
-                            var playerOneShipCount = -1
-                            var playerTwoShipCount = -1
-                            var playerOneName = ""
-                            var playerTwoName = ""
-                            var state = ""
-
-                            if(game.hasChild("Game State"))
-                            {
-                                state = game.child("Game State").value as String
-                                Log.e("GAME STATE", state)
-                            }
-                            if(game.hasChild("Player One") && game.child("Player One").hasChild("shipCount"))
-                            {
-                                Log.e("PLAYER ONE SHIP COUNT", game.child("Player One").child("shipCount").value.toString())
-                                playerOneShipCount = Integer.parseInt(game.child("Player One").child("shipCount").value.toString())
-                            }
-                            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("shipCount"))
-                            {
-                                Log.e("PLAYER TWO SHIP COUNT", game.child("Player Two").child("shipCount").value.toString())
-                                playerTwoShipCount = Integer.parseInt(game.child("Player Two").child("shipCount").value.toString())
-                            }
-                            if(game.hasChild("Player One") && game.child("Player One").hasChild("name"))
-                            {
-                                Log.e("PLAYER ONE NAME", game.child("Player One").child("name").value.toString())
-                                playerOneName = game.child("Player One").child("name").value.toString()
-                            }
-                            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
-                            {
-                                Log.e("PLAYER TWO NAME", game.child("Player Two").child("name").value.toString())
-                                playerTwoName = game.child("Player Two").child("name").value.toString()
-                            }
-
-                            if(gameId.equals("") || playerOneShipCount == -1 || playerTwoShipCount == -1 || playerOneName.equals("") || state.equals(""))
-                            {
-                                Log.e("RECYCLER VIEW","DATA IS NOT VALID, CANT HAVE EMPTY DATA")
-                                return
-                            }
-
-                            if(state != GameState.gameState.STARTED.name && playerTwoName.isEmpty())
-                            {
-                                Log.e("RECYCLER VIEW", "DATA IS NOT VALID, PLAYER 2 CANT BE EMPTY WITH THE GAME STARTED")
-                                return
-                            }
-
-                            if(state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name &&
-                                    !playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two"))
-                            {
-                                Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
-                                return
-                            }
-
-                            var dataString = ""
-
-                            when(state) {
-                                GameState.gameState.STARTED.name -> {
-                                    dataString = "Game Started\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
-                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.started, dataString, gameId))
-                                }
-                                GameState.gameState.PLAYER_ONE_TURN.name -> {
-                                    dataString = "Game In Progress\n" + "Player One's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
-                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
-                                }
-                                GameState.gameState.PLAYER_TWO_TURN.name -> {
-                                    dataString = "Game In Progress\n" + "Player Two's Turn\n" + "Player One Ships Left: " + playerOneShipCount + "\nPlayer Two Ships Left: " + playerTwoShipCount
-                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
-                                }
-                                GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
-                                    dataString = "Game Over\n" + "Player One Wins!\n" + "Player Ones Ships Left: " + playerOneShipCount
-                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
-                                }
-                                GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
-                                    dataString = "Game Over\n" + "Player Two Wins!\n" + "Player Two's Ships Left: " + playerTwoShipCount
-                                    recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
-                                }
-                            }
-                        }
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {}
-                })
-
-            recyclerViewDataset.toTypedArray()
+            databaseList.add(0,MyAdapter.ImageWithTitle(R.drawable.plus, "New Game", ""))
+            databaseList.toTypedArray()
         }()).apply {
             setOnMyAdapterItemSelectedListener { myAdapterItem: MyAdapter.MyAdapterItem ->
                 Log.e("FileSelection", "Listener notified of the item selection")
@@ -184,7 +176,7 @@ class Game : AppCompatActivity() {
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                             intent = Intent(applicationContext, GameState::class.java)
                         if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", "")
-                        else intent.putExtra("gameId", myAdapterItem.title.split("\\s+".toRegex())[0])
+                        else intent.putExtra("gameId", myAdapterItem.gameId)
                         startActivity(intent)
                         finish()
                     }

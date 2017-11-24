@@ -14,11 +14,12 @@ import kotlin.collections.ArrayList
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
+import android.provider.ContactsContract
+import android.widget.RelativeLayout
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 
 
 /**
@@ -254,7 +255,7 @@ class GameState() : AppCompatActivity() {
                     "gameId" ->
                     {
                         gameId = intent.getStringExtra("gameId")
-                        updateDatabase(false)
+                        loadFromDatabase(gameId)
                     }
 
                     "New Game" ->
@@ -285,9 +286,9 @@ class GameState() : AppCompatActivity() {
                             }
 
                             if (!playerOneSetup) {
-                                playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), currentUser.email!!)
+                                playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), currentUser.email!!, 5)
                                 playerOneSetup = true
-                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "Player Two")
+                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "Player Two", 5)
                         }
                         updateDatabase(true)
                     }
@@ -515,10 +516,204 @@ class GameState() : AppCompatActivity() {
         else
         {
             var gamesRef = mDbRoot.getReference("Games")
-            gamesRef.child(gameId).setValue("Game")
             gamesRef.child(gameId).child("Game State").setValue(state)
             gamesRef.child(gameId).child("Player One").setValue(playerOne)
             gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
         }
+    }
+
+    fun loadFromDatabase(gameId : String)
+    {
+        FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
+        {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+                var game : DataSnapshot
+
+                if(!dataSnapshot.hasChild(gameId))
+                {
+                    Log.e("GAMSESTATE", "Game: " + gameId + " does not exist!")
+                    return
+                }
+
+                game = dataSnapshot.child(gameId)
+
+                Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
+
+                var player : DataSnapshot? = null
+                var ships : DataSnapshot? = null
+                var myAttacks : DataSnapshot? = null
+                var oppAttacks : DataSnapshot? = null
+
+                var shipsData = ArrayList<Ship>()
+                var myAttacksData = ArrayList<Triple<Int,Int,Int>>()
+                var oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
+                var playerShipCount = -1
+                var playerName = ""
+                var state = ""
+
+                //STATE OF GAME
+                if(game.hasChild("Game State"))
+                {
+                    state = game.child("Game State").value as String
+                    Log.e("GAME STATE", state)
+                }
+
+                if(game.hasChild("Player One")) player = game.child("Player One")
+
+                //FIRST PLAYER SHIPCOUNT
+                if(player != null && player.hasChild("shipCount"))
+                {
+                    Log.e("PLAYER ONE SHIP COUNT", player.child("shipCount").value.toString())
+                    playerShipCount = Integer.parseInt(player.child("shipCount").value.toString())
+                }
+
+                //FIRST PLAYER NAME
+                if(player != null && player.hasChild("name"))
+                {
+                    Log.e("PLAYER ONE SHIP COUNT", player.child("name").value.toString())
+                    playerName = player.child("name").value.toString()
+                }
+
+
+                //FIRST PLAYER SHIPS
+                if(player != null && player.hasChild("ships")) ships = player.child("ships")
+
+                if(ships != null) for(ship in ships.children)
+                {
+                    var shipSize = 0
+                    var shipArray = ArrayList<Triple<Int,Int,Int>>()
+                    for(shipData in ship.children)
+                    {
+                        if(shipData.hasChild("size")) shipSize = Integer.parseInt(shipData.child("size").value.toString())
+
+                        for(posData in shipData.children)
+                        {
+                            if(posData.hasChild("first") && posData.hasChild("second") && posData.hasChild("third"))
+                            {
+                                shipArray.add(Triple(Integer.parseInt(posData.child("first").value.toString()),
+                                        Integer.parseInt(posData.child("second").value.toString()),
+                                        Integer.parseInt(posData.child("third").value.toString())))
+                            }
+                        }
+                        shipsData.add(Ship(shipSize, shipArray))
+                    }
+                }
+
+                //FIRST PLAYER MYATTACKS
+                if(player != null && player.hasChild("myAttacks")) myAttacks = player.child("myAttacks")
+
+                if(myAttacks != null) for(attacks in myAttacks.children)
+                {
+                    for(attackData in attacks.children)
+                    {
+                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
+                        {
+                            myAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
+                                    Integer.parseInt(attackData.child("second").value.toString()),
+                                    Integer.parseInt(attackData.child("third").value.toString())))
+                        }
+                    }
+                }
+
+                //FIRST PLAYER OPPONENT ATTACKS
+                if(player != null && player.hasChild("oppAttacks")) oppAttacks = player.child("oppAttacks")
+
+                if(oppAttacks != null) for(attacks in oppAttacks.children)
+                {
+                    for(attackData in attacks.children)
+                    {
+                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
+                        {
+                            oppAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
+                                    Integer.parseInt(attackData.child("second").value.toString()),
+                                    Integer.parseInt(attackData.child("third").value.toString())))
+                        }
+                    }
+                }
+
+                playerOne = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
+
+                shipsData.clear()
+                oppAttacksData.clear()
+                myAttacksData.clear()
+
+                if(game.hasChild("Player Two")) player = game.child("Player Two")
+
+                //SECOND PLAYER SHIPCOUNT
+                if(player != null && player.hasChild("shipCount"))
+                {
+                    Log.e("PLAYER TWO SHIP COUNT", player.child("shipCount").value.toString())
+                    playerShipCount = Integer.parseInt(player.child("shipCount").value.toString())
+                }
+
+                //SECOND PLAYER NAME
+                if(player != null && player.hasChild("name"))
+                {
+                    Log.e("PLAYER TWO SHIP COUNT", player.child("name").value.toString())
+                    playerName = player.child("name").value.toString()
+                }
+
+                //SECOND PLAYER SHIPS
+                if(player != null && player.hasChild("ships")) ships = player.child("ships")
+
+                if(ships != null) for(ship in ships.children)
+                {
+                    var shipSize = 0
+                    var shipArray = ArrayList<Triple<Int,Int,Int>>()
+                    for(shipData in ship.children)
+                    {
+                        if(shipData.hasChild("size")) shipSize = Integer.parseInt(shipData.child("size").value.toString())
+
+                        for(posData in shipData.children)
+                        {
+                            if(posData.hasChild("first") && posData.hasChild("second") && posData.hasChild("third"))
+                            {
+                                shipArray.add(Triple(Integer.parseInt(posData.child("first").value.toString()),
+                                        Integer.parseInt(posData.child("second").value.toString()),
+                                        Integer.parseInt(posData.child("third").value.toString())))
+                            }
+                        }
+                        shipsData.add(Ship(shipSize, shipArray))
+                    }
+                }
+
+                //SECOND PLAYER MYATTACKS
+                if(player != null && player.hasChild("myAttacks")) myAttacks = player.child("myAttacks")
+
+                if(myAttacks != null) for(attacks in myAttacks.children)
+                {
+                    for(attackData in attacks.children)
+                    {
+                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
+                        {
+                            myAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
+                                    Integer.parseInt(attackData.child("second").value.toString()),
+                                    Integer.parseInt(attackData.child("third").value.toString())))
+                        }
+                    }
+                }
+
+                //SECOND PLAYER OPPONENT ATTACKS
+                if(player != null && player.hasChild("oppAttacks")) oppAttacks = player.child("oppAttacks")
+
+                if(oppAttacks != null) for(attacks in oppAttacks.children)
+                {
+                    for(attackData in attacks.children)
+                    {
+                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
+                        {
+                            oppAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
+                                    Integer.parseInt(attackData.child("second").value.toString()),
+                                    Integer.parseInt(attackData.child("third").value.toString())))
+                        }
+                    }
+                }
+
+                playerTwo = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 }
