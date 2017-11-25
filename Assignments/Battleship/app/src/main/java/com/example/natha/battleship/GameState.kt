@@ -73,6 +73,7 @@ class GameState() : AppCompatActivity() {
                 }
                 setupCoordinateButtons()
                 state = gameState.PLAYER_ONE_TURN
+                updateDatabase(false)
             }
 
             else if(state == gameState.SWITCH_TO_PLAYER_TWO)
@@ -80,6 +81,7 @@ class GameState() : AppCompatActivity() {
                 state = gameState.PLAYER_TWO_TURN
                 setupPlayer(playerTwo)
                 findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                updateDatabase(false)
             }
 
             else if(state == gameState.SWITCH_TO_PLAYER_ONE)
@@ -87,6 +89,7 @@ class GameState() : AppCompatActivity() {
                 state = gameState.PLAYER_ONE_TURN
                 setupPlayer(playerOne)
                 findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                updateDatabase(false)
             }
         }
 
@@ -210,10 +213,12 @@ class GameState() : AppCompatActivity() {
                                 findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
                                 state = gameState.SWITCH_TO_PLAYER_TWO
                                 findViewById<Button>(R.id.Okay).isClickable = true
+                                updateDatabase(false)
                             } else if (state == gameState.PLAYER_TWO_TURN && i > 2) {
                                 findViewById<Button>(R.id.Okay).setText("Switch to Player One")
                                 state = gameState.SWITCH_TO_PLAYER_ONE
                                 findViewById<Button>(R.id.Okay).isClickable = true
+                                updateDatabase(false)
                             }
                         }, timer.toLong() * 1000)
 
@@ -516,6 +521,7 @@ class GameState() : AppCompatActivity() {
         else
         {
             var gamesRef = mDbRoot.getReference("Games")
+            gamesRef.child(gameId).removeValue()
             gamesRef.child(gameId).child("Game State").setValue(state)
             gamesRef.child(gameId).child("Player One").setValue(playerOne)
             gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
@@ -550,13 +556,14 @@ class GameState() : AppCompatActivity() {
                 var oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
                 var playerShipCount = -1
                 var playerName = ""
-                var state = ""
+                var stateOfGame = ""
 
                 //STATE OF GAME
                 if(game.hasChild("Game State"))
                 {
-                    state = game.child("Game State").value as String
-                    Log.e("GAME STATE", state)
+                    stateOfGame = game.child("Game State").value as String
+                    state = gameState.valueOf(stateOfGame)
+                    Log.e("GAME STATE", stateOfGame)
                 }
 
                 if(game.hasChild("Player One")) player = game.child("Player One")
@@ -571,7 +578,7 @@ class GameState() : AppCompatActivity() {
                 //FIRST PLAYER NAME
                 if(player != null && player.hasChild("name"))
                 {
-                    Log.e("PLAYER ONE SHIP COUNT", player.child("name").value.toString())
+                    Log.e("PLAYER ONE NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
                 }
 
@@ -583,9 +590,10 @@ class GameState() : AppCompatActivity() {
                 {
                     var shipSize = 0
                     var shipArray = ArrayList<Triple<Int,Int,Int>>()
+                    if(ship.hasChild("size")) shipSize = Integer.parseInt(ship.child("size").value.toString())
+                    Log.e("PLAYER ONE SHIP", "SHIP SIZE: " + shipSize)
                     for(shipData in ship.children)
                     {
-                        if(shipData.hasChild("size")) shipSize = Integer.parseInt(shipData.child("size").value.toString())
 
                         for(posData in shipData.children)
                         {
@@ -594,6 +602,7 @@ class GameState() : AppCompatActivity() {
                                 shipArray.add(Triple(Integer.parseInt(posData.child("first").value.toString()),
                                         Integer.parseInt(posData.child("second").value.toString()),
                                         Integer.parseInt(posData.child("third").value.toString())))
+                                Log.e("PLAYER ONE SHIP POSITION DATA", "first: " + Integer.parseInt(posData.child("first").value.toString()) + ", second: " + Integer.parseInt(posData.child("second").value.toString()) + ", third: " + Integer.parseInt(posData.child("third").value.toString()))
                             }
                         }
                         shipsData.add(Ship(shipSize, shipArray))
@@ -605,14 +614,13 @@ class GameState() : AppCompatActivity() {
 
                 if(myAttacks != null) for(attacks in myAttacks.children)
                 {
-                    for(attackData in attacks.children)
+                    if(attacks.hasChild("first") && attacks.hasChild("second") && attacks.hasChild("third"))
                     {
-                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
-                        {
-                            myAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
-                                    Integer.parseInt(attackData.child("second").value.toString()),
-                                    Integer.parseInt(attackData.child("third").value.toString())))
-                        }
+                        myAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
+                                Integer.parseInt(attacks.child("second").value.toString()),
+                                Integer.parseInt(attacks.child("third").value.toString())))
+                        Log.e("PLAYER ONE ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
+
                     }
                 }
 
@@ -621,22 +629,21 @@ class GameState() : AppCompatActivity() {
 
                 if(oppAttacks != null) for(attacks in oppAttacks.children)
                 {
-                    for(attackData in attacks.children)
+                    if(attacks.hasChild("first") && attacks.hasChild("second") && attacks.hasChild("third"))
                     {
-                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
-                        {
-                            oppAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
-                                    Integer.parseInt(attackData.child("second").value.toString()),
-                                    Integer.parseInt(attackData.child("third").value.toString())))
-                        }
+                        oppAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
+                                Integer.parseInt(attacks.child("second").value.toString()),
+                                Integer.parseInt(attacks.child("third").value.toString())))
+                        Log.e("PLAYER ONE OPP ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
+
                     }
                 }
 
                 playerOne = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
 
-                shipsData.clear()
-                oppAttacksData.clear()
-                myAttacksData.clear()
+                shipsData = ArrayList<Ship>()
+                oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
+                myAttacksData = ArrayList<Triple<Int,Int,Int>>()
 
                 if(game.hasChild("Player Two")) player = game.child("Player Two")
 
@@ -650,7 +657,7 @@ class GameState() : AppCompatActivity() {
                 //SECOND PLAYER NAME
                 if(player != null && player.hasChild("name"))
                 {
-                    Log.e("PLAYER TWO SHIP COUNT", player.child("name").value.toString())
+                    Log.e("PLAYER TWO NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
                 }
 
@@ -661,10 +668,10 @@ class GameState() : AppCompatActivity() {
                 {
                     var shipSize = 0
                     var shipArray = ArrayList<Triple<Int,Int,Int>>()
+                    if(ship.hasChild("size")) shipSize = Integer.parseInt(ship.child("size").value.toString())
+                    Log.e("PLAYER TWO SHIP", "SHIP SIZE: " + shipSize)
                     for(shipData in ship.children)
                     {
-                        if(shipData.hasChild("size")) shipSize = Integer.parseInt(shipData.child("size").value.toString())
-
                         for(posData in shipData.children)
                         {
                             if(posData.hasChild("first") && posData.hasChild("second") && posData.hasChild("third"))
@@ -672,6 +679,8 @@ class GameState() : AppCompatActivity() {
                                 shipArray.add(Triple(Integer.parseInt(posData.child("first").value.toString()),
                                         Integer.parseInt(posData.child("second").value.toString()),
                                         Integer.parseInt(posData.child("third").value.toString())))
+                                Log.e("PLAYER TWO SHIP POSITION DATA", "first: " + Integer.parseInt(posData.child("first").value.toString()) + ", second: " + Integer.parseInt(posData.child("second").value.toString()) + ", third: " + Integer.parseInt(posData.child("third").value.toString()))
+
                             }
                         }
                         shipsData.add(Ship(shipSize, shipArray))
@@ -683,14 +692,12 @@ class GameState() : AppCompatActivity() {
 
                 if(myAttacks != null) for(attacks in myAttacks.children)
                 {
-                    for(attackData in attacks.children)
+                    if(attacks.hasChild("first") && attacks.hasChild("second") && attacks.hasChild("third"))
                     {
-                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
-                        {
-                            myAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
-                                    Integer.parseInt(attackData.child("second").value.toString()),
-                                    Integer.parseInt(attackData.child("third").value.toString())))
-                        }
+                        myAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
+                                Integer.parseInt(attacks.child("second").value.toString()),
+                                Integer.parseInt(attacks.child("third").value.toString())))
+                        Log.e("PLAYER ONE ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
                     }
                 }
 
@@ -699,18 +706,131 @@ class GameState() : AppCompatActivity() {
 
                 if(oppAttacks != null) for(attacks in oppAttacks.children)
                 {
-                    for(attackData in attacks.children)
+                    if(attacks.hasChild("first") && attacks.hasChild("second") && attacks.hasChild("third"))
                     {
-                        if(attackData.hasChild("first") && attackData.hasChild("second") && attackData.hasChild("third"))
-                        {
-                            oppAttacksData.add(Triple(Integer.parseInt(attackData.child("first").value.toString()),
-                                    Integer.parseInt(attackData.child("second").value.toString()),
-                                    Integer.parseInt(attackData.child("third").value.toString())))
-                        }
+                        oppAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
+                                Integer.parseInt(attacks.child("second").value.toString()),
+                                Integer.parseInt(attacks.child("third").value.toString())))
+                        Log.e("PLAYER ONE OPP ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
+
                     }
                 }
 
                 playerTwo = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
+
+
+                setupCoordinateButtons()
+                when(stateOfGame)
+                {
+                    gameState.PLAYER_ONE_TURN.name ->
+                    {
+                        setupPlayer(playerOne)
+                        findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                        findViewById<Button>(R.id.Okay).isClickable = true
+                    }
+                    gameState.PLAYER_TWO_TURN.name ->
+                    {
+                        setupPlayer(playerTwo)
+                        findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                        findViewById<Button>(R.id.Okay).isClickable = true
+                    }
+                    gameState.SWITCH_TO_PLAYER_ONE.name -> {
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
+                            if (view is LinearLayout) {
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        button.isClickable = false
+                                        if (button.id != R.id.Okay) {
+                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                                            button.setText("")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        findViewById<Button>(R.id.Okay).setText("Switch to Player One")
+                        findViewById<Button>(R.id.Okay).isClickable = true
+                    }
+                    gameState.SWITCH_TO_PLAYER_TWO.name ->
+                    {
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
+                            if (view is LinearLayout) {
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        button.isClickable = false
+                                        if (button.id != R.id.Okay) {
+                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                                            button.setText("")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
+                        findViewById<Button>(R.id.Okay).isClickable = true
+                    }
+                    gameState.GAME_OVER_PLAYER_ONE.name ->
+                    {
+                        setupPlayer(playerOne)
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
+                            if (view is LinearLayout) {
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        button.isClickable = false
+                                    }
+                                }
+                            }
+                        }
+                        findViewById<Button>(R.id.Okay).setText("Player One Wins!")
+                    }
+                    gameState.GAME_OVER_PLAYER_TWO.name ->
+                    {
+                        setupPlayer(playerTwo)
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
+                            if (view is LinearLayout) {
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        button.isClickable = false
+                                    }
+                                }
+                            }
+                        }
+                        findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
+                    }
+                    gameState.STARTED.name ->
+                    {
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (j in 0..views.childCount - 1) {
+                            var view = views.getChildAt(j)
+                            if (view is LinearLayout) {
+                                for (k in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(k)
+                                    if (button is Button) {
+                                        button.isClickable = false
+                                        if (button.id != R.id.Okay) {
+                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                                            button.setText("")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        findViewById<Button>(R.id.Okay).setText("Start")
+                        findViewById<Button>(R.id.Okay).isClickable = true
+                    }
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}

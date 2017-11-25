@@ -1,7 +1,10 @@
 package com.example.natha.battleship
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.Image
@@ -10,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.util.Log.i
@@ -31,9 +35,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.FirebaseDatabase
-
-
-
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class Game : AppCompatActivity() {
@@ -50,7 +53,7 @@ class Game : AppCompatActivity() {
         mDbRoot = FirebaseDatabase.getInstance()
         mDbRootRef = mDbRoot.getReference()
         auth = FirebaseAuth.getInstance()
-        if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
+        if (auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         logout = findViewById(R.id.logout)
         logout.setOnClickListener(View.OnClickListener {
             auth.signOut()
@@ -58,6 +61,23 @@ class Game : AppCompatActivity() {
             finish()
         })
 
+        setupRecyclerView()
+
+        mDbRootRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+            override fun onChildChanged(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+            override fun onChildRemoved(p0: DataSnapshot?) {setupRecyclerView()}
+
+            override fun onChildMoved(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+            override fun onCancelled(p0: DatabaseError?) {setupRecyclerView()}
+        })
+    }
+
+    fun setupRecyclerView()
+    {
         val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
         FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -113,8 +133,8 @@ class Game : AppCompatActivity() {
                         return
                     }
 
-                    if(state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name &&
-                            !playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two"))
+                    if((state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name) &&
+                            (!playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two")))
                     {
                         Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
                         return
@@ -124,15 +144,15 @@ class Game : AppCompatActivity() {
 
                     when(state) {
                         GameState.gameState.STARTED.name -> {
-                            if(playerTwoName.isEmpty())dataString = "Game Started\n" + playerOneName + " is waiting for player to join"
-                            dataString = "Game Started\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            if(playerTwoName.isEmpty()) dataString = "Game Started\n" + playerOneName + " is waiting for player to join"
+                            else dataString = "Game Started\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.start, dataString, gameId))
                         }
-                        GameState.gameState.PLAYER_ONE_TURN.name -> {
+                        GameState.gameState.PLAYER_ONE_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_ONE.name -> {
                             dataString = "Game In Progress\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }
-                        GameState.gameState.PLAYER_TWO_TURN.name -> {
+                        GameState.gameState.PLAYER_TWO_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_TWO.name -> {
                             dataString = "Game In Progress\n" + playerTwoName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }

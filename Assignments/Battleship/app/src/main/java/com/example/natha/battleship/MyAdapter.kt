@@ -40,7 +40,6 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
                 holder.titledImageView.title = dataSetItem.title
                 holder.titledImageView.buttonView.setTag(dataSetItem.gameId)
                 holder.titledImageView.buttonView.setOnClickListener(clickListener)
-
             }
         }
     }
@@ -110,26 +109,31 @@ class MyAdapter(private val dataset: Array<MyAdapterItem>) : RecyclerView.Adapte
 
                 else if(child.text.contains("Game Started"))
                 {
+                    Log.e("MYADAPTER", "Game Started button pushed, tag is: " + parent.getChildAt(0).getTag().toString())
                     intent = Intent(view.context, GameState::class.java)
-                    intent.putExtra("gameId", child.getTag().toString())
+                    intent.putExtra("gameId", parent.getChildAt(0).getTag().toString())
                     view.context.startActivity(intent)
                 }
 
                 else if(child.text.contains("Game In Progress"))
                 {
+                    Log.e("MYADAPTER", "Game In Progress button pushed, tag is: " + parent.getChildAt(0).getTag().toString())
                     intent = Intent(view.context, GameState::class.java)
-                    intent.putExtra("gameId", child.getTag().toString())
+                    intent.putExtra("gameId", parent.getChildAt(0).getTag().toString())
                     view.context.startActivity(intent)
                 }
 
                 else if(child.text.contains("Game Over")) {
+                    Log.e("MYADAPTER", "Game Delete button pushed, tag is: " + parent.getChildAt(0).getTag().toString())
                     FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
                     {
                     override fun onDataChange(datasnapshot: DataSnapshot?) {
-                        if(datasnapshot != null && datasnapshot.hasChild(view.getTag().toString())) datasnapshot.ref.child(view.getTag().toString()).removeValue()
+                        if(datasnapshot != null && datasnapshot.hasChild(parent.getChildAt(0).getTag().toString()))
+                        {
+                            datasnapshot.ref.child(parent.getChildAt(0).getTag().toString()).removeValue()
+                        }
                         else Log.e("MYADAPTER", "REMOVAL OF VALUE FAILED")
                         }
-
                         override fun onCancelled(p0: DatabaseError?) {
                             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                         }
