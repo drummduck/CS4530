@@ -42,6 +42,9 @@ class GameState() : AppCompatActivity() {
     lateinit var currentUser : FirebaseUser
     var state = gameState.STARTED
     var gameId = ""
+    var spectating = false
+    var isPlayerOne = false
+    var joining = false
 
 
     val clickListener = View.OnClickListener { view ->
@@ -253,14 +256,22 @@ class GameState() : AppCompatActivity() {
         else if(intent != null && intent.extras != null && !intent.extras.isEmpty)
         {
             gameId = ""
+            var joining = false
             for(i in intent.extras.keySet())
             {
                 when(i) {
 
+                    "joining" -> joining = true
+
+                    "isPlayerOne" -> isPlayerOne = true
+
+                    "isSpectating" -> spectating = true
+
                     "gameId" ->
                     {
+
                         gameId = intent.getStringExtra("gameId")
-                        loadFromDatabase(gameId)
+                        loadFromDatabase(gameId, joining, spectating, isPlayerOne)
                     }
 
                     "New Game" ->
@@ -293,7 +304,11 @@ class GameState() : AppCompatActivity() {
                             if (!playerOneSetup) {
                                 playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), currentUser.email!!, 5)
                                 playerOneSetup = true
-                            } else playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "Player Two", 5)
+                            } else
+                            {
+                                playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "", 5)
+                                findViewById<TextView>(R.id.enemyName).setText("Waiting for player...")
+                            }
                         }
                         updateDatabase(true)
                     }
@@ -528,7 +543,7 @@ class GameState() : AppCompatActivity() {
         }
     }
 
-    fun loadFromDatabase(gameId : String)
+    fun loadFromDatabase(gameId : String, joining : Boolean, spectating : Boolean, isPlayerOne : Boolean)
     {
         FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -557,6 +572,10 @@ class GameState() : AppCompatActivity() {
                 var playerShipCount = -1
                 var playerName = ""
                 var stateOfGame = ""
+                var whichPlayer = ""
+
+                if(!isPlayerOne) whichPlayer = "Player Two"
+                else whichPlayer = "Player One"
 
                 //STATE OF GAME
                 if(game.hasChild("Game State"))
@@ -566,7 +585,7 @@ class GameState() : AppCompatActivity() {
                     Log.e("GAME STATE", stateOfGame)
                 }
 
-                if(game.hasChild("Player One")) player = game.child("Player One")
+                if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
 
                 //FIRST PLAYER SHIPCOUNT
                 if(player != null && player.hasChild("shipCount"))
@@ -645,7 +664,10 @@ class GameState() : AppCompatActivity() {
                 oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
                 myAttacksData = ArrayList<Triple<Int,Int,Int>>()
 
-                if(game.hasChild("Player Two")) player = game.child("Player Two")
+                if(!isPlayerOne) whichPlayer = "Player One"
+                else whichPlayer = "Player Two"
+
+                if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
 
                 //SECOND PLAYER SHIPCOUNT
                 if(player != null && player.hasChild("shipCount"))

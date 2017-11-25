@@ -37,6 +37,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Pattern
 
 
 class Game : AppCompatActivity() {
@@ -124,44 +125,44 @@ class Game : AppCompatActivity() {
                     if(gameId.equals("") || playerOneShipCount == -1 || playerTwoShipCount == -1 || playerOneName.equals("") || state.equals(""))
                     {
                         Log.e("RECYCLER VIEW","DATA IS NOT VALID, CANT HAVE EMPTY DATA")
-                        return
+                        continue
                     }
 
                     if(state != GameState.gameState.STARTED.name && playerTwoName.isEmpty())
                     {
                         Log.e("RECYCLER VIEW", "DATA IS NOT VALID, PLAYER 2 CANT BE EMPTY WITH THE GAME STARTED")
-                        return
+                        continue
                     }
 
                     if((state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name) &&
                             (!playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two")))
                     {
                         Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
-                        return
+                        continue
                     }
 
                     var dataString : String
 
                     when(state) {
                         GameState.gameState.STARTED.name -> {
-                            if(playerTwoName.isEmpty()) dataString = "Game Started\n" + playerOneName + " is waiting for player to join"
-                            else dataString = "Game Started\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            if(playerTwoName.isEmpty()) dataString = "Game Started!\n" + playerOneName + " is waiting for player to join"
+                            else dataString = "Game Started!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + "\nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.start, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_ONE_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_ONE.name -> {
-                            dataString = "Game In Progress\n" + playerOneName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            dataString = "Player One's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_TWO_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_TWO.name -> {
-                            dataString = "Game In Progress\n" + playerTwoName + " turn\n" + playerOneName + " Ships left: " + playerOneShipCount + "\n" + playerTwoName + " Ships left: " + playerTwoShipCount
+                            dataString = "Player Two's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
-                            dataString = "Game Over\n" + playerOneName + " wins!\n" + "Ships left: " + playerOneShipCount
+                            dataString = "Player One Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
-                            dataString = "Game Over\n" + playerTwoName + " wins!\n" + "Ships left: " + playerTwoShipCount
+                            dataString = "Player Two Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
                         }
                     }
@@ -175,7 +176,6 @@ class Game : AppCompatActivity() {
     }
 
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
-    var numOfFiles = 0
 
     fun setupFiles(databaseList : MutableList<MyAdapter.MyAdapterItem>) {
         recyclerViewLayoutManager = LinearLayoutManager(this)
@@ -194,9 +194,45 @@ class Game : AppCompatActivity() {
                     is MyAdapter.ImageWithTitle -> {
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
-                            intent = Intent(applicationContext, GameState::class.java)
-                        if(myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", "")
-                        else intent.putExtra("gameId", myAdapterItem.gameId)
+                        var isInGame = false
+                        intent = Intent(applicationContext, GameState::class.java)
+                        if(myAdapterItem.title.contains("waiting for player"))
+                        {
+                            intent.putExtra("joining", true)
+                            intent.putExtra("gameId", myAdapterItem.gameId)
+                        }
+
+                        else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn") || myAdapterItem.title.contains("Player Two's Turn"))
+                        {
+                            var pattern = Pattern.compile("One: \n(.*?)Ships\n")
+                            var matcher = pattern.matcher(myAdapterItem.title)
+                            while(matcher.find())
+                            {
+                                if(matcher.group(0).equals(currentUser.email)) {
+                                    intent.putExtra("isPlayerOne", true)
+                                    intent.putExtra("gameId", myAdapterItem.gameId)
+                                    isInGame = true
+                                }
+                            }
+                            pattern = Pattern.compile("Two: \n(.*?) Ships\n")
+                            matcher = pattern.matcher(myAdapterItem.title)
+                            while(matcher.find())
+                            {
+                                if(matcher.group(0).equals(currentUser.email)) {
+                                    intent.putExtra("gameId", myAdapterItem.gameId)
+                                    isInGame = true
+                                }
+                            }
+
+                            if(!isInGame)
+                            {
+                                intent.putExtra("isSpectating", true)
+                                intent.putExtra("gameId", myAdapterItem.gameId)
+                            }
+                        }
+
+                        else if (myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", "")
+
                         startActivity(intent)
                         finish()
                     }
