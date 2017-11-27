@@ -29,7 +29,7 @@ class GameState() : AppCompatActivity() {
 
     enum class gameState
     {
-        STARTED, SWITCH_TO_PLAYER_ONE,SWITCH_TO_PLAYER_TWO, PLAYER_ONE_TURN, PLAYER_TWO_TURN, GAME_OVER_PLAYER_ONE, GAME_OVER_PLAYER_TWO
+        STARTED, PLAYER_ONE_TURN, PLAYER_TWO_TURN, GAME_OVER_PLAYER_ONE, GAME_OVER_PLAYER_TWO
     }
 
     lateinit var playerOne : Player
@@ -76,22 +76,6 @@ class GameState() : AppCompatActivity() {
                 }
                 setupCoordinateButtons()
                 state = gameState.PLAYER_ONE_TURN
-                updateDatabase(false)
-            }
-
-            else if(state == gameState.SWITCH_TO_PLAYER_TWO)
-            {
-                state = gameState.PLAYER_TWO_TURN
-                setupPlayer(playerTwo)
-                findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
-                updateDatabase(false)
-            }
-
-            else if(state == gameState.SWITCH_TO_PLAYER_ONE)
-            {
-                state = gameState.PLAYER_ONE_TURN
-                setupPlayer(playerOne)
-                findViewById<Button>(R.id.Okay).setText("Player One's Turn")
                 updateDatabase(false)
             }
         }
@@ -192,40 +176,14 @@ class GameState() : AppCompatActivity() {
                     currentPlayer.myAttacks.add(Triple(xVal, yVal, 1))
                     view.setText("Miss")
                     view.isClickable = false
-
-                    var timer = 0
-                    for (i in 1..3) {
-                        Handler().postDelayed(Runnable {
-                            var views = findViewById<ViewGroup>(R.id.buttons)
-                            for (j in 0..views.childCount - 1) {
-                                var view = views.getChildAt(j)
-                                if (view is LinearLayout) {
-                                    for (k in 0..view.childCount - 1) {
-                                        var button = view.getChildAt(k)
-                                        if (button is Button) {
-                                            if (i == 1) button.isClickable = false
-                                            else if (i > 2 && button.id != R.id.Okay && state != gameState.GAME_OVER_PLAYER_TWO && state != gameState.GAME_OVER_PLAYER_ONE) {
-                                                button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                                button.setText("")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if (state == gameState.PLAYER_ONE_TURN && i > 2) {
-                                findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
-                                state = gameState.SWITCH_TO_PLAYER_TWO
-                                findViewById<Button>(R.id.Okay).isClickable = true
-                                updateDatabase(false)
-                            } else if (state == gameState.PLAYER_TWO_TURN && i > 2) {
-                                findViewById<Button>(R.id.Okay).setText("Switch to Player One")
-                                state = gameState.SWITCH_TO_PLAYER_ONE
-                                findViewById<Button>(R.id.Okay).isClickable = true
-                                updateDatabase(false)
-                            }
-                        }, timer.toLong() * 1000)
-
-                        timer = 3
+                    if (state == gameState.PLAYER_ONE_TURN) {
+                        findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                        state = gameState.PLAYER_TWO_TURN
+                        updateDatabase(false)
+                    } else if (state == gameState.PLAYER_TWO_TURN) {
+                        findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                        state = gameState.PLAYER_ONE_TURN
+                        updateDatabase(false)
                     }
                 }
             }
@@ -243,6 +201,27 @@ class GameState() : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
+        mDbRootRef.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(p0: DataSnapshot?, p1: String?) {
+                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            }
+
+            override fun onChildChanged(p0: DataSnapshot?, p1: String?) {
+                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            }
+
+            override fun onChildRemoved(p0: DataSnapshot?){
+                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            }
+
+            override fun onChildMoved(p0: DataSnapshot?, p1: String?) {
+                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            }
+
+            override fun onCancelled(p0: DatabaseError?) {
+                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            }
+        })
         if(savedInstanceState != null) {
 
             Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE AFTER")
@@ -250,13 +229,15 @@ class GameState() : AppCompatActivity() {
             for (i in savedInstanceState.keySet()) {
                 when (i) {
                     "gameId" -> gameId = savedInstanceState.getString("gameId")
+                    "joining" -> joining = savedInstanceState.getBoolean("joining")
+                    "spectating" -> spectating = savedInstanceState.getBoolean("spectating")
+                    "isPlayerOne" -> isPlayerOne = savedInstanceState.getBoolean("isPlayerOne")
                 }
             }
         }
         else if(intent != null && intent.extras != null && !intent.extras.isEmpty)
         {
             gameId = ""
-            var joining = false
             for(i in intent.extras.keySet())
             {
                 when(i) {
@@ -303,11 +284,12 @@ class GameState() : AppCompatActivity() {
 
                             if (!playerOneSetup) {
                                 playerOne = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), currentUser.email!!, 5)
+                                myNameDisplay.setText(currentUser.email + "//Ships Left: " + playerOne.shipCount)
                                 playerOneSetup = true
                             } else
                             {
                                 playerTwo = Player(ships, ArrayList<Triple<Int, Int, Int>>(), ArrayList<Triple<Int, Int, Int>>(), "", 5)
-                                findViewById<TextView>(R.id.enemyName).setText("Waiting for player...")
+                                enemyNameDisplay.setText("Waiting for player...")
                             }
                         }
                         updateDatabase(true)
@@ -518,6 +500,9 @@ class GameState() : AppCompatActivity() {
         if(savedInstanceState !is Bundle) return
         Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
         savedInstanceState.putString("gameId", gameId)
+        savedInstanceState.putBoolean("joining", joining)
+        savedInstanceState.putBoolean("spectating", spectating)
+        savedInstanceState.putBoolean ("isPlayerOne", isPlayerOne)
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -525,6 +510,7 @@ class GameState() : AppCompatActivity() {
     {
         if(newGame)
         {
+            Log.e("UPDATE", "Updating database with new game")
             var gamesRef = mDbRoot.getReference("Games")
             gameId = gamesRef.push().key
             gamesRef.child(gameId).setValue("Game")
@@ -535,12 +521,17 @@ class GameState() : AppCompatActivity() {
 
         else
         {
+            Log.e("UPDATE", "Updating database with current game")
             var gamesRef = mDbRoot.getReference("Games")
             gamesRef.child(gameId).removeValue()
             gamesRef.child(gameId).child("Game State").setValue(state)
-            gamesRef.child(gameId).child("Player One").setValue(playerOne)
-            gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+            if(isPlayerOne) gamesRef.child(gameId).child("Player One").setValue(playerOne)
+            else if(!isPlayerOne) gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+
+            //Dont allow any buttons to be pushed right here.
+            //Also do check when loading
         }
+
     }
 
     fun loadFromDatabase(gameId : String, joining : Boolean, spectating : Boolean, isPlayerOne : Boolean)
@@ -574,9 +565,6 @@ class GameState() : AppCompatActivity() {
                 var stateOfGame = ""
                 var whichPlayer = ""
 
-                if(!isPlayerOne) whichPlayer = "Player Two"
-                else whichPlayer = "Player One"
-
                 //STATE OF GAME
                 if(game.hasChild("Game State"))
                 {
@@ -584,6 +572,16 @@ class GameState() : AppCompatActivity() {
                     state = gameState.valueOf(stateOfGame)
                     Log.e("GAME STATE", stateOfGame)
                 }
+
+                if(joining) whichPlayer = "Player Two"
+                else if(spectating)
+                {
+                    if(state == gameState.PLAYER_ONE_TURN) whichPlayer = "Player One"
+                    else if(state == gameState.PLAYER_TWO_TURN) whichPlayer = "Player Two"
+                }
+                else if(!isPlayerOne) whichPlayer = "Player Two"
+                else if (isPlayerOne) whichPlayer = "Player One"
+
 
                 if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
 
@@ -599,6 +597,7 @@ class GameState() : AppCompatActivity() {
                 {
                     Log.e("PLAYER ONE NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
+                    myNameDisplay.setText(playerName)
                 }
 
 
@@ -681,6 +680,8 @@ class GameState() : AppCompatActivity() {
                 {
                     Log.e("PLAYER TWO NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
+                    if(playerName.isEmpty()) enemyNameDisplay.setText("Waiting for player...")
+                    else enemyNameDisplay.setText(playerName)
                 }
 
                 //SECOND PLAYER SHIPS
@@ -742,64 +743,17 @@ class GameState() : AppCompatActivity() {
 
 
                 setupCoordinateButtons()
+                setupPlayer(playerOne)
                 when(stateOfGame)
                 {
-                    gameState.PLAYER_ONE_TURN.name ->
+                    gameState.PLAYER_ONE_TURN.name, gameState.PLAYER_TWO_TURN.name ->
                     {
-                        setupPlayer(playerOne)
-                        findViewById<Button>(R.id.Okay).setText("Player One's Turn")
-                        findViewById<Button>(R.id.Okay).isClickable = true
+                        findViewById<Button>(R.id.Okay).isClickable = false
+                        if(stateOfGame == gameState.PLAYER_ONE_TURN.name) findViewById<Button>(R.id.Okay).setText("Player One's Turn!")
+                        else if(stateOfGame == gameState.PLAYER_TWO_TURN.name) findViewById<Button>(R.id.Okay).setText("Player Two's Turn!")
                     }
-                    gameState.PLAYER_TWO_TURN.name ->
+                    gameState.GAME_OVER_PLAYER_ONE.name, gameState.GAME_OVER_PLAYER_TWO.name ->
                     {
-                        setupPlayer(playerTwo)
-                        findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
-                        findViewById<Button>(R.id.Okay).isClickable = true
-                    }
-                    gameState.SWITCH_TO_PLAYER_ONE.name -> {
-                        var views = findViewById<ViewGroup>(R.id.buttons)
-                        for (j in 0..views.childCount - 1) {
-                            var view = views.getChildAt(j)
-                            if (view is LinearLayout) {
-                                for (k in 0..view.childCount - 1) {
-                                    var button = view.getChildAt(k)
-                                    if (button is Button) {
-                                        button.isClickable = false
-                                        if (button.id != R.id.Okay) {
-                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                            button.setText("")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        findViewById<Button>(R.id.Okay).setText("Switch to Player One")
-                        findViewById<Button>(R.id.Okay).isClickable = true
-                    }
-                    gameState.SWITCH_TO_PLAYER_TWO.name ->
-                    {
-                        var views = findViewById<ViewGroup>(R.id.buttons)
-                        for (j in 0..views.childCount - 1) {
-                            var view = views.getChildAt(j)
-                            if (view is LinearLayout) {
-                                for (k in 0..view.childCount - 1) {
-                                    var button = view.getChildAt(k)
-                                    if (button is Button) {
-                                        button.isClickable = false
-                                        if (button.id != R.id.Okay) {
-                                            button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-                                            button.setText("")
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        findViewById<Button>(R.id.Okay).setText("Switch to Player Two")
-                        findViewById<Button>(R.id.Okay).isClickable = true
-                    }
-                    gameState.GAME_OVER_PLAYER_ONE.name ->
-                    {
-                        setupPlayer(playerOne)
                         var views = findViewById<ViewGroup>(R.id.buttons)
                         for (j in 0..views.childCount - 1) {
                             var view = views.getChildAt(j)
@@ -812,11 +766,11 @@ class GameState() : AppCompatActivity() {
                                 }
                             }
                         }
-                        findViewById<Button>(R.id.Okay).setText("Player One Wins!")
+                        if(stateOfGame == gameState.GAME_OVER_PLAYER_ONE.name) findViewById<Button>(R.id.Okay).setText("Player One Wins!")
+                        else if(stateOfGame == gameState.GAME_OVER_PLAYER_TWO.name) findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
                     }
                     gameState.GAME_OVER_PLAYER_TWO.name ->
                     {
-                        setupPlayer(playerTwo)
                         var views = findViewById<ViewGroup>(R.id.buttons)
                         for (j in 0..views.childCount - 1) {
                             var view = views.getChildAt(j)
@@ -829,7 +783,7 @@ class GameState() : AppCompatActivity() {
                                 }
                             }
                         }
-                        findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
+
                     }
                     gameState.STARTED.name ->
                     {

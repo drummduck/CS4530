@@ -149,11 +149,11 @@ class Game : AppCompatActivity() {
                             else dataString = "Game Started!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + "\nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.start, dataString, gameId))
                         }
-                        GameState.gameState.PLAYER_ONE_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_ONE.name -> {
+                        GameState.gameState.PLAYER_ONE_TURN.name -> {
                             dataString = "Player One's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }
-                        GameState.gameState.PLAYER_TWO_TURN.name, GameState.gameState.SWITCH_TO_PLAYER_TWO.name -> {
+                        GameState.gameState.PLAYER_TWO_TURN.name -> {
                             dataString = "Player Two's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
                         }
@@ -231,7 +231,12 @@ class Game : AppCompatActivity() {
                             }
                         }
 
-                        else if (myAdapterItem.title.equals("New Game")) intent.putExtra("New Game", "")
+                        else if (myAdapterItem.title.equals("New Game"))
+                        {
+                            Log.e("NEW GAME", "Starting new game!")
+                            intent.putExtra("isPlayerOne", true)
+                            intent.putExtra("New Game", "")
+                        }
 
                         startActivity(intent)
                         finish()
