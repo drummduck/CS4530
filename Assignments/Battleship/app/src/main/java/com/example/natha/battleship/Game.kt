@@ -99,26 +99,26 @@ class Game : AppCompatActivity() {
                     if(game.hasChild("Game State"))
                     {
                         state = game.child("Game State").value as String
-                        Log.e("GAME STATE", state)
+                        Log.e("RECYCLER VIEW GAME STATE", state)
                     }
                     if(game.hasChild("Player One") && game.child("Player One").hasChild("shipCount"))
                     {
-                        Log.e("PLAYER ONE SHIP COUNT", game.child("Player One").child("shipCount").value.toString())
+                        Log.e("RECYCLER VIEW PLAYER ONE SHIP COUNT", game.child("Player One").child("shipCount").value.toString())
                         playerOneShipCount = Integer.parseInt(game.child("Player One").child("shipCount").value.toString())
                     }
                     if(game.hasChild("Player Two") && game.child("Player Two").hasChild("shipCount"))
                     {
-                        Log.e("PLAYER TWO SHIP COUNT", game.child("Player Two").child("shipCount").value.toString())
+                        Log.e("RECYCLER VIEW PLAYER TWO SHIP COUNT", game.child("Player Two").child("shipCount").value.toString())
                         playerTwoShipCount = Integer.parseInt(game.child("Player Two").child("shipCount").value.toString())
                     }
                     if(game.hasChild("Player One") && game.child("Player One").hasChild("name"))
                     {
-                        Log.e("PLAYER ONE NAME", game.child("Player One").child("name").value.toString())
+                        Log.e("RECYCLER VIEW PLAYER ONE NAME", game.child("Player One").child("name").value.toString())
                         playerOneName = game.child("Player One").child("name").value.toString()
                     }
                     if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
                     {
-                        Log.e("PLAYER TWO NAME", game.child("Player Two").child("name").value.toString())
+                        Log.e("RECYCLER VIEW PLAYER TWO NAME", game.child("Player Two").child("name").value.toString())
                         playerTwoName = game.child("Player Two").child("name").value.toString()
                     }
 
@@ -237,7 +237,7 @@ class Game : AppCompatActivity() {
                             intent.putExtra("isPlayerOne", true)
                             intent.putExtra("New Game", "")
                         }
-
+                        
                         startActivity(intent)
                         finish()
                     }

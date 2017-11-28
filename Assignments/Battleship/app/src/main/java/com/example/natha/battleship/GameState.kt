@@ -7,16 +7,13 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
 import java.util.*
 import kotlin.collections.ArrayList
 import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.provider.ContactsContract
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
@@ -50,33 +47,30 @@ class GameState() : AppCompatActivity() {
     val clickListener = View.OnClickListener { view ->
         if(view.id == R.id.Okay)
         {
-            if(state == gameState.STARTED)
-            {
-                Log.e("STARTING", "Starting game!")
-                findViewById<Button>(R.id.Okay).setText("Player One's Turn")
-                for(i in playerOne.ships)
-                {
-                    var size = i.size
-                    var count = 1
-                    for(j in i.pos)
-                    {
-                        var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first+12)
-                        if(view is LinearLayout)
-                        {
-                            var button = view.getChildAt(j.second-1)
-                            if(button is Button)
-                            {
-                                 button.setBackgroundColor(Color.GRAY)
-                                if(count == 1) button.setText("**" + button.text.toString())
-                                if(count == size) button.setText(button.text.toString() + "**")
+            if(state == gameState.STARTED) {
+                if (!enemyNameDisplay.text.equals("Waiting for player...") && isPlayerOne) {
+                    Log.e("STARTING", "Starting game!")
+                    findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                    for (i in playerOne.ships) {
+                        var size = i.size
+                        var count = 1
+                        for (j in i.pos) {
+                            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first + 12)
+                            if (view is LinearLayout) {
+                                var button = view.getChildAt(j.second - 1)
+                                if (button is Button) {
+                                    button.setBackgroundColor(Color.GRAY)
+                                    if (count == 1) button.setText("**" + button.text.toString())
+                                    if (count == size) button.setText(button.text.toString() + "**")
+                                }
                             }
+                            count++
                         }
-                        count++
                     }
+                    setupCoordinateButtons()
+                    state = gameState.PLAYER_ONE_TURN
+                    updateDatabase(false)
                 }
-                setupCoordinateButtons()
-                state = gameState.PLAYER_ONE_TURN
-                updateDatabase(false)
             }
         }
 
@@ -111,8 +105,7 @@ class GameState() : AppCompatActivity() {
                             hit = true
                         }
                         if (j.third == 2) hitCount++
-                        if (hitCount == i.size)
-                        {
+                        if (hitCount == i.size) {
                             sunk = true
                             opponentPlayer.shipCount--
                         }
@@ -179,11 +172,21 @@ class GameState() : AppCompatActivity() {
                     if (state == gameState.PLAYER_ONE_TURN) {
                         findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
                         state = gameState.PLAYER_TWO_TURN
-                        updateDatabase(false)
                     } else if (state == gameState.PLAYER_TWO_TURN) {
                         findViewById<Button>(R.id.Okay).setText("Player One's Turn")
                         state = gameState.PLAYER_ONE_TURN
-                        updateDatabase(false)
+                    }
+                    var views = findViewById<ViewGroup>(R.id.buttons)
+                    for (i in 0..views.childCount - 1) {
+                        var view = views.getChildAt(i)
+                        if (view is LinearLayout) {
+                            for (j in 0..view.childCount - 1) {
+                                var button = view.getChildAt(j)
+                                if (button is Button) {
+                                    button.isClickable = false
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -202,24 +205,32 @@ class GameState() : AppCompatActivity() {
         if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
         mDbRootRef.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(p0: DataSnapshot?, p1: String?) {
-                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
+                if(loadFromDatabase(snapshot))
+                    loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+                Log.e("ONCHILDADDED", "CHILD ADDED")
             }
 
-            override fun onChildChanged(p0: DataSnapshot?, p1: String?) {
+            override fun onChildChanged(snapshot: DataSnapshot?, p1: String?) {
+                if(loadFromDatabase(snapshot))
                 loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+                Log.e("ONCHILDCHANGED", "CHILD CHANGED")
             }
 
-            override fun onChildRemoved(p0: DataSnapshot?){
+            override fun onChildRemoved(snapshot: DataSnapshot?){
+                if(loadFromDatabase(snapshot))
                 loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+                Log.e("ONCHILDREMOVED", "CHILD REMOVED")
             }
 
-            override fun onChildMoved(p0: DataSnapshot?, p1: String?) {
+            override fun onChildMoved(snapshot: DataSnapshot?, p1: String?) {
+                if(loadFromDatabase(snapshot))
                 loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+                Log.e("ONCHILDMOVED", "CHILD MOVED")
             }
 
-            override fun onCancelled(p0: DatabaseError?) {
-                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+            override fun onCancelled(snapshot: DatabaseError?) {
+                Log.e("ONCHILDCANCELLED", "CHILD CANCELLED")
             }
         })
         if(savedInstanceState != null) {
@@ -257,7 +268,6 @@ class GameState() : AppCompatActivity() {
 
                     "New Game" ->
                     {
-                        gameId = intent.getStringExtra(i)
                         var playerOneSetup = false
                         for (i in 1..2) {
                             var shipSize = 2
@@ -292,6 +302,7 @@ class GameState() : AppCompatActivity() {
                                 enemyNameDisplay.setText("Waiting for player...")
                             }
                         }
+                        if(!isPlayerOne || spectating) findViewById<Button>(R.id.Okay).isClickable = false
                         updateDatabase(true)
                     }
                 }
@@ -465,8 +476,11 @@ class GameState() : AppCompatActivity() {
                 {
                     var child2 = child.getChildAt(i)
                     val buttonColor = child2.background as ColorDrawable
-
-                    if(child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light)) child2.setOnClickListener(clickListener)
+                    if(child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
+                    {
+                        if(!spectating)child2.isClickable = true
+                        child2.setOnClickListener(clickListener)
+                    }
                 }
             }
         }
@@ -527,9 +541,6 @@ class GameState() : AppCompatActivity() {
             gamesRef.child(gameId).child("Game State").setValue(state)
             if(isPlayerOne) gamesRef.child(gameId).child("Player One").setValue(playerOne)
             else if(!isPlayerOne) gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
-
-            //Dont allow any buttons to be pushed right here.
-            //Also do check when loading
         }
 
     }
@@ -571,6 +582,12 @@ class GameState() : AppCompatActivity() {
                     stateOfGame = game.child("Game State").value as String
                     state = gameState.valueOf(stateOfGame)
                     Log.e("GAME STATE", stateOfGame)
+                }
+
+                else
+                {
+                    Log.e("ERROR", "ERROR GETTING GAME INFO")
+                    return
                 }
 
                 if(joining) whichPlayer = "Player Two"
@@ -804,12 +821,47 @@ class GameState() : AppCompatActivity() {
                             }
                         }
                         findViewById<Button>(R.id.Okay).setText("Start")
-                        findViewById<Button>(R.id.Okay).isClickable = true
+                        if(isPlayerOne)findViewById<Button>(R.id.Okay).isClickable = true
                     }
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+    }
+
+    fun loadFromDatabase(snapshot : DataSnapshot?) : Boolean{
+
+        if(snapshot !is DataSnapshot) return false
+
+        if(!snapshot.hasChild(gameId))
+        {
+            Log.e("GAMSESTATE", "Game: " + gameId + " does not exist!")
+            return false
+        }
+
+        var game = snapshot.child(gameId)
+
+        var stateOfGame = ""
+
+        //STATE OF GAME
+        if(game.hasChild("Game State"))
+        {
+            stateOfGame = game.child("Game State").value as String
+            state = gameState.valueOf(stateOfGame)
+            Log.e("GAME STATE", stateOfGame)
+        }
+
+        else
+        {
+            Log.e("ERROR", "ERROR GETTING GAME INFO")
+            return false
+        }
+
+        if(spectating || (!isPlayerOne && state == gameState.PLAYER_TWO_TURN) || (isPlayerOne && state == gameState.PLAYER_ONE_TURN) ||
+                (!isPlayerOne && state == gameState.GAME_OVER_PLAYER_ONE) || (isPlayerOne && state == gameState.GAME_OVER_PLAYER_TWO))
+            return true
+
+        return false
     }
 }
