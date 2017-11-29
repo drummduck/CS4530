@@ -47,6 +47,17 @@ class Game : AppCompatActivity() {
     lateinit var currentUser : FirebaseUser
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
+    val childEventListener = object : ChildEventListener {
+        override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+        override fun onChildChanged(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+        override fun onChildRemoved(p0: DataSnapshot?) {setupRecyclerView()}
+
+        override fun onChildMoved(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+
+        override fun onCancelled(p0: DatabaseError?) {setupRecyclerView()}
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +75,7 @@ class Game : AppCompatActivity() {
 
         setupRecyclerView()
 
-        mDbRootRef.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
-
-            override fun onChildChanged(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
-
-            override fun onChildRemoved(p0: DataSnapshot?) {setupRecyclerView()}
-
-            override fun onChildMoved(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
-
-            override fun onCancelled(p0: DatabaseError?) {setupRecyclerView()}
-        })
+        mDbRootRef.addChildEventListener(childEventListener)
     }
 
     fun setupRecyclerView()
@@ -198,36 +199,53 @@ class Game : AppCompatActivity() {
                         intent = Intent(applicationContext, GameState::class.java)
                         if(myAdapterItem.title.contains("waiting for player"))
                         {
+                            Log.e("JOINING GAME", "Joining game!")
                             intent.putExtra("joining", true)
                             intent.putExtra("gameId", myAdapterItem.gameId)
+                            startActivity(intent)
+                            mDbRootRef.removeEventListener(childEventListener)
+                            startActivity(intent)
+                            finish()
+                            finish()
                         }
 
                         else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn") || myAdapterItem.title.contains("Player Two's Turn"))
                         {
-                            var pattern = Pattern.compile("One: \n(.*?)Ships\n")
+                            var pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
                             var matcher = pattern.matcher(myAdapterItem.title)
                             while(matcher.find())
                             {
                                 if(matcher.group(0).equals(currentUser.email)) {
+                                    Log.e("MATCHER", "Matcher value is: " + matcher.group(0))
                                     intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
                                     isInGame = true
+                                    mDbRootRef.removeEventListener(childEventListener)
+                                    startActivity(intent)
+                                    finish()
                                 }
                             }
-                            pattern = Pattern.compile("Two: \n(.*?) Ships\n")
+                            pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
                             matcher = pattern.matcher(myAdapterItem.title)
                             while(matcher.find())
                             {
                                 if(matcher.group(0).equals(currentUser.email)) {
                                     intent.putExtra("gameId", myAdapterItem.gameId)
                                     isInGame = true
+                                    mDbRootRef.removeEventListener(childEventListener)
+                                    startActivity(intent)
+                                    finish()
                                 }
                             }
 
                             if(!isInGame)
                             {
+                                Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
                                 intent.putExtra("isSpectating", true)
                                 intent.putExtra("gameId", myAdapterItem.gameId)
+                                mDbRootRef.removeEventListener(childEventListener)
+                                startActivity(intent)
+                                finish()
                             }
                         }
 
@@ -236,10 +254,10 @@ class Game : AppCompatActivity() {
                             Log.e("NEW GAME", "Starting new game!")
                             intent.putExtra("isPlayerOne", true)
                             intent.putExtra("New Game", "")
+                            mDbRootRef.removeEventListener(childEventListener)
+                            startActivity(intent)
+                            finish()
                         }
-                        
-                        startActivity(intent)
-                        finish()
                     }
                 }
             }

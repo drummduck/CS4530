@@ -42,6 +42,35 @@ class GameState() : AppCompatActivity() {
     var spectating = false
     var isPlayerOne = false
     var joining = false
+    val childListener = (object : ChildEventListener {
+        override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
+            if(loadFromDatabase(snapshot))
+                loadFromDatabase()
+            Log.e("ONCHILDADDED", "CHILD ADDED")
+        }
+
+        override fun onChildChanged(snapshot: DataSnapshot?, p1: String?) {
+            if(loadFromDatabase(snapshot))
+                loadFromDatabase()
+            Log.e("ONCHILDCHANGED", "CHILD CHANGED")
+        }
+
+        override fun onChildRemoved(snapshot: DataSnapshot?){
+            if(loadFromDatabase(snapshot))
+                loadFromDatabase()
+            Log.e("ONCHILDREMOVED", "CHILD REMOVED")
+        }
+
+        override fun onChildMoved(snapshot: DataSnapshot?, p1: String?) {
+            if(loadFromDatabase(snapshot))
+                loadFromDatabase()
+            Log.e("ONCHILDMOVED", "CHILD MOVED")
+        }
+
+        override fun onCancelled(snapshot: DatabaseError?) {
+            Log.e("ONCHILDCANCELLED", "CHILD CANCELLED")
+        }
+    })
 
 
     val clickListener = View.OnClickListener { view ->
@@ -204,35 +233,7 @@ class GameState() : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
-        mDbRootRef.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
-                if(loadFromDatabase(snapshot))
-                    loadFromDatabase(gameId, joining, spectating, isPlayerOne)
-                Log.e("ONCHILDADDED", "CHILD ADDED")
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot?, p1: String?) {
-                if(loadFromDatabase(snapshot))
-                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
-                Log.e("ONCHILDCHANGED", "CHILD CHANGED")
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot?){
-                if(loadFromDatabase(snapshot))
-                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
-                Log.e("ONCHILDREMOVED", "CHILD REMOVED")
-            }
-
-            override fun onChildMoved(snapshot: DataSnapshot?, p1: String?) {
-                if(loadFromDatabase(snapshot))
-                loadFromDatabase(gameId, joining, spectating, isPlayerOne)
-                Log.e("ONCHILDMOVED", "CHILD MOVED")
-            }
-
-            override fun onCancelled(snapshot: DatabaseError?) {
-                Log.e("ONCHILDCANCELLED", "CHILD CANCELLED")
-            }
-        })
+        mDbRootRef.addChildEventListener(childListener)
         if(savedInstanceState != null) {
 
             Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE AFTER")
@@ -261,9 +262,8 @@ class GameState() : AppCompatActivity() {
 
                     "gameId" ->
                     {
-
                         gameId = intent.getStringExtra("gameId")
-                        loadFromDatabase(gameId, joining, spectating, isPlayerOne)
+                        loadFromDatabase()
                     }
 
                     "New Game" ->
@@ -506,6 +506,7 @@ class GameState() : AppCompatActivity() {
 
     override fun onBackPressed() {
         var intent = Intent(this, Game::class.java)
+        mDbRootRef.removeEventListener(childListener)
         startActivity(intent)
         finish()
     }
@@ -539,13 +540,21 @@ class GameState() : AppCompatActivity() {
             var gamesRef = mDbRoot.getReference("Games")
             gamesRef.child(gameId).removeValue()
             gamesRef.child(gameId).child("Game State").setValue(state)
-            if(isPlayerOne) gamesRef.child(gameId).child("Player One").setValue(playerOne)
-            else if(!isPlayerOne) gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+            if(isPlayerOne)
+            {
+                gamesRef.child(gameId).child("Player One").setValue(playerOne)
+                gamesRef.child(gameId).child("Player Two").setValue(playerTwo)
+            }
+            else if(!isPlayerOne)
+            {
+                gamesRef.child(gameId).child("Player One").setValue(playerTwo)
+                gamesRef.child(gameId).child("Player Two").setValue(playerOne)
+            }
         }
 
     }
 
-    fun loadFromDatabase(gameId : String, joining : Boolean, spectating : Boolean, isPlayerOne : Boolean)
+    fun loadFromDatabase()
     {
         FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
         {
@@ -593,7 +602,7 @@ class GameState() : AppCompatActivity() {
                 if(joining) whichPlayer = "Player Two"
                 else if(spectating)
                 {
-                    if(state == gameState.PLAYER_ONE_TURN) whichPlayer = "Player One"
+                    if(state == gameState.PLAYER_ONE_TURN || state == gameState.STARTED) whichPlayer = "Player One"
                     else if(state == gameState.PLAYER_TWO_TURN) whichPlayer = "Player Two"
                 }
                 else if(!isPlayerOne) whichPlayer = "Player Two"
@@ -613,8 +622,9 @@ class GameState() : AppCompatActivity() {
                 if(player != null && player.hasChild("name"))
                 {
                     Log.e("PLAYER ONE NAME", player.child("name").value.toString())
-                    playerName = player.child("name").value.toString()
-                    myNameDisplay.setText(playerName)
+                    if(joining && currentUser != null && currentUser is FirebaseUser) playerName = currentUser.email!!
+                    else playerName = player.child("name").value.toString()
+                    myNameDisplay.setText(playerName + "//Ships Left: " + playerShipCount)
                 }
 
 
@@ -680,7 +690,9 @@ class GameState() : AppCompatActivity() {
                 oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
                 myAttacksData = ArrayList<Triple<Int,Int,Int>>()
 
-                if(!isPlayerOne) whichPlayer = "Player One"
+                if(joining) whichPlayer = "Player One"
+                else if(spectating) whichPlayer = "Player Two"
+                else if(!isPlayerOne) whichPlayer = "Player One"
                 else whichPlayer = "Player Two"
 
                 if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
@@ -697,8 +709,10 @@ class GameState() : AppCompatActivity() {
                 {
                     Log.e("PLAYER TWO NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
+                    var playerRef = player.child("name").ref
                     if(playerName.isEmpty()) enemyNameDisplay.setText("Waiting for player...")
-                    else enemyNameDisplay.setText(playerName)
+                    else enemyNameDisplay.setText(playerName + "//Ships Left: " + playerShipCount)
+
                 }
 
                 //SECOND PLAYER SHIPS
@@ -822,6 +836,12 @@ class GameState() : AppCompatActivity() {
                         }
                         findViewById<Button>(R.id.Okay).setText("Start")
                         if(isPlayerOne)findViewById<Button>(R.id.Okay).isClickable = true
+                        if(!isPlayerOne)findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                        if(joining)
+                        {
+                            joining = false
+                            updateDatabase(false)
+                        }
                     }
                 }
             }
@@ -850,6 +870,13 @@ class GameState() : AppCompatActivity() {
             stateOfGame = game.child("Game State").value as String
             state = gameState.valueOf(stateOfGame)
             Log.e("GAME STATE", stateOfGame)
+        }
+
+        if(state == gameState.STARTED && isPlayerOne)
+        {
+            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name") &&
+                    !game.child("Player Two").child("name").value.toString().isEmpty())
+                enemyNameDisplay.setText(game.child("Player Two").child("name").value.toString())
         }
 
         else
