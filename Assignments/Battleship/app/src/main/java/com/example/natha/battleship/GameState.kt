@@ -110,24 +110,16 @@ class GameState() : AppCompatActivity() {
             var hit = false
             var sunk = false
             if(state == gameState.PLAYER_ONE_TURN || state == gameState.PLAYER_TWO_TURN) {
-                var currentPlayer: Player
-                var opponentPlayer: Player
-                if (state == gameState.PLAYER_ONE_TURN) {
-                    currentPlayer = playerOne
-                    opponentPlayer = playerTwo
-                } else {
-                    currentPlayer = playerTwo
-                    opponentPlayer = playerOne
-                }
-                for (i in opponentPlayer.ships) {
+
+                for (i in playerTwo.ships) {
                     var hitCount = 0
                     var pos = 0
                     for (j in i.pos) {
                         if (xVal == j.first && yVal == j.second) {
                             i.pos[pos] = Triple(xVal, yVal, 2)
                             view.text = "Hit"
-                            opponentPlayer.oppAttacks.add(Triple(xVal, yVal, 2))
-                            currentPlayer.myAttacks.add(Triple(xVal, yVal, 2))
+                            playerTwo.oppAttacks.add(Triple(xVal, yVal, 2))
+                            playerOne.myAttacks.add(Triple(xVal, yVal, 2))
                             view.setBackgroundColor(Color.YELLOW)
                             view.isClickable = false
                             hitCount++
@@ -136,20 +128,20 @@ class GameState() : AppCompatActivity() {
                         if (j.third == 2) hitCount++
                         if (hitCount == i.size) {
                             sunk = true
-                            opponentPlayer.shipCount--
+                            playerTwo.shipCount--
                         }
                         if (sunk) {
                             pos = 0
                             for (k in i.pos) {
                                 var pos2 = 0
-                                for (l in currentPlayer.myAttacks) {
+                                for (l in playerOne.myAttacks) {
 
-                                    if (l.first == k.first && l.second == k.second) currentPlayer.myAttacks[pos2] = Triple(l.first, l.second, 3)
+                                    if (l.first == k.first && l.second == k.second) playerOne.myAttacks[pos2] = Triple(l.first, l.second, 3)
                                     pos2++
                                 }
                                 pos2 = 0
-                                for (l in opponentPlayer.oppAttacks) {
-                                    if (l.first == k.first && l.second == k.second) opponentPlayer.oppAttacks[pos2] = Triple(l.first, l.second, 3)
+                                for (l in playerTwo.oppAttacks) {
+                                    if (l.first == k.first && l.second == k.second) playerTwo.oppAttacks[pos2] = Triple(l.first, l.second, 3)
                                     pos2++
                                 }
                                 i.pos[pos] = Triple(k.first, k.second, 3)
@@ -166,7 +158,7 @@ class GameState() : AppCompatActivity() {
                                 pos++
                             }
 
-                            if (opponentPlayer.shipCount == 0) {
+                            if (playerTwo.shipCount == 0) {
                                 if (state == gameState.PLAYER_ONE_TURN) {
                                     state = gameState.GAME_OVER_PLAYER_ONE
                                     findViewById<Button>(R.id.Okay).setText("Player One Wins!")
@@ -194,8 +186,8 @@ class GameState() : AppCompatActivity() {
                 }
                 if (!hit && !sunk) {
                     view.setBackgroundColor(Color.WHITE)
-                    opponentPlayer.oppAttacks.add(Triple(xVal, yVal, 1))
-                    currentPlayer.myAttacks.add(Triple(xVal, yVal, 1))
+                    playerTwo.oppAttacks.add(Triple(xVal, yVal, 1))
+                    playerOne.myAttacks.add(Triple(xVal, yVal, 1))
                     view.setText("Miss")
                     view.isClickable = false
                     if (state == gameState.PLAYER_ONE_TURN) {
@@ -304,6 +296,7 @@ class GameState() : AppCompatActivity() {
                         }
                         if(!isPlayerOne || spectating) findViewById<Button>(R.id.Okay).isClickable = false
                         updateDatabase(true)
+                        setupPlayer(playerOne)
                     }
                 }
             }
@@ -476,11 +469,8 @@ class GameState() : AppCompatActivity() {
                 {
                     var child2 = child.getChildAt(i)
                     val buttonColor = child2.background as ColorDrawable
-                    if(child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
-                    {
-                        if(!spectating)child2.isClickable = true
-                        child2.setOnClickListener(clickListener)
-                    }
+                    if(child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light) && !spectating)
+                    child2.setOnClickListener(clickListener)
                 }
             }
         }
@@ -573,6 +563,7 @@ class GameState() : AppCompatActivity() {
                 Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
 
                 var player : DataSnapshot? = null
+                var enemy : DataSnapshot? = null
                 var ships : DataSnapshot? = null
                 var myAttacks : DataSnapshot? = null
                 var oppAttacks : DataSnapshot? = null
@@ -583,7 +574,8 @@ class GameState() : AppCompatActivity() {
                 var playerShipCount = -1
                 var playerName = ""
                 var stateOfGame = ""
-                var whichPlayer = ""
+                var currentPlayer = ""
+                var enemyPlayer = ""
 
                 //STATE OF GAME
                 if(game.hasChild("Game State"))
@@ -599,17 +591,38 @@ class GameState() : AppCompatActivity() {
                     return
                 }
 
-                if(joining) whichPlayer = "Player Two"
+                if(joining)
+                {
+                    currentPlayer = "Player Two"
+                    enemyPlayer = "Player One"
+                }
                 else if(spectating)
                 {
-                    if(state == gameState.PLAYER_ONE_TURN || state == gameState.STARTED) whichPlayer = "Player One"
-                    else if(state == gameState.PLAYER_TWO_TURN) whichPlayer = "Player Two"
+                    if(state == gameState.PLAYER_ONE_TURN || state == gameState.STARTED)
+                    {
+                        currentPlayer = "Player One"
+                        enemyPlayer = "Player Two"
+                    }
+                    else if(state == gameState.PLAYER_TWO_TURN)
+                    {
+                        currentPlayer = "Player Two"
+                        enemyPlayer = "Player One"
+                    }
                 }
-                else if(!isPlayerOne) whichPlayer = "Player Two"
-                else if (isPlayerOne) whichPlayer = "Player One"
+                else if(!isPlayerOne)
+                {
+                    currentPlayer = "Player Two"
+                    enemyPlayer = "Player One"
+                }
+                else if (isPlayerOne)
+                {
+                    currentPlayer = "Player One"
+                    enemyPlayer = "Player Two"
+                }
 
 
-                if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
+                if(game.hasChild(currentPlayer)) player = game.child(currentPlayer)
+                if(game.hasChild(enemyPlayer)) enemy = game.child(enemyPlayer)
 
                 //FIRST PLAYER SHIPCOUNT
                 if(player != null && player.hasChild("shipCount"))
@@ -650,7 +663,7 @@ class GameState() : AppCompatActivity() {
                                 Log.e("PLAYER ONE SHIP POSITION DATA", "first: " + Integer.parseInt(posData.child("first").value.toString()) + ", second: " + Integer.parseInt(posData.child("second").value.toString()) + ", third: " + Integer.parseInt(posData.child("third").value.toString()))
                             }
                         }
-                        shipsData.add(Ship(shipSize, shipArray))
+                        if(!shipData.key.equals("size")) shipsData.add(Ship(shipSize, shipArray))
                     }
                 }
 
@@ -670,7 +683,7 @@ class GameState() : AppCompatActivity() {
                 }
 
                 //FIRST PLAYER OPPONENT ATTACKS
-                if(player != null && player.hasChild("oppAttacks")) oppAttacks = player.child("oppAttacks")
+                if(enemy != null && enemy.hasChild("myAttacks")) oppAttacks = enemy.child("myAttacks")
 
                 if(oppAttacks != null) for(attacks in oppAttacks.children)
                 {
@@ -690,12 +703,29 @@ class GameState() : AppCompatActivity() {
                 oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
                 myAttacksData = ArrayList<Triple<Int,Int,Int>>()
 
-                if(joining) whichPlayer = "Player One"
-                else if(spectating) whichPlayer = "Player Two"
-                else if(!isPlayerOne) whichPlayer = "Player One"
-                else whichPlayer = "Player Two"
+                if(joining)
+                {
+                    currentPlayer = "Player One"
+                    enemyPlayer = "Player Two"
+                }
+                else if(spectating)
+                {
+                    currentPlayer = "Player Two"
+                    enemyPlayer = "Player One"
+                }
+                else if(!isPlayerOne)
+                {
+                    currentPlayer = "Player One"
+                    enemyPlayer = "Player Two"
+                }
+                else
+                {
+                    currentPlayer = "Player Two"
+                    enemyPlayer = "Player One"
+                }
 
-                if(game.hasChild(whichPlayer)) player = game.child(whichPlayer)
+                if(game.hasChild(currentPlayer)) player = game.child(currentPlayer)
+                if(game.hasChild(enemyPlayer)) enemy = game.child(enemyPlayer)
 
                 //SECOND PLAYER SHIPCOUNT
                 if(player != null && player.hasChild("shipCount"))
@@ -737,7 +767,7 @@ class GameState() : AppCompatActivity() {
 
                             }
                         }
-                        shipsData.add(Ship(shipSize, shipArray))
+                        if(!shipData.key.equals("size")) shipsData.add(Ship(shipSize, shipArray))
                     }
                 }
 
@@ -751,12 +781,12 @@ class GameState() : AppCompatActivity() {
                         myAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
                                 Integer.parseInt(attacks.child("second").value.toString()),
                                 Integer.parseInt(attacks.child("third").value.toString())))
-                        Log.e("PLAYER ONE ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
+                        Log.e("PLAYER TWO ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
                     }
                 }
 
                 //SECOND PLAYER OPPONENT ATTACKS
-                if(player != null && player.hasChild("oppAttacks")) oppAttacks = player.child("oppAttacks")
+                if(enemy != null && enemy.hasChild("myAttacks")) oppAttacks = enemy.child("myAttacks")
 
                 if(oppAttacks != null) for(attacks in oppAttacks.children)
                 {
@@ -765,7 +795,7 @@ class GameState() : AppCompatActivity() {
                         oppAttacksData.add(Triple(Integer.parseInt(attacks.child("first").value.toString()),
                                 Integer.parseInt(attacks.child("second").value.toString()),
                                 Integer.parseInt(attacks.child("third").value.toString())))
-                        Log.e("PLAYER ONE OPP ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
+                        Log.e("PLAYER TWO OPP ATTACKS DATA", "first: " + Integer.parseInt(attacks.child("first").value.toString()) + ", second: " + Integer.parseInt(attacks.child("second").value.toString()) + ", third: " + Integer.parseInt(attacks.child("third").value.toString()))
 
                     }
                 }
@@ -841,6 +871,7 @@ class GameState() : AppCompatActivity() {
                         {
                             joining = false
                             updateDatabase(false)
+                            setupPlayer(playerOne)
                         }
                     }
                 }
@@ -872,20 +903,31 @@ class GameState() : AppCompatActivity() {
             Log.e("GAME STATE", stateOfGame)
         }
 
-        if(state == gameState.STARTED && isPlayerOne)
-        {
-            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name") &&
-                    !game.child("Player Two").child("name").value.toString().isEmpty())
-                enemyNameDisplay.setText(game.child("Player Two").child("name").value.toString())
-        }
-
         else
         {
             Log.e("ERROR", "ERROR GETTING GAME INFO")
             return false
         }
 
-        if(spectating || (!isPlayerOne && state == gameState.PLAYER_TWO_TURN) || (isPlayerOne && state == gameState.PLAYER_ONE_TURN) ||
+        if(state == gameState.STARTED && isPlayerOne)
+        {
+            if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
+            {
+                if(!game.child("Player Two").child("name").value.toString().isEmpty()) {
+                    playerTwo.name = game.child("Player Two").child("name").value.toString()
+                    enemyNameDisplay.setText(game.child("Player Two").child("name").value.toString() + "//Ships Left: " + playerTwo.shipCount)
+                }
+            }
+
+            else
+            {
+                Log.e("ERROR", "ERROR GETTING GAME INFO")
+                return false
+            }
+        }
+
+
+        if(spectating || (!isPlayerOne && state == gameState.PLAYER_ONE_TURN) || (isPlayerOne && state == gameState.PLAYER_TWO_TURN) ||
                 (!isPlayerOne && state == gameState.GAME_OVER_PLAYER_ONE) || (isPlayerOne && state == gameState.GAME_OVER_PLAYER_TWO))
             return true
 
