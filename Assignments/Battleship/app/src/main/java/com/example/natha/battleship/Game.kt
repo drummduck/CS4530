@@ -129,14 +129,8 @@ class Game : AppCompatActivity() {
                         continue
                     }
 
-                    if(state != GameState.gameState.STARTED.name && playerTwoName.isEmpty())
-                    {
-                        Log.e("RECYCLER VIEW", "DATA IS NOT VALID, PLAYER 2 CANT BE EMPTY WITH THE GAME STARTED")
-                        continue
-                    }
-
                     if((state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name) &&
-                            (!playerOneName.equals(currentUser.email) || !playerTwoName.equals("Player Two")))
+                            (!playerOneName.equals(currentUser.email) || !playerTwoName.equals(currentUser.email)))
                     {
                         Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
                         continue
@@ -195,10 +189,20 @@ class Game : AppCompatActivity() {
                     is MyAdapter.ImageWithTitle -> {
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
-                        var isInGame = false
                         intent = Intent(applicationContext, GameState::class.java)
                         if(myAdapterItem.title.contains("waiting for player"))
                         {
+                            var pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
+                            var matcher = pattern.matcher(myAdapterItem.title)
+                            while(matcher.find())
+                            {
+                                if(matcher.group().equals(currentUser.email)) {
+                                    intent.putExtra("isPlayerOne", true)
+                                    intent.putExtra("gameId", myAdapterItem.gameId)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            }
                             Log.e("JOINING GAME", "Joining game!")
                             intent.putExtra("joining", true)
                             intent.putExtra("gameId", myAdapterItem.gameId)
@@ -206,47 +210,32 @@ class Game : AppCompatActivity() {
                             mDbRootRef.removeEventListener(childEventListener)
                             startActivity(intent)
                             finish()
-                            finish()
                         }
 
                         else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn") || myAdapterItem.title.contains("Player Two's Turn"))
                         {
                             var pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
                             var matcher = pattern.matcher(myAdapterItem.title)
+                            var count = 1
                             while(matcher.find())
                             {
-                                if(matcher.group(0).equals(currentUser.email)) {
-                                    Log.e("MATCHER", "Matcher value is: " + matcher.group(0))
-                                    intent.putExtra("isPlayerOne", true)
+                                if(matcher.group().equals(currentUser.email)) {
+                                    Log.e("MATCHER", "Matcher value is: " + matcher.group())
+                                    if(count == 1)intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
-                                    isInGame = true
                                     mDbRootRef.removeEventListener(childEventListener)
                                     startActivity(intent)
                                     finish()
                                 }
-                            }
-                            pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
-                            matcher = pattern.matcher(myAdapterItem.title)
-                            while(matcher.find())
-                            {
-                                if(matcher.group(0).equals(currentUser.email)) {
-                                    intent.putExtra("gameId", myAdapterItem.gameId)
-                                    isInGame = true
-                                    mDbRootRef.removeEventListener(childEventListener)
-                                    startActivity(intent)
-                                    finish()
-                                }
+                                count++
                             }
 
-                            if(!isInGame)
-                            {
-                                Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
-                                intent.putExtra("isSpectating", true)
-                                intent.putExtra("gameId", myAdapterItem.gameId)
-                                mDbRootRef.removeEventListener(childEventListener)
-                                startActivity(intent)
-                                finish()
-                            }
+                            Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
+                            intent.putExtra("isSpectating", true)
+                            intent.putExtra("gameId", myAdapterItem.gameId)
+                            mDbRootRef.removeEventListener(childEventListener)
+                            startActivity(intent)
+                            finish()
                         }
 
                         else if (myAdapterItem.title.equals("New Game"))
