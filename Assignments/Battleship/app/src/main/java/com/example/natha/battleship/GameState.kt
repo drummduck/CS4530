@@ -29,8 +29,8 @@ class GameState() : AppCompatActivity() {
         STARTED, PLAYER_ONE_TURN, PLAYER_TWO_TURN, GAME_OVER_PLAYER_ONE, GAME_OVER_PLAYER_TWO
     }
 
-    lateinit var playerOne : Player
-    lateinit var playerTwo : Player
+    var playerOne = Player()
+    var playerTwo = Player()
     lateinit var myNameDisplay : TextView
     lateinit var enemyNameDisplay : TextView
     lateinit var mDbRoot : FirebaseDatabase
@@ -203,8 +203,8 @@ class GameState() : AppCompatActivity() {
                         }
                     }
                 }
+                updateDatabase(false)
             }
-            updateDatabase(false)
         }
     }
 
@@ -378,11 +378,8 @@ class GameState() : AppCompatActivity() {
             if (view is LinearLayout) {
                 var button = view.getChildAt(i.second - 1)
                 if (button is Button) {
-                    var oppPlayer: Player
                     var endOfShip = false
-                    if (state == gameState.PLAYER_ONE_TURN) oppPlayer = playerTwo
-                    else oppPlayer = playerOne
-                    for (j in oppPlayer.ships) {
+                    for (j in playerTwo.ships) {
                         if ((j.pos.first().first == i.first && j.pos.first().second == i.second) || (j.pos.last().first == i.first && j.pos.last().second == i.second)) endOfShip = true
                     }
                     if (i.third == 3) {

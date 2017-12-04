@@ -19,6 +19,10 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import org.w3c.dom.Text
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import kotlinx.android.synthetic.main.login.*
 
 
@@ -65,6 +69,20 @@ class Login : AppCompatActivity() {
         if(auth != null && auth.currentUser != null && currentUser.isEmailVerified)
         {
             Log.e("LOGIN", "Current user exists and has email verified ")
+            FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener
+            {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    if(!dataSnapshot.hasChild(currentUser.uid))
+                    {
+                        var UserRef = FirebaseDatabase.getInstance().getReference()
+                        UserRef.child("Users").child(currentUser.uid).setValue("")
+                    }
+                }
+
+                override fun onCancelled(p0: DatabaseError?) {
+
+                }
+            })
             intent = Intent(applicationContext, Game::class.java)
             loginState = LoginState.DONE
             startActivity(intent)
@@ -153,6 +171,20 @@ class Login : AppCompatActivity() {
             if (loginState == LoginState.SIGNING_IN) {
                 if (currentUser.isEmailVerified) {
                     Log.e("LOGIN", "Email is verified on sign in, take to main screen")
+                    FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener
+                    {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            if(!dataSnapshot.hasChild(currentUser.uid))
+                            {
+                                var UserRef = FirebaseDatabase.getInstance().getReference()
+                                UserRef.child("Users").child(currentUser.uid).setValue("")
+                            }
+                        }
+
+                        override fun onCancelled(p0: DatabaseError?) {
+
+                        }
+                    })
                     intent = Intent(applicationContext, Game::class.java)
                     loginState = LoginState.DONE
                     startActivity(intent)
@@ -216,6 +248,22 @@ class Login : AppCompatActivity() {
                                     handler.removeCallbacksAndMessages(null)
                                     handler = Handler()
                                     loginState = LoginState.DONE
+
+                                    FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener
+                                    {
+                                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                            if(!dataSnapshot.hasChild(currentUser.uid))
+                                            {
+                                                var UserRef = FirebaseDatabase.getInstance().getReference()
+                                                UserRef.child("Users").child(currentUser.uid).setValue("")
+                                            }
+                                        }
+
+                                        override fun onCancelled(p0: DatabaseError?) {
+
+                                        }
+                                    })
+
                                     startActivity(intent)
                                     finish()
                                 }
@@ -275,10 +323,27 @@ class Login : AppCompatActivity() {
                             loginState = LoginState.STARTED
 
                             auth.signOut()
-                        } else {
+                        }
+                        else {
                             Log.e("LOGIN", "Timer is at: " + timer + " in creation")
                             if (currentUser.isEmailVerified) {
                                 Log.e("LOGIN", "Email is verified, take to main screen")
+
+                                FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener
+                                {
+                                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                        if(!dataSnapshot.hasChild(currentUser.uid))
+                                        {
+                                            var UserRef = FirebaseDatabase.getInstance().getReference()
+                                            UserRef.child("Users").child(currentUser.uid).setValue("")
+                                        }
+                                    }
+
+                                    override fun onCancelled(p0: DatabaseError?) {
+
+                                    }
+                                })
+
                                 loginState = LoginState.DONE
                                 intent = Intent(applicationContext, Game::class.java)
                                 handler.removeCallbacksAndMessages(null)
@@ -357,8 +422,12 @@ class Login : AppCompatActivity() {
         }
         else super.onBackPressed()
     }
-}
 
+    override fun onDestroy() {
+        super.onDestroy()
+        handler = Handler()
+    }
+}
 
 enum class LoginState
 {

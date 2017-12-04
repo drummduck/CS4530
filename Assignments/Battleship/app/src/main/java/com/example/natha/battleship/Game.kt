@@ -37,26 +37,39 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.Collections.replaceAll
 import java.util.regex.Pattern
+import kotlin.collections.ArrayList
 
 
 class Game : AppCompatActivity() {
-
     lateinit var logout : Button
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
+    val KILL = "com.example.natha.battleship.KILL"
+
+    val broadCastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(contxt: Context?, intent: Intent?) {
+            Log.e("BROADCAST RECEIVED", "RECEIVED KILL!")
+
+            when (intent?.action) {
+                KILL -> finish()
+            }
+        }
+    }
+
     val childEventListener = object : ChildEventListener {
-        override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+        override fun onChildAdded(p0: DataSnapshot?, p1: String?) {}
 
         override fun onChildChanged(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
 
-        override fun onChildRemoved(p0: DataSnapshot?) {setupRecyclerView()}
+        override fun onChildRemoved(p0: DataSnapshot?) {}
 
-        override fun onChildMoved(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
+        override fun onChildMoved(p0: DataSnapshot?, p1: String?) {}
 
-        override fun onCancelled(p0: DatabaseError?) {setupRecyclerView()}
+        override fun onCancelled(p0: DatabaseError?) {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +86,8 @@ class Game : AppCompatActivity() {
             finish()
         })
 
+        this.registerReceiver(broadCastReceiver, IntentFilter(KILL))
+
         setupRecyclerView()
 
         mDbRootRef.addChildEventListener(childEventListener)
@@ -81,13 +96,24 @@ class Game : AppCompatActivity() {
     fun setupRecyclerView()
     {
         val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
-        FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
+        var gamesToIgnore = ArrayList<String>()
+
+        mDbRootRef.addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
+                if(!dataSnapshot.hasChild("Users")) return
+                if(!dataSnapshot.hasChild("Games")) return
+
+                var usersSnapshot = dataSnapshot.child("Users")
+                if(usersSnapshot.hasChild(currentUser.uid) && usersSnapshot.child(currentUser.uid).hasChild("GamesToIgnore"))
+                    gamesToIgnore = usersSnapshot.child(currentUser!!.uid).child("GamesToIgnore").getValue() as ArrayList<String>
+
+
+                var gamesSnapshot = dataSnapshot.child("Games")
                 var gameId = ""
 
-                for (game in dataSnapshot.children) {
+                for (game in gamesSnapshot.children) {
                     Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
 
                     gameId = game.key
@@ -96,6 +122,12 @@ class Game : AppCompatActivity() {
                     var playerOneName = ""
                     var playerTwoName = ""
                     var state = ""
+
+                    if(gamesToIgnore.contains(gameId))
+                    {
+                        Log.e("PLAYER DELETED GAME", "Not going to show game due to player deletion!")
+                        continue
+                    }
 
                     if(game.hasChild("Game State"))
                     {
@@ -130,7 +162,7 @@ class Game : AppCompatActivity() {
                     }
 
                     if((state == GameState.gameState.GAME_OVER_PLAYER_ONE.name || state == GameState.gameState.GAME_OVER_PLAYER_TWO.name) &&
-                            (!playerOneName.equals(currentUser.email) || !playerTwoName.equals(currentUser.email)))
+                            (!playerOneName.equals(currentUser.email) && !playerTwoName.equals(currentUser.email)))
                     {
                         Log.e("RECYCLER VIEW", "PLAYER WAS NOT APART OF GAME")
                         continue
@@ -192,50 +224,54 @@ class Game : AppCompatActivity() {
                         intent = Intent(applicationContext, GameState::class.java)
                         if(myAdapterItem.title.contains("waiting for player"))
                         {
+                            var matched = false
                             var pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
                             var matcher = pattern.matcher(myAdapterItem.title)
                             while(matcher.find())
                             {
-                                if(matcher.group().equals(currentUser.email)) {
+                                if(matcher.group().equals(currentUser!!.email)) {
                                     intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
+                                    matched = true
                                     startActivity(intent)
                                     finish()
                                 }
                             }
-                            Log.e("JOINING GAME", "Joining game!")
-                            intent.putExtra("joining", true)
-                            intent.putExtra("gameId", myAdapterItem.gameId)
-                            startActivity(intent)
-                            mDbRootRef.removeEventListener(childEventListener)
-                            startActivity(intent)
-                            finish()
+                            if(!matched) {
+                                Log.e("JOINING GAME", "Joining game!")
+                                intent.putExtra("joining", true)
+                                intent.putExtra("gameId", myAdapterItem.gameId)
+                                startActivity(intent)
+                                finish()
+                            }
                         }
 
-                        else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn") || myAdapterItem.title.contains("Player Two's Turn"))
+                        else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn")
+                                || myAdapterItem.title.contains("Player Two's Turn") || myAdapterItem.title.contains("Wins!"))
                         {
+                            var matched = false
                             var pattern = Pattern.compile("[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
                             var matcher = pattern.matcher(myAdapterItem.title)
                             var count = 1
                             while(matcher.find())
                             {
-                                if(matcher.group().equals(currentUser.email)) {
-                                    Log.e("MATCHER", "Matcher value is: " + matcher.group())
+                                if(matcher.group().equals(currentUser!!.email)) {
                                     if(count == 1)intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
-                                    mDbRootRef.removeEventListener(childEventListener)
+                                    matched = true
                                     startActivity(intent)
                                     finish()
                                 }
                                 count++
                             }
 
-                            Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
-                            intent.putExtra("isSpectating", true)
-                            intent.putExtra("gameId", myAdapterItem.gameId)
-                            mDbRootRef.removeEventListener(childEventListener)
-                            startActivity(intent)
-                            finish()
+                            if(!matched) {
+                                Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
+                                intent.putExtra("isSpectating", true)
+                                intent.putExtra("gameId", myAdapterItem.gameId)
+                                startActivity(intent)
+                                finish()
+                            }
                         }
 
                         else if (myAdapterItem.title.equals("New Game"))
@@ -243,7 +279,6 @@ class Game : AppCompatActivity() {
                             Log.e("NEW GAME", "Starting new game!")
                             intent.putExtra("isPlayerOne", true)
                             intent.putExtra("New Game", "")
-                            mDbRootRef.removeEventListener(childEventListener)
                             startActivity(intent)
                             finish()
                         }
@@ -251,5 +286,12 @@ class Game : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mDbRootRef.removeEventListener(childEventListener)
+        LocalBroadcastManager.getInstance(this)
+                .unregisterReceiver(broadCastReceiver)
     }
 }
