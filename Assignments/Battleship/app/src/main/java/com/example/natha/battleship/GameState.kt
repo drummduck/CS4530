@@ -17,6 +17,7 @@ import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.game_board.*
 
 
 /**
@@ -346,6 +347,25 @@ class GameState() : AppCompatActivity() {
     }
 
     fun setupPlayer(player : Player) {
+
+        if(spectating)
+        {
+            var linLay : LinearLayout
+            for(i in 0..buttons.childCount)
+            {
+                if(buttons.getChildAt(i) is LinearLayout)
+                {
+                    linLay = buttons.getChildAt(i) as LinearLayout
+                    for(j in 0..linLay.childCount) {
+                        if (linLay.getChildAt(j) is Button && buttons.getChildAt(i).id != R.id.Okay) {
+                            (linLay.getChildAt(j) as Button).setText("")
+                            (linLay.getChildAt(j) as Button).setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                        }
+                    }
+                }
+            }
+        }
+
         for (i in player.ships) {
             var size = i.size
             var count = 1
@@ -422,14 +442,14 @@ class GameState() : AppCompatActivity() {
             }
         }
 
-        if (isPlayerOne && state == gameState.PLAYER_ONE_TURN || !isPlayerOne && state == gameState.PLAYER_TWO_TURN) {
+        if (isPlayerOne && state == gameState.PLAYER_ONE_TURN || !isPlayerOne && state == gameState.PLAYER_TWO_TURN && !spectating) {
             for (i in 0..10) {
                 var child = findViewById<ViewGroup>(R.id.buttons).getChildAt(i)
                 if (child is LinearLayout) {
                     for (i in 0..child.childCount - 1) {
                         var child2 = child.getChildAt(i)
                         val buttonColor = child2.background as ColorDrawable
-                        if (child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light) && !spectating)
+                        if (child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
                             child2.setOnClickListener(clickListener)
                     }
                 }
@@ -561,12 +581,12 @@ class GameState() : AppCompatActivity() {
                 }
                 else if(spectating)
                 {
-                    if(state == gameState.PLAYER_ONE_TURN || state == gameState.STARTED)
+                    if(state == gameState.PLAYER_ONE_TURN || state == gameState.STARTED || state == gameState.GAME_OVER_PLAYER_ONE)
                     {
                         currentPlayer = "Player One"
                         enemyPlayer = "Player Two"
                     }
-                    else if(state == gameState.PLAYER_TWO_TURN)
+                    else if(state == gameState.PLAYER_TWO_TURN || state == gameState.GAME_OVER_PLAYER_TWO)
                     {
                         currentPlayer = "Player Two"
                         enemyPlayer = "Player One"
@@ -671,25 +691,16 @@ class GameState() : AppCompatActivity() {
                 myAttacks = null
                 oppAttacks = null
 
-                if(joining)
-                {
-                    currentPlayer = "Player One"
-                    enemyPlayer = "Player Two"
-                }
-                else if(spectating)
+                if(currentPlayer.equals("Player One"))
                 {
                     currentPlayer = "Player Two"
                     enemyPlayer = "Player One"
                 }
-                else if(!isPlayerOne)
-                {
-                    currentPlayer = "Player One"
-                    enemyPlayer = "Player Two"
-                }
+
                 else
                 {
-                    currentPlayer = "Player Two"
-                    enemyPlayer = "Player One"
+                    currentPlayer = "Player One"
+                    enemyPlayer = "Player Two"
                 }
 
                 if(game.hasChild(currentPlayer)) player = game.child(currentPlayer)
@@ -778,7 +789,13 @@ class GameState() : AppCompatActivity() {
                         if(stateOfGame == gameState.PLAYER_ONE_TURN.name)
                         {
                             findViewById<Button>(R.id.Okay).setText("Player One's Turn!")
-                            if(isPlayerOne)
+
+                            if(spectating)
+                            {
+                                myNameDisplay.setTextColor(Color.YELLOW)
+                                enemyNameDisplay.setTextColor(Color.WHITE)
+                            }
+                            else if(isPlayerOne)
                             {
                                 myNameDisplay.setTextColor(Color.YELLOW)
                                 enemyNameDisplay.setTextColor(Color.WHITE)
@@ -792,7 +809,13 @@ class GameState() : AppCompatActivity() {
                         else if(stateOfGame == gameState.PLAYER_TWO_TURN.name)
                         {
                             findViewById<Button>(R.id.Okay).setText("Player Two's Turn!")
-                            if(!isPlayerOne)
+
+                            if(spectating)
+                            {
+                                myNameDisplay.setTextColor(Color.YELLOW)
+                                enemyNameDisplay.setTextColor(Color.WHITE)
+                            }
+                            else if(!isPlayerOne)
                             {
                                 myNameDisplay.setTextColor(Color.YELLOW)
                                 enemyNameDisplay.setTextColor(Color.WHITE)
@@ -821,7 +844,13 @@ class GameState() : AppCompatActivity() {
                         if(stateOfGame == gameState.GAME_OVER_PLAYER_ONE.name)
                         {
                             findViewById<Button>(R.id.Okay).setText("Player One Wins!!")
-                            if(isPlayerOne)
+
+                            if(spectating)
+                            {
+                                myNameDisplay.setTextColor(Color.YELLOW)
+                                enemyNameDisplay.setTextColor(Color.WHITE)
+                            }
+                            else if(isPlayerOne)
                             {
                                 myNameDisplay.setTextColor(Color.YELLOW)
                                 enemyNameDisplay.setTextColor(Color.WHITE)
@@ -835,7 +864,12 @@ class GameState() : AppCompatActivity() {
                         else if(stateOfGame == gameState.GAME_OVER_PLAYER_TWO.name)
                         {
                             findViewById<Button>(R.id.Okay).setText("Player Two Wins!!")
-                            if(!isPlayerOne)
+                            if(spectating)
+                            {
+                                myNameDisplay.setTextColor(Color.YELLOW)
+                                enemyNameDisplay.setTextColor(Color.WHITE)
+                            }
+                            else if(!isPlayerOne)
                             {
                                 myNameDisplay.setTextColor(Color.YELLOW)
                                 enemyNameDisplay.setTextColor(Color.WHITE)
@@ -862,8 +896,13 @@ class GameState() : AppCompatActivity() {
                             }
                         }
                         findViewById<Button>(R.id.Okay).setText("Start")
-                        if(isPlayerOne)findViewById<Button>(R.id.Okay).isClickable = true
-                        if(!isPlayerOne)
+                        if(spectating)
+                        {
+                            findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                            myNameDisplay.setTextColor(Color.YELLOW)
+                        }
+                        else if(isPlayerOne)findViewById<Button>(R.id.Okay).isClickable = true
+                        else if(!isPlayerOne)
                         {
                             findViewById<Button>(R.id.Okay).setText("Player One's Turn")
                             enemyNameDisplay.setTextColor(Color.YELLOW)

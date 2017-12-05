@@ -61,11 +61,11 @@ class Game : AppCompatActivity() {
     }
 
     val childEventListener = object : ChildEventListener {
-        override fun onChildAdded(p0: DataSnapshot?, p1: String?) {}
+        override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
 
         override fun onChildChanged(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
 
-        override fun onChildRemoved(p0: DataSnapshot?) {}
+        override fun onChildRemoved(p0: DataSnapshot?) {setupRecyclerView()}
 
         override fun onChildMoved(p0: DataSnapshot?, p1: String?) {}
 
@@ -87,10 +87,11 @@ class Game : AppCompatActivity() {
         })
 
         this.registerReceiver(broadCastReceiver, IntentFilter(KILL))
+        mDbRootRef.addChildEventListener(childEventListener)
+
 
         setupRecyclerView()
 
-        mDbRootRef.addChildEventListener(childEventListener)
     }
 
     fun setupRecyclerView()
@@ -103,12 +104,12 @@ class Game : AppCompatActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
                 if(!dataSnapshot.hasChild("Users")) return
-                if(!dataSnapshot.hasChild("Games")) return
+                if(!dataSnapshot.hasChild("Games")) mDbRootRef.child("Games").setValue("")
+
 
                 var usersSnapshot = dataSnapshot.child("Users")
                 if(usersSnapshot.hasChild(currentUser.uid) && usersSnapshot.child(currentUser.uid).hasChild("GamesToIgnore"))
                     gamesToIgnore = usersSnapshot.child(currentUser!!.uid).child("GamesToIgnore").getValue() as ArrayList<String>
-
 
                 var gamesSnapshot = dataSnapshot.child("Games")
                 var gameId = ""
@@ -198,7 +199,9 @@ class Game : AppCompatActivity() {
                 setupFiles(recyclerViewDataset)
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {}
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("NO INTERNET", "NO INTERNET")
+            }
         })
     }
 

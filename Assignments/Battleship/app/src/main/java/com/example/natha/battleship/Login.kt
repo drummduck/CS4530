@@ -1,9 +1,11 @@
 package com.example.natha.battleship
 
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.Handler
 import android.support.annotation.NonNull
@@ -61,33 +63,38 @@ class Login : AppCompatActivity() {
         cancel.setOnClickListener(clickListener)
         auth = FirebaseAuth.getInstance()
         loginState = LoginState.STARTED
-        if(auth != null && auth.currentUser != null)
-        {
-            Log.e("LOGIN", "Current user is logged in")
-            currentUser = auth.currentUser!!
-        }
-        if(auth != null && auth.currentUser != null && currentUser.isEmailVerified)
-        {
-            Log.e("LOGIN", "Current user exists and has email verified ")
-            FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener
-            {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    if(!dataSnapshot.hasChild(currentUser.uid))
-                    {
-                        var UserRef = FirebaseDatabase.getInstance().getReference()
-                        UserRef.child("Users").child(currentUser.uid).setValue("")
+
+        if(checkConnection()) {
+            if (auth != null && auth.currentUser != null) {
+                if (checkConnection()) {
+                    Log.e("LOGIN", "Current user is logged in")
+                    currentUser = auth.currentUser!!
+                }
+            }
+            if (auth != null && auth.currentUser != null && currentUser.isEmailVerified) {
+                Log.e("LOGIN", "Current user exists and has email verified ")
+                FirebaseDatabase.getInstance().reference.child("Users").addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if (!dataSnapshot.hasChild(currentUser.uid)) {
+                            var UserRef = FirebaseDatabase.getInstance().getReference()
+                            UserRef.child("Users").child(currentUser.uid).setValue("")
+                        }
                     }
-                }
 
-                override fun onCancelled(p0: DatabaseError?) {
+                    override fun onCancelled(p0: DatabaseError?) {
 
-                }
-            })
-            intent = Intent(applicationContext, Game::class.java)
-            loginState = LoginState.DONE
-            startActivity(intent)
-            finish()
+                    }
+                })
+                intent = Intent(applicationContext, Game::class.java)
+                loginState = LoginState.DONE
+                startActivity(intent)
+                finish()
+            }
         }
+
+        else  errorField.text = "Check internet settings"
+
+
     }
 
     val clickListener = View.OnClickListener { view ->
@@ -96,40 +103,43 @@ class Login : AppCompatActivity() {
         {
             R.id.login ->
             {
-                loginState = LoginState.SIGNING_IN
-                if(passwordField.text.contains(("^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[#:?!@\$%^&*-]).{8,}$").toRegex()) && !passwordField.text.isEmpty() && !emailField.text.isEmpty()) {
-                    Log.e("LOGIN", "Attempting to sign in first")
-                    auth.signInWithEmailAndPassword(emailField.text.toString(), passwordField.text.toString()).addOnCompleteListener(onCompleteListener)
+                if(checkConnection()) {
+                    loginState = LoginState.SIGNING_IN
+                    if (passwordField.text.contains(("^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[#:?!@\$%^&*-]).{8,}$").toRegex()) && !passwordField.text.isEmpty() && !emailField.text.isEmpty()) {
+                        Log.e("LOGIN", "Attempting to sign in first")
+                        auth.signInWithEmailAndPassword(emailField.text.toString(), passwordField.text.toString()).addOnCompleteListener(onCompleteListener)
+                    } else {
+                        loginState = LoginState.STARTED
+                        Log.e("LOGIN", "Fields are either empty or the password doesnt meet the criteria")
+                        errorField.setBackgroundColor(Color.RED)
+                        if (passwordField.text.isEmpty() || emailField.text.isEmpty())
+                            errorField.setText("Password and Email fields must not be empty")
+                        else errorField.setText("Password requires 1 or more capital letters, digits, and non-alphanumeric symbols and must be at least 8 characters")
+                    }
                 }
-                else
-                {
-                    loginState = LoginState.STARTED
-                    Log.e("LOGIN", "Fields are either empty or the password doesnt meet the criteria")
-                    errorField.setBackgroundColor(Color.RED)
-                    if(passwordField.text.isEmpty() || emailField.text.isEmpty())
-                        errorField.setText("Password and Email fields must not be empty")
-                    else
-                        errorField.setText("Password requires 1 or more capital letters, digits, and non-alphanumeric symbols and must be at least 8 characters")
-                }
+
+                else errorField.text = "Check internet settings"
             }
 
             R.id.register ->
             {
-                loginState = LoginState.CREATING
-                if(passwordField.text.contains(("^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[#:?!@\$%^&*-]).{8,}$").toRegex()) && !passwordField.text.isEmpty() && !emailField.text.isEmpty()) {
-                    Log.e("LOGIN", "Attempting to create user")
-                    auth.createUserWithEmailAndPassword(emailField.text.toString(), passwordField.text.toString()).addOnCompleteListener(onCompleteListener)
+                if(checkConnection()) {
+                    loginState = LoginState.CREATING
+                    if (passwordField.text.contains(("^(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[#:?!@\$%^&*-]).{8,}$").toRegex()) && !passwordField.text.isEmpty() && !emailField.text.isEmpty()) {
+                        Log.e("LOGIN", "Attempting to create user")
+                        auth.createUserWithEmailAndPassword(emailField.text.toString(), passwordField.text.toString()).addOnCompleteListener(onCompleteListener)
+                    } else {
+                        loginState = LoginState.STARTED
+                        Log.e("LOGIN", "Fields are either empty or the password doesnt meet the criteria")
+                        errorField.setBackgroundColor(Color.RED)
+                        if (passwordField.text.isEmpty() || emailField.text.isEmpty())
+                            errorField.setText("Password and Email fields must not be empty")
+                        else
+                            errorField.setText("Password requires 1 or more capital letters, digits, and non-alphanumeric symbols and must be at least 8 characters")
+                    }
                 }
-                else
-                {
-                    loginState = LoginState.STARTED
-                    Log.e("LOGIN", "Fields are either empty or the password doesnt meet the criteria")
-                    errorField.setBackgroundColor(Color.RED)
-                    if(passwordField.text.isEmpty() || emailField.text.isEmpty())
-                        errorField.setText("Password and Email fields must not be empty")
-                    else
-                        errorField.setText("Password requires 1 or more capital letters, digits, and non-alphanumeric symbols and must be at least 8 characters")
-                }
+                else errorField.text = "Check internet settings"
+
             }
 
             R.id.cancel ->
@@ -426,6 +436,17 @@ class Login : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         handler = Handler()
+    }
+
+    fun checkConnection() : Boolean
+    {
+        var cm = this.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        var activeNetwork = cm.getActiveNetworkInfo();
+        if (activeNetwork != null) { // connected to the internet
+            if (activeNetwork.getType() != ConnectivityManager.TYPE_WIFI || activeNetwork.getType() != ConnectivityManager.TYPE_MOBILE)
+                return true
+        }
+        return true
     }
 }
 
