@@ -91,7 +91,6 @@ class GameState() : AppCompatActivity() {
                         }
                     }
                     state = gameState.PLAYER_ONE_TURN
-                    setupPlayer(playerOne)
                     updateDatabase(false)
                 }
             }
@@ -348,111 +347,168 @@ class GameState() : AppCompatActivity() {
 
     fun setupPlayer(player : Player) {
 
-        if(spectating)
-        {
-            var linLay : LinearLayout
-            for(i in 0..buttons.childCount)
-            {
-                if(buttons.getChildAt(i) is LinearLayout)
-                {
-                    linLay = buttons.getChildAt(i) as LinearLayout
-                    for(j in 0..linLay.childCount) {
-                        if (linLay.getChildAt(j) is Button && buttons.getChildAt(i).id != R.id.Okay) {
-                            (linLay.getChildAt(j) as Button).setText("")
-                            (linLay.getChildAt(j) as Button).setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+//        if(spectating)
+//        {
+//            var linLay : LinearLayout
+//            for(i in 0..buttons.childCount)
+//            {
+//                if(buttons.getChildAt(i) is LinearLayout)
+//                {
+//                    linLay = buttons.getChildAt(i) as LinearLayout
+//                    for(j in 0..linLay.childCount) {
+//                        if (linLay.getChildAt(j) is Button && buttons.getChildAt(i).id != R.id.Okay) {
+//                            (linLay.getChildAt(j) as Button).setText("")
+//                            (linLay.getChildAt(j) as Button).setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
+        var doneWithButton = false
+
+        for (i in 0..buttons.childCount) {
+            if (buttons.getChildAt(i) is LinearLayout) {
+                for (j in 0..(buttons.getChildAt(i) as LinearLayout).childCount) {
+
+                    for (k in player.ships) {
+                        var size = k.size
+                        var count = 1
+                        for (l in k.pos) {
+                            if (l.first + 12 == i && l.second - 1 == j) {
+                                var linLay = buttons.getChildAt(i)
+                                if (linLay is LinearLayout) {
+                                    var button = linLay.getChildAt(j)
+                                    if (button is Button) {
+                                        if (l.third == 3) {
+                                            if((!button.text.equals("**Sunk**") || !button.text.equals("Sunk")) && (button.background as ColorDrawable).color != Color.RED)
+                                            if (count == 1 || count == size) button.setText("**Sunk**")
+                                            else button.setText("Sunk")
+                                            button.setBackgroundColor(Color.RED)
+                                        } else if (l.third == 2) {
+                                            if((!button.text.equals("**Hit**") || !button.text.equals("Hit")) && (button.background as ColorDrawable).color != Color.YELLOW)
+                                            if (count == 1 || count == size) button.setText("**Hit**")
+                                            else button.setText("Hit")
+                                            button.setBackgroundColor(Color.YELLOW)
+                                        } else if (l.third == 0) {
+                                            if(!button.text.equals("**") || (button.background as ColorDrawable).color != Color.GRAY) {
+                                                if (count == 1 || count == size) button.setText("**")
+                                                button.setBackgroundColor(Color.GRAY)
+                                            }
+                                        }
+                                    }
+                                }
+                                doneWithButton = true
+                                break
+                            }
+                            count++
                         }
                     }
-                }
-            }
-        }
 
-        for (i in player.ships) {
-            var size = i.size
-            var count = 1
-            for (j in i.pos) {
-                var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(j.first + 12)
-                if (view is LinearLayout) {
-                    var button = view.getChildAt(j.second - 1)
-                    if (button is Button) {
-                        if (j.third == 3) {
-                            if (count == 1 || count == size) button.setText("**Sunk**")
-                            else button.setText("Sunk")
-                            button.setBackgroundColor(Color.RED)
-                        } else if (j.third == 2) {
-                            if (count == 1 || count == size) button.setText("**Hit**")
-                            else button.setText("Hit")
-                            button.setBackgroundColor(Color.YELLOW)
-                        } else if (j.third == 0) {
-                            if (count == 1 || count == size) button.setText("**")
-                            button.setBackgroundColor(Color.GRAY)
+                    if (!doneWithButton) {
+                        for (k in player.myAttacks) {
+                            if (k.first - 1 == i && k.second - 1 == j) {
+                                var linLay = buttons.getChildAt(i)
+                                if (linLay is LinearLayout) {
+                                    var button = linLay.getChildAt(j)
+                                    if (button is Button) {
+                                        var endOfShip = false
+                                        for (l in playerTwo.ships) {
+                                            if ((l.pos.first().first == k.first && l.pos.first().second == k.second) || (l.pos.last().first == k.first && l.pos.last().second == k.second)) endOfShip = true
+                                        }
+                                        if (k.third == 3) {
+                                            if((!button.text.equals("Sunk") || !button.text.equals("**Sunk**")) && (button.background as ColorDrawable).color != Color.RED) {
+                                                if (endOfShip) button.setText("**Sunk**")
+                                                else button.setText("Sunk")
+                                                button.setBackgroundColor(Color.RED)
+                                            }
+                                        } else if (k.third == 2) {
+                                            if(!button.text.equals("Hit") && (button.background as ColorDrawable).color != Color.YELLOW) {
+                                                button.setText("Hit")
+                                                button.setBackgroundColor(Color.YELLOW)
+                                            }
+                                        } else if (k.third == 1) {
+                                            if(!button.text.equals("Miss") && (button.background as ColorDrawable).color != Color.WHITE) {
+                                                button.setText("Miss")
+                                                button.setBackgroundColor(Color.WHITE)
+                                            }
+                                        }
+                                    }
+                                }
+                                doneWithButton = true
+                                break
+                            }
                         }
                     }
-                }
-                count++
-            }
-        }
 
-
-        for (i in player.myAttacks) {
-            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first - 1)
-            if (view is LinearLayout) {
-                var button = view.getChildAt(i.second - 1)
-                if (button is Button) {
-                    var endOfShip = false
-                    for (j in playerTwo.ships) {
-                        if ((j.pos.first().first == i.first && j.pos.first().second == i.second) || (j.pos.last().first == i.first && j.pos.last().second == i.second)) endOfShip = true
+                    if (!doneWithButton) {
+                        for (k in player.oppAttacks) {
+                            if (k.first + 12 == i && k.second - 1 == j) {
+                                var linLay = buttons.getChildAt(i)
+                                if (linLay is LinearLayout) {
+                                    var button = linLay.getChildAt(j)
+                                    if (button is Button) {
+                                        if (k.third == 3) {
+                                            if((!button.text.equals("Sunk") || !button.text.equals("**Sunk**")) && (button.background as ColorDrawable).color != Color.RED) {
+                                                if (button.text.contains("*")) button.setText("**Sunk**")
+                                                else button.setText("Sunk")
+                                                button.setBackgroundColor(Color.RED)
+                                            }
+                                        } else if (k.third == 2) {
+                                            if((!button.text.equals("Hit") || !button.text.equals("**Hit**")) && (button.background as ColorDrawable).color != Color.YELLOW) {
+                                                if (button.text.contains("*")) button.setText("**Hit**")
+                                                else button.setText("Hit")
+                                                button.setBackgroundColor(Color.YELLOW)
+                                            }
+                                        } else if (k.third == 1) {
+                                            if(!button.text.equals("Miss") && (button.background as ColorDrawable).color != Color.WHITE) {
+                                                button.setText("Miss")
+                                                button.setBackgroundColor(Color.WHITE)
+                                            }
+                                        }
+                                    }
+                                }
+                                doneWithButton = true
+                                break
+                            }
+                        }
                     }
-                    if (i.third == 3) {
-                        if (endOfShip) button.setText("**Sunk**")
-                        else button.setText("Sunk")
-                        button.setBackgroundColor(Color.RED)
-                        button.isClickable = false
-                    } else if (i.third == 2) {
-                        button.setText("Hit")
-                        button.setBackgroundColor(Color.YELLOW)
-                        button.isClickable = false
-                    } else if (i.third == 1) {
-                        button.setText("Miss")
-                        button.setBackgroundColor(Color.WHITE)
-                        button.isClickable = false
-                    }
-                }
-            }
-        }
 
-
-        for (i in player.oppAttacks) {
-            var view = findViewById<ViewGroup>(R.id.buttons).getChildAt(i.first + 12)
-            if (view is LinearLayout) {
-                var button = view.getChildAt(i.second - 1)
-                if (button is Button) {
-                    if (i.third == 3) {
-                        if (button.text.contains("*")) button.setText("**Sunk**")
-                        else button.setText("Sunk")
-                        button.setBackgroundColor(Color.RED)
-                    } else if (i.third == 2) {
-                        if (button.text.contains("*")) button.setText("**Hit**")
-                        else button.setText("Hit")
-                        button.setBackgroundColor(Color.YELLOW)
-                    } else if (i.third == 1) {
-                        button.setText("Miss")
-                        button.setBackgroundColor(Color.WHITE)
+                    if (((isPlayerOne && state == GameState.gameState.PLAYER_ONE_TURN) || (!isPlayerOne && state == GameState.gameState.PLAYER_TWO_TURN) || spectating) && !doneWithButton)
+                    {
+                        var linLay = buttons.getChildAt(i)
+                        if(linLay is LinearLayout)
+                        {
+                            var button = linLay.getChildAt(j)
+                            if(button is Button)
+                            {
+                                if(button.id != R.id.Okay)
+                                {
+                                    if(!spectating)button.setOnClickListener(clickListener)
+                                    button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
+                                    button.setText("")
+                                    doneWithButton = true
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
 
-        if (isPlayerOne && state == gameState.PLAYER_ONE_TURN || !isPlayerOne && state == gameState.PLAYER_TWO_TURN && !spectating) {
-            for (i in 0..10) {
-                var child = findViewById<ViewGroup>(R.id.buttons).getChildAt(i)
-                if (child is LinearLayout) {
-                    for (i in 0..child.childCount - 1) {
-                        var child2 = child.getChildAt(i)
-                        val buttonColor = child2.background as ColorDrawable
-                        if (child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
-                            child2.setOnClickListener(clickListener)
-                    }
+                    doneWithButton = false
                 }
+
+//                if (isPlayerOne && state == gameState.PLAYER_ONE_TURN || !isPlayerOne && state == gameState.PLAYER_TWO_TURN && !spectating) {
+//                    for (i in 0..10) {
+//                        var child = findViewById<ViewGroup>(R.id.buttons).getChildAt(i)
+//                        if (child is LinearLayout) {
+//                            for (i in 0..child.childCount - 1) {
+//                                var child2 = child.getChildAt(i)
+//                                val buttonColor = child2.background as ColorDrawable
+//                                if (child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
+//                                    child2.setOnClickListener(clickListener)
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
@@ -491,7 +547,6 @@ class GameState() : AppCompatActivity() {
         {
             Log.e("UPDATE", "Updating database with current game")
             var gamesRef = mDbRoot.getReference("Games")
-            gamesRef.child(gameId).removeValue()
             gamesRef.child(gameId).child("Game State").setValue(state)
             if(isPlayerOne)
             {
@@ -788,7 +843,7 @@ class GameState() : AppCompatActivity() {
                         findViewById<Button>(R.id.Okay).isClickable = false
                         if(stateOfGame == gameState.PLAYER_ONE_TURN.name)
                         {
-                            findViewById<Button>(R.id.Okay).setText("Player One's Turn!")
+                            findViewById<Button>(R.id.Okay).setText("Player One's Turn")
 
                             if(spectating)
                             {
@@ -804,11 +859,23 @@ class GameState() : AppCompatActivity() {
                             {
                                 enemyNameDisplay.setTextColor(Color.YELLOW)
                                 myNameDisplay.setTextColor(Color.WHITE)
-                            }
+                                var views = findViewById<ViewGroup>(R.id.buttons)
+                                    for (i in 0..views.childCount - 1) {
+                                        var view = views.getChildAt(i)
+                                        if (view is LinearLayout) {
+                                            for (j in 0..view.childCount - 1) {
+                                                var button = view.getChildAt(j)
+                                                if (button is Button) {
+                                                    button.isClickable = false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                         }
                         else if(stateOfGame == gameState.PLAYER_TWO_TURN.name)
                         {
-                            findViewById<Button>(R.id.Okay).setText("Player Two's Turn!")
+                            findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
 
                             if(spectating)
                             {
@@ -824,6 +891,18 @@ class GameState() : AppCompatActivity() {
                             {
                                 enemyNameDisplay.setTextColor(Color.YELLOW)
                                 myNameDisplay.setTextColor(Color.WHITE)
+                                var views = findViewById<ViewGroup>(R.id.buttons)
+                                for (i in 0..views.childCount - 1) {
+                                    var view = views.getChildAt(i)
+                                    if (view is LinearLayout) {
+                                        for (j in 0..view.childCount - 1) {
+                                            var button = view.getChildAt(j)
+                                            if (button is Button) {
+                                                button.isClickable = false
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
