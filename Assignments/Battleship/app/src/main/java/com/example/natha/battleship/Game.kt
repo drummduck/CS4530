@@ -51,7 +51,7 @@ class Game : AppCompatActivity() {
     lateinit var shownUser : TextView
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
-    lateinit var checkInternet : EditText
+    lateinit var checkInternet : TextView
     lateinit var loadingPanel : ProgressBar
     lateinit var recyclerView : android.support.v7.widget.RecyclerView
     var connected = false
@@ -106,9 +106,11 @@ class Game : AppCompatActivity() {
         setupRecyclerView()
 
         handler.postDelayed(Runnable {
-            checkInternet.visibility = View.VISIBLE
-            recyclerView.visibility = View.INVISIBLE
-            loadingPanel.visibility = View.INVISIBLE
+            if(!connected) {
+                checkInternet.visibility = View.VISIBLE
+                recyclerView.visibility = View.INVISIBLE
+                loadingPanel.visibility = View.INVISIBLE
+            }
             }, 10000)
     }
 
@@ -193,23 +195,23 @@ class Game : AppCompatActivity() {
                         GameState.gameState.STARTED.name -> {
                             if(playerTwoName.isEmpty()) dataString = "Game Started!\n" + playerOneName + " is waiting for player to join"
                             else dataString = "Game Started!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + "\nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.start, dataString, gameId))
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledstart, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_ONE_TURN.name -> {
                             dataString = "Player One's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledbattle, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_TWO_TURN.name -> {
                             dataString = "Player Two's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.battle, dataString, gameId))
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledbattle, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
                             dataString = "Player One Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaleddelete, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
                             dataString = "Player Two Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.delete, dataString, gameId))
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaleddelete, dataString, gameId))
                         }
                     }
                 }
@@ -237,7 +239,7 @@ class Game : AppCompatActivity() {
         my_recycler_view.layoutManager = recyclerViewLayoutManager
 
         my_recycler_view.adapter = MyAdapter({
-            databaseList.add(0,MyAdapter.ImageWithTitle(R.drawable.plus, "New Game", ""))
+            databaseList.add(0,MyAdapter.ImageWithTitle(R.drawable.scaledplus, "New Game", ""))
             databaseList.toTypedArray()
         }()).apply {
             setOnMyAdapterItemSelectedListener { myAdapterItem: MyAdapter.MyAdapterItem ->
@@ -285,6 +287,10 @@ class Game : AppCompatActivity() {
                                     if(count == 1)intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
                                     matched = true
+                                    if(myAdapterItem.title.contains("Wins!"))
+                                    {
+
+                                    }
                                     startActivity(intent)
                                     finish()
                                 }

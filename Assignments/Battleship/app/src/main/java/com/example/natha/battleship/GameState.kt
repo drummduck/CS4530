@@ -393,6 +393,7 @@ class GameState() : AppCompatActivity() {
                                         } else if (l.third == 0) {
                                             if(!button.text.equals("**") || (button.background as ColorDrawable).color != Color.GRAY) {
                                                 if (count == 1 || count == size) button.setText("**")
+                                                else button.setText("")
                                                 button.setBackgroundColor(Color.GRAY)
                                             }
                                         }
@@ -774,6 +775,7 @@ class GameState() : AppCompatActivity() {
                     Log.e("PLAYER TWO NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
                     if(playerName.isEmpty()) enemyNameDisplay.setText("Waiting for player...")
+                    else if(spectating) enemyNameDisplay.setText("Spectating")
                     else enemyNameDisplay.setText(playerName + "//Ships Left: " + playerShipCount)
 
                 }

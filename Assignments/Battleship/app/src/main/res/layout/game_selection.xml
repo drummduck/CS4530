@@ -30,6 +30,7 @@ android:layout_height="match_parent">
             android:layout_height="match_parent"
             android:visibility="invisible"
             android:textAlignment="center"
+            android:gravity="center"
             android:textColor="@android:color/holo_red_light"
             android:text="Check internet settings..."/>
 
