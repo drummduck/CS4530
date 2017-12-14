@@ -37,6 +37,7 @@ class Login : AppCompatActivity() {
     lateinit var errorField : TextView
     lateinit var loginButton : Button
     lateinit var registerButton : Button
+    lateinit var loginButtons : LinearLayout
     lateinit var cancel : TextView
     lateinit var title : TextView
     lateinit var auth : FirebaseAuth
@@ -57,6 +58,7 @@ class Login : AppCompatActivity() {
         registerButton = findViewById(R.id.register)
         cancel = findViewById(R.id.cancel)
         title = findViewById(R.id.title)
+        loginButtons = findViewById(R.id.loginButtons)
 
         loginButton.setOnClickListener(clickListener)
         registerButton.setOnClickListener(clickListener)
@@ -154,13 +156,12 @@ class Login : AppCompatActivity() {
                 passwordField.text.clear()
                 passwordField.hint = "Password:"
                 cancel.visibility = View.INVISIBLE
+                loginButtons.visibility = View.INVISIBLE
                 errorField.setBackgroundColor(android.R.attr.editTextBackground)
                 errorField.text = ""
                 errorField.visibility = View.VISIBLE
                 passwordField.visibility = View.VISIBLE
                 title.visibility = View.VISIBLE
-                loginButton.visibility = View.VISIBLE
-                registerButton.visibility = View.VISIBLE
                 handler.removeCallbacksAndMessages(null)
                 handler = Handler()
                 loginState = LoginState.STARTED
@@ -209,8 +210,7 @@ class Login : AppCompatActivity() {
                     emailField.isEnabled = false;
                     cancel.visibility = View.VISIBLE
                     errorField.visibility = View.INVISIBLE
-                    loginButton.visibility = View.INVISIBLE
-                    registerButton.visibility = View.INVISIBLE
+                    loginButtons.visibility = View.VISIBLE
                     passwordField.visibility = View.INVISIBLE
                     title.visibility = View.INVISIBLE
                     sendVerificationEmail()
@@ -243,8 +243,7 @@ class Login : AppCompatActivity() {
                                 errorField.visibility = View.VISIBLE
                                 passwordField.visibility = View.VISIBLE
                                 title.visibility = View.VISIBLE
-                                loginButton.visibility = View.VISIBLE
-                                registerButton.visibility = View.VISIBLE
+                                loginButtons.visibility = View.VISIBLE
                                 handler.removeCallbacksAndMessages(null)
                                 handler = Handler()
                                 loginState = LoginState.STARTED
@@ -291,8 +290,7 @@ class Login : AppCompatActivity() {
                 emailField.gravity = Gravity.CENTER
                 cancel.visibility = View.VISIBLE
                 errorField.visibility = View.INVISIBLE
-                loginButton.visibility = View.INVISIBLE
-                registerButton.visibility = View.INVISIBLE
+                loginButtons.visibility = View.INVISIBLE
                 passwordField.visibility = View.INVISIBLE
                 title.visibility = View.INVISIBLE
                 loginState = LoginState.VERIFYING
@@ -326,8 +324,7 @@ class Login : AppCompatActivity() {
                             errorField.visibility = View.VISIBLE
                             passwordField.visibility = View.VISIBLE
                             title.visibility = View.VISIBLE
-                            loginButton.visibility = View.VISIBLE
-                            registerButton.visibility = View.VISIBLE
+                            loginButtons.visibility = View.VISIBLE
                             handler.removeCallbacksAndMessages(null)
                             handler = Handler()
                             loginState = LoginState.STARTED
@@ -400,8 +397,7 @@ class Login : AppCompatActivity() {
                 errorField.setBackgroundColor(android.R.attr.editTextBackground)
                 passwordField.visibility = View.VISIBLE
                 title.visibility = View.VISIBLE
-                loginButton.visibility = View.VISIBLE
-                registerButton.visibility = View.VISIBLE
+                loginButtons.visibility = View.INVISIBLE
                 loginState = LoginState.STARTED
             } else Log.e("LOGIN", "EMAIL SUCCEEDED ON SEND")
         })
@@ -424,8 +420,7 @@ class Login : AppCompatActivity() {
             errorField.visibility = View.VISIBLE
             passwordField.visibility = View.VISIBLE
             title.visibility = View.VISIBLE
-            loginButton.visibility = View.VISIBLE
-            registerButton.visibility = View.VISIBLE
+            loginButtons.visibility = View.VISIBLE
             handler.removeCallbacksAndMessages(null)
             handler = Handler()
             loginState = LoginState.STARTED

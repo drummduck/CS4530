@@ -6,38 +6,69 @@ android:orientation="vertical"
 android:id="@+id/buttons"
 android:layout_width="match_parent"
 android:layout_height="match_parent">
-
-    <RelativeLayout
-        android:id="@+id/loadingPanel"
+    <TextView
+        android:id="@+id/loggedInAs"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textColor="@android:color/black"
+        android:background="@android:color/holo_blue_light"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:layout_weight="6.5"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#000080"
         android:gravity="center">
 
+        <TextView
+            android:id="@+id/checkInternet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+            android:textAlignment="center"
+            android:textColor="@android:color/holo_red_light"
+            android:text="Check internet settings..."/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/my_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp"
+            android:visibility="invisible"
+            android:scrollbars="vertical"
+            />
         <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/loadingPanel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000080"
+            android:indeterminateTint="@android:color/darker_gray"
             android:indeterminate="true" />
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/my_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="8dp"
-        android:scrollbars="vertical"
-        android:layout_weight="1"
-        />
 
-    <Button
-        android:id="@+id/logout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Logout"
-        android:textAllCaps="false"
-        android:fontFamily="sans-serif-black"
-        android:autoSizeTextType="uniform"
-        android:gravity="center"
         android:layout_weight="6"
-        />
-
+        android:id="@+id/loginButtons"
+        android:gravity="center"
+        android:background="#000080"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/logout"
+            android:textAllCaps="false"
+            android:text="Logout"
+            android:textColor="@android:color/black"
+            android:background="@drawable/mybutton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:autoSizeTextType="uniform"
+            android:fontFamily="sans-serif-black"
+            android:gravity="center"/>
+    </LinearLayout>
 </LinearLayout>

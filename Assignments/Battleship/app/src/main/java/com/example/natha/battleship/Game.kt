@@ -6,21 +6,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.media.Image
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v4.widget.ContentLoadingProgressBar
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.util.Log.i
+import android.view.Gravity
 import android.view.View
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.RelativeLayout
+import android.widget.*
 import com.example.natha.battleship.R.id.my_recycler_view
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -46,8 +48,14 @@ class Game : AppCompatActivity() {
     lateinit var logout : Button
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
+    lateinit var shownUser : TextView
     lateinit var mDbRoot : FirebaseDatabase
     lateinit var mDbRootRef : DatabaseReference
+    lateinit var checkInternet : EditText
+    lateinit var loadingPanel : ProgressBar
+    lateinit var recyclerView : android.support.v7.widget.RecyclerView
+    var connected = false
+    var handler = Handler()
     val KILL = "com.example.natha.battleship.KILL"
 
     val broadCastReceiver = object : BroadcastReceiver() {
@@ -75,6 +83,10 @@ class Game : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_selection)
+        checkInternet = findViewById(R.id.checkInternet)
+        recyclerView = findViewById(R.id.my_recycler_view)
+        loadingPanel = findViewById(R.id.loadingPanel)
+        shownUser = findViewById(R.id.loggedInAs)
         mDbRoot = FirebaseDatabase.getInstance()
         mDbRootRef = mDbRoot.getReference()
         auth = FirebaseAuth.getInstance()
@@ -89,9 +101,15 @@ class Game : AppCompatActivity() {
         this.registerReceiver(broadCastReceiver, IntentFilter(KILL))
         mDbRootRef.addChildEventListener(childEventListener)
 
+        shownUser.text = "Logged in as: " + currentUser.email
 
         setupRecyclerView()
 
+        handler.postDelayed(Runnable {
+            checkInternet.visibility = View.VISIBLE
+            recyclerView.visibility = View.INVISIBLE
+            loadingPanel.visibility = View.INVISIBLE
+            }, 10000)
     }
 
     fun setupRecyclerView()
@@ -195,12 +213,17 @@ class Game : AppCompatActivity() {
                         }
                     }
                 }
-                findViewById<RelativeLayout>(R.id.loadingPanel).setVisibility(View.GONE)
+                connected = true
+                loadingPanel.visibility = View.INVISIBLE
+                recyclerView.visibility = View.VISIBLE
                 setupFiles(recyclerViewDataset)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.e("NO INTERNET", "NO INTERNET")
+                checkInternet.visibility = View.VISIBLE
+                recyclerView.visibility = View.INVISIBLE
+                loadingPanel.visibility = View.INVISIBLE
             }
         })
     }
@@ -294,7 +317,7 @@ class Game : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         mDbRootRef.removeEventListener(childEventListener)
-        LocalBroadcastManager.getInstance(this)
-                .unregisterReceiver(broadCastReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadCastReceiver)
+        handler = Handler()
     }
 }
