@@ -37,6 +37,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.google.firebase:firebase-database:11.6.0'
     compile 'com.google.firebase:firebase-auth:11.6.0'
+    compile "org.jetbrains.anko:anko-commons:0.10.1"
 }
 
 apply plugin: 'com.google.gms.google-services'

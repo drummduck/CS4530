@@ -1,11 +1,9 @@
 package com.example.natha.battleship
 
 import android.Manifest
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.media.Image
@@ -17,6 +15,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.widget.ContentLoadingProgressBar
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.util.Log.i
@@ -44,7 +43,7 @@ import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
 
-class Game : AppCompatActivity() {
+class Game : AppCompatActivity(){
     lateinit var logout : Button
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
@@ -287,16 +286,11 @@ class Game : AppCompatActivity() {
                                     if(count == 1)intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
                                     matched = true
-                                    if(myAdapterItem.title.contains("Wins!"))
-                                    {
-
-                                    }
                                     startActivity(intent)
                                     finish()
                                 }
                                 count++
                             }
-
                             if(!matched) {
                                 Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
                                 intent.putExtra("isSpectating", true)

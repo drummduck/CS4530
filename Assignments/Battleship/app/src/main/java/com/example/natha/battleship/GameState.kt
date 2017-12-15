@@ -13,11 +13,18 @@ import android.content.Intent
 import android.graphics.drawable.ColorDrawable
 import android.os.Environment
 import android.provider.ContactsContract
+import android.support.v4.widget.TextViewCompat
 import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.game_board.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.toast
+import android.view.Gravity
+import android.widget.TextView
+
+
 
 
 /**
@@ -43,6 +50,7 @@ class GameState() : AppCompatActivity() {
     var spectating = false
     var isPlayerOne = false
     var joining = false
+    var replay = false
     val childListener = (object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
             Log.e("ONCHILDADDED", "CHILD ADDED")
@@ -961,6 +969,22 @@ class GameState() : AppCompatActivity() {
                                 myNameDisplay.setTextColor(Color.WHITE)
                             }
                         }
+
+                        var alert = alert("") {
+                            neutralPressed("Yes") {
+                                replay = true
+                                replayGame()
+                            }
+                            negativeButton("No") {
+
+                            }
+                        }
+                        val myMsg = TextView(applicationContext)
+                        myMsg.text = "Would you like to see a replay of this game?"
+                        myMsg.setTextColor(Color.WHITE)
+                        myMsg.gravity = Gravity.CENTER
+                        alert.customView = myMsg
+                        alert.show().setCanceledOnTouchOutside(false)
                     }
                     gameState.STARTED.name ->
                     {
@@ -999,5 +1023,21 @@ class GameState() : AppCompatActivity() {
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+    }
+
+    fun replayGame()
+    {
+        var playerOneClone = Player()
+        var playerTwoClone = Player()
+
+        for(i in playerOne.ships)
+        {
+
+        }
+
+        for(i in playerTwo.ships)
+        {
+
+        }
     }
 }
