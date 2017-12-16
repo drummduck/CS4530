@@ -260,16 +260,16 @@ class Game : AppCompatActivity(){
                                     intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
                                     matched = true
-                                    startActivity(intent)
                                     finish()
+                                    startActivity(intent)
                                 }
                             }
                             if(!matched) {
                                 Log.e("JOINING GAME", "Joining game!")
                                 intent.putExtra("joining", true)
                                 intent.putExtra("gameId", myAdapterItem.gameId)
-                                startActivity(intent)
                                 finish()
+                                startActivity(intent)
                             }
                         }
 
@@ -285,9 +285,10 @@ class Game : AppCompatActivity(){
                                 if(matcher.group().equals(currentUser!!.email)) {
                                     if(count == 1)intent.putExtra("isPlayerOne", true)
                                     intent.putExtra("gameId", myAdapterItem.gameId)
+                                    if(myAdapterItem.title.contains("Wins!")) intent.putExtra("gameOver", true)
                                     matched = true
-                                    startActivity(intent)
                                     finish()
+                                    startActivity(intent)
                                 }
                                 count++
                             }
@@ -295,8 +296,8 @@ class Game : AppCompatActivity(){
                                 Log.e("SPECTATING", "YOU ARE CURRENTLY SPECTATING!")
                                 intent.putExtra("isSpectating", true)
                                 intent.putExtra("gameId", myAdapterItem.gameId)
-                                startActivity(intent)
                                 finish()
+                                startActivity(intent)
                             }
                         }
 
@@ -305,8 +306,8 @@ class Game : AppCompatActivity(){
                             Log.e("NEW GAME", "Starting new game!")
                             intent.putExtra("isPlayerOne", true)
                             intent.putExtra("New Game", "")
-                            startActivity(intent)
                             finish()
+                            startActivity(intent)
                         }
                     }
                 }
@@ -317,7 +318,7 @@ class Game : AppCompatActivity(){
     override fun onDestroy() {
         super.onDestroy()
         mDbRootRef.removeEventListener(childEventListener)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadCastReceiver)
+        unregisterReceiver(broadCastReceiver)
         handler = Handler()
     }
 }

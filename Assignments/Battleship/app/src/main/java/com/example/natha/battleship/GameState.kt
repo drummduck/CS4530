@@ -45,10 +45,13 @@ class GameState() : AppCompatActivity() {
     lateinit var mDbRootRef : DatabaseReference
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
+    lateinit var buttons : LinearLayout
     var state = gameState.STARTED
     var gameId = ""
+    var joinGameOver = false
     var spectating = false
     var isPlayerOne = false
+    var replayHit = false
     var joining = false
     var replay = false
     val childListener = (object : ChildEventListener {
@@ -106,43 +109,67 @@ class GameState() : AppCompatActivity() {
 
         else if(view is Button)
         {
+            Log.e("ON CLICK CALLED", "ON CLICK CALLED")
             var xVal = view.resources.getResourceName(view.id).substringAfter("/")[0].toInt() - 64
             var yVal = Integer.parseInt(view.resources.getResourceName(view.id).substringAfter("/").substringBefore("_2").substring(1))
             var hit = false
             var sunk = false
             if(state == gameState.PLAYER_ONE_TURN || state == gameState.PLAYER_TWO_TURN) {
 
-                for (i in playerTwo.ships) {
+                var player : Player
+                var enemy : Player
+
+                if(replay)
+                {
+                    if(isPlayerOne)
+                    {
+                        player = playerOne
+                        enemy = playerTwo
+                    }
+                    else
+                    {
+                        player = playerTwo
+                        enemy = playerOne
+                    }
+                }
+                else
+                {
+                    enemy = playerTwo
+                    player = playerOne
+                }
+
+                for (i in enemy.ships) {
                     var hitCount = 0
                     var pos = 0
                     for (j in i.pos) {
                         if (xVal == j.first && yVal == j.second) {
                             i.pos[pos] = Triple(xVal, yVal, 2)
                             view.text = "Hit"
-                            playerTwo.oppAttacks.add(Triple(xVal, yVal, 2))
-                            playerOne.myAttacks.add(Triple(xVal, yVal, 2))
+                            enemy.oppAttacks.add(Triple(xVal, yVal, 2))
+                            player.myAttacks.add(Triple(xVal, yVal, 2))
                             view.setBackgroundColor(Color.YELLOW)
                             view.isClickable = false
                             hitCount++
                             hit = true
+                            if(replay) replayHit = true
                         }
                         if (j.third == 2) hitCount++
                         if (hitCount == i.size) {
                             sunk = true
-                            playerTwo.shipCount--
+                            enemy.shipCount--
                         }
                         if (sunk) {
                             pos = 0
                             for (k in i.pos) {
                                 var pos2 = 0
-                                for (l in playerOne.myAttacks) {
+                                for (l in player.myAttacks) {
 
-                                    if (l.first == k.first && l.second == k.second) playerOne.myAttacks[pos2] = Triple(l.first, l.second, 3)
+                                    if (l.first == k.first && l.second == k.second) player.myAttacks[pos2] = Triple(l.first, l.second, 3)
                                     pos2++
                                 }
                                 pos2 = 0
-                                for (l in playerTwo.oppAttacks) {
-                                    if (l.first == k.first && l.second == k.second) playerTwo.oppAttacks[pos2] = Triple(l.first, l.second, 3)
+                                for (l in enemy.oppAttacks) {
+                                    if (l.first == k.first && l.second == k.second) enemy.oppAttacks[pos2] = Triple(l.first, l.second, 3)
                                     pos2++
                                 }
                                 i.pos[pos] = Triple(k.first, k.second, 3)
@@ -159,7 +186,7 @@ class GameState() : AppCompatActivity() {
                                 pos++
                             }
 
-                            if (playerTwo.shipCount == 0) {
+                            if (enemy.shipCount == 0) {
                                 if (state == gameState.PLAYER_ONE_TURN) {
                                     state = gameState.GAME_OVER_PLAYER_ONE
                                     findViewById<Button>(R.id.Okay).setText("Player One Wins!")
@@ -187,8 +214,8 @@ class GameState() : AppCompatActivity() {
                 }
                 if (!hit && !sunk) {
                     view.setBackgroundColor(Color.WHITE)
-                    playerTwo.oppAttacks.add(Triple(xVal, yVal, 1))
-                    playerOne.myAttacks.add(Triple(xVal, yVal, 1))
+                    enemy.oppAttacks.add(Triple(xVal, yVal, 1))
+                    player.myAttacks.add(Triple(xVal, yVal, 1))
                     view.setText("Miss")
                     view.isClickable = false
                     if (state == gameState.PLAYER_ONE_TURN) {
@@ -221,6 +248,7 @@ class GameState() : AppCompatActivity() {
         setContentView(R.layout.game_board)
         mDbRoot = FirebaseDatabase.getInstance()
         mDbRootRef = mDbRoot.getReference()
+        buttons = findViewById(R.id.buttons)
         myNameDisplay = findViewById(R.id.myName)
         enemyNameDisplay = findViewById(R.id.enemyName)
         auth = FirebaseAuth.getInstance()
@@ -252,6 +280,8 @@ class GameState() : AppCompatActivity() {
                     "isPlayerOne" -> isPlayerOne = true
 
                     "isSpectating" -> spectating = true
+
+                    "gameOver" -> joinGameOver = true
 
                     "gameId" ->
                     {
@@ -837,9 +867,8 @@ class GameState() : AppCompatActivity() {
                             {
                                 enemyNameDisplay.setTextColor(Color.YELLOW)
                                 myNameDisplay.setTextColor(Color.WHITE)
-                                var views = findViewById<ViewGroup>(R.id.buttons)
-                                    for (i in 0..views.childCount - 1) {
-                                        var view = views.getChildAt(i)
+                                    for (i in 0..buttons.childCount - 1) {
+                                        var view = buttons.getChildAt(i)
                                         if (view is LinearLayout) {
                                             for (j in 0..view.childCount - 1) {
                                                 var button = view.getChildAt(j)
@@ -869,9 +898,8 @@ class GameState() : AppCompatActivity() {
                             {
                                 enemyNameDisplay.setTextColor(Color.YELLOW)
                                 myNameDisplay.setTextColor(Color.WHITE)
-                                var views = findViewById<ViewGroup>(R.id.buttons)
-                                for (i in 0..views.childCount - 1) {
-                                    var view = views.getChildAt(i)
+                                for (i in 0..buttons.childCount - 1) {
+                                    var view = buttons.getChildAt(i)
                                     if (view is LinearLayout) {
                                         for (j in 0..view.childCount - 1) {
                                             var button = view.getChildAt(j)
@@ -886,9 +914,8 @@ class GameState() : AppCompatActivity() {
                     }
                     gameState.GAME_OVER_PLAYER_ONE.name, gameState.GAME_OVER_PLAYER_TWO.name ->
                     {
-                        var views = findViewById<ViewGroup>(R.id.buttons)
-                        for (j in 0..views.childCount - 1) {
-                            var view = views.getChildAt(j)
+                        for (j in 0..buttons.childCount - 1) {
+                            var view = buttons.getChildAt(j)
                             if (view is LinearLayout) {
                                 for (k in 0..view.childCount - 1) {
                                     var button = view.getChildAt(k)
@@ -938,27 +965,51 @@ class GameState() : AppCompatActivity() {
                             }
                         }
 
-                        var alert = alert("") {
-                            neutralPressed("Yes") {
-                                replay = true
-                                replayGame()
-                            }
-                            negativeButton("No") {
+                        if(joinGameOver) {
+                            var alert = alert("") {
+                                neutralPressed("Yes") {
+                                    replay = true
+                                    replayGame()
+                                }
+                                negativeButton("No") {
 
+                                }
                             }
+                            val myMsg = TextView(applicationContext)
+                            myMsg.text = "Would you like to see a replay of this game?"
+                            myMsg.setTextColor(Color.WHITE)
+                            myMsg.gravity = Gravity.CENTER
+                            alert.customView = myMsg
+                            alert.show().setCanceledOnTouchOutside(false)
+                            joinGameOver = false
                         }
-                        val myMsg = TextView(applicationContext)
-                        myMsg.text = "Would you like to see a replay of this game?"
-                        myMsg.setTextColor(Color.WHITE)
-                        myMsg.gravity = Gravity.CENTER
-                        alert.customView = myMsg
-                        alert.show().setCanceledOnTouchOutside(false)
+
+                        else{
+                            var timer = System.currentTimeMillis()
+                            while(System.currentTimeMillis() - timer < 2000){}
+                            var alert = alert("") {
+                                neutralPressed("Yes") {
+                                    replay = true
+                                    replayGame()
+                                }
+                                negativeButton("No") {
+
+                                }
+                            }
+                            val myMsg = TextView(applicationContext)
+                            myMsg.text = "Would you like to see a replay of this game?"
+                            myMsg.setTextColor(Color.WHITE)
+                            myMsg.gravity = Gravity.CENTER
+                            alert.customView = myMsg
+                            alert.show().setCanceledOnTouchOutside(false)
+                            joinGameOver = false
+                        }
+
                     }
                     gameState.STARTED.name ->
                     {
-                        var views = findViewById<ViewGroup>(R.id.buttons)
-                        for (j in 0..views.childCount - 1) {
-                            var view = views.getChildAt(j)
+                        for (j in 0..buttons.childCount - 1) {
+                            var view = buttons.getChildAt(j)
                             if (view is LinearLayout) {
                                 for (k in 0..view.childCount - 1) {
                                     var button = view.getChildAt(k)
@@ -997,6 +1048,7 @@ class GameState() : AppCompatActivity() {
     {
         var playerOneAttacks = ArrayList<Pair<Int,Int>>()
         var playerTwoAttacks = ArrayList<Pair<Int,Int>>()
+        state = gameState.PLAYER_ONE_TURN
 
 
         for(i in playerOne.myAttacks)
@@ -1028,49 +1080,109 @@ class GameState() : AppCompatActivity() {
         }
 
         var showBoard = true
-        var count = 1
+        var playerOneAttackCount = 0
+        var playerTwoAttackCount = 0
+        var maxTurns : Int
+        if(playerTwoAttacks.size > playerOneAttacks.size) maxTurns = playerTwoAttacks.size
+        else maxTurns = playerOneAttacks.size
 
-        while(state != gameState.GAME_OVER_PLAYER_TWO || state != gameState.GAME_OVER_PLAYER_ONE) {
+        for(i in 1..maxTurns) {
             Handler().postDelayed(Runnable {
+                Log.e("REPLAY RUNNING", "REPLAY RUNNING")
 
-                if(isPlayerOne)
-                {
-                    if(state == gameState.GAME_OVER_PLAYER_ONE)
-                    {
-                        if(showBoard)
-                        {
-                            setupPlayer(playerOne)
-                            showBoard = false
+                if(state != gameState.GAME_OVER_PLAYER_TWO || state != gameState.GAME_OVER_PLAYER_ONE) {
+                    if (isPlayerOne) {
+                        if (state == gameState.PLAYER_ONE_TURN) {
+                            myNameDisplay.text = playerOne.name
+                            enemyNameDisplay.text = playerTwo.name
+                            findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                            if (showBoard) {
+                                setupPlayer(playerOne)
+                                showBoard = false
+                            } else if (!showBoard) {
+                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first) as LinearLayout
+                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second) as Button
+                                button.setOnClickListener(clickListener)
+                                button.isClickable = true
+                                button.performClick()
+                                button.isClickable = false
+                                if (!replayHit) {
+                                    showBoard = true
+                                    replayHit = false
+                                }
+                                playerOneAttackCount++
+                            }
                         }
 
-                        else if(!showBoard)
-                        {
-                            //Hit button with x,y
+                        if (state == gameState.PLAYER_TWO_TURN) {
+                            myNameDisplay.text = playerTwo.name
+                            enemyNameDisplay.text = playerOne.name
+                            findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                            if (showBoard) {
+                                setupPlayer(playerTwo)
+                                showBoard = false
+                            } else if (!showBoard) {
+                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first) as LinearLayout
+                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second) as Button
+                                button.setOnClickListener(clickListener)
+                                button.isClickable = true
+                                button.performClick()
+                                button.isClickable = false
+                                if (!replayHit) {
+                                    showBoard = true
+                                    replayHit = false
+                                }
+                                playerTwoAttackCount++
+                            }
+                        }
+                    } else {
+                        if (state == gameState.PLAYER_ONE_TURN) {
+                            myNameDisplay.text = playerTwo.name
+                            enemyNameDisplay.text = playerOne.name
+                            findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                            if (showBoard) {
+                                setupPlayer(playerTwo)
+                                showBoard = false
+                            } else if (!showBoard) {
+                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first) as LinearLayout
+                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second) as Button
+                                button.setOnClickListener(clickListener)
+                                button.isClickable = true
+                                button.performClick()
+                                button.isClickable = false
+                                if (!replayHit) {
+                                    showBoard = true
+                                    replayHit = false
+                                }
+                                playerTwoAttackCount++
+                            }
+                        } else if (state == gameState.PLAYER_TWO_TURN) {
+                            myNameDisplay.text = playerOne.name
+                            enemyNameDisplay.text = playerTwo.name
+                            findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                            if (showBoard) {
+                                setupPlayer(playerOne)
+                                showBoard = false
+                            } else if (!showBoard) {
+                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first) as LinearLayout
+                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second)
+                                button.setOnClickListener(clickListener)
+                                button.isClickable = true
+                                button.performClick()
+                                button.isClickable = false
+                                if (!replayHit) {
+                                    showBoard = true
+                                    replayHit = false
+                                }
+                                playerOneAttackCount++
+                            }
                         }
                     }
                 }
 
-                else
-                {
-                    if(state == gameState.GAME_OVER_PLAYER_TWO)
-                    {
-                        if(showBoard)
-                        {
-                            setupPlayer(playerTwo)
-                            showBoard = false
-                        }
+                else replay = false
 
-                        else if(!showBoard)
-                        {
-                            //Hit button with x,y
-                        }
-                    }
-                }
-
-                count++
-            }, (count*1000).toLong())
+            }, (i*1000).toLong())
         }
-
-        replay = false
     }
 }
