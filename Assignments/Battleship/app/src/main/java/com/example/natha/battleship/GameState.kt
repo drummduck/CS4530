@@ -211,7 +211,7 @@ class GameState() : AppCompatActivity() {
                         }
                     }
                 }
-                updateDatabase(false)
+                if(!replay)updateDatabase(false)
             }
         }
     }
@@ -355,24 +355,6 @@ class GameState() : AppCompatActivity() {
 
     fun setupPlayer(player : Player) {
 
-//        if(spectating)
-//        {
-//            var linLay : LinearLayout
-//            for(i in 0..buttons.childCount)
-//            {
-//                if(buttons.getChildAt(i) is LinearLayout)
-//                {
-//                    linLay = buttons.getChildAt(i) as LinearLayout
-//                    for(j in 0..linLay.childCount) {
-//                        if (linLay.getChildAt(j) is Button && buttons.getChildAt(i).id != R.id.Okay) {
-//                            (linLay.getChildAt(j) as Button).setText("")
-//                            (linLay.getChildAt(j) as Button).setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         var doneWithButton = false
 
         for (i in 0..buttons.childCount) {
@@ -483,7 +465,7 @@ class GameState() : AppCompatActivity() {
                         }
                     }
 
-                    if (((isPlayerOne && state == GameState.gameState.PLAYER_ONE_TURN) || (!isPlayerOne && state == GameState.gameState.PLAYER_TWO_TURN) || spectating) && !doneWithButton)
+                    if (((isPlayerOne && state == GameState.gameState.PLAYER_ONE_TURN) || (!isPlayerOne && state == GameState.gameState.PLAYER_TWO_TURN) || spectating || replay) && !doneWithButton)
                     {
                         var linLay = buttons.getChildAt(i)
                         if(linLay is LinearLayout)
@@ -504,20 +486,6 @@ class GameState() : AppCompatActivity() {
 
                     doneWithButton = false
                 }
-
-//                if (isPlayerOne && state == gameState.PLAYER_ONE_TURN || !isPlayerOne && state == gameState.PLAYER_TWO_TURN && !spectating) {
-//                    for (i in 0..10) {
-//                        var child = findViewById<ViewGroup>(R.id.buttons).getChildAt(i)
-//                        if (child is LinearLayout) {
-//                            for (i in 0..child.childCount - 1) {
-//                                var child2 = child.getChildAt(i)
-//                                val buttonColor = child2.background as ColorDrawable
-//                                if (child2 is Button && buttonColor.color == resources.getColor(android.R.color.holo_blue_light))
-//                                    child2.setOnClickListener(clickListener)
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
     }
@@ -1027,17 +995,82 @@ class GameState() : AppCompatActivity() {
 
     fun replayGame()
     {
-        var playerOneClone = Player()
-        var playerTwoClone = Player()
+        var playerOneAttacks = ArrayList<Pair<Int,Int>>()
+        var playerTwoAttacks = ArrayList<Pair<Int,Int>>()
+
+
+        for(i in playerOne.myAttacks)
+        {
+            playerOneAttacks.add(Pair(i.first, i.second))
+        }
+
+        for(i in playerTwo.myAttacks)
+        {
+            playerTwoAttacks.add(Pair(i.first,  i.second))
+        }
 
         for(i in playerOne.ships)
         {
-
+            var count = 0
+            for(j in i.pos)
+            {
+                i.pos[count] = Triple(j.first, j.second, 0)
+            }
         }
 
         for(i in playerTwo.ships)
         {
-
+            var count = 0
+            for(j in i.pos)
+            {
+                i.pos[count] = Triple(j.first, j.second, 0)
+            }
         }
+
+        var showBoard = true
+        var count = 1
+
+        while(state != gameState.GAME_OVER_PLAYER_TWO || state != gameState.GAME_OVER_PLAYER_ONE) {
+            Handler().postDelayed(Runnable {
+
+                if(isPlayerOne)
+                {
+                    if(state == gameState.GAME_OVER_PLAYER_ONE)
+                    {
+                        if(showBoard)
+                        {
+                            setupPlayer(playerOne)
+                            showBoard = false
+                        }
+
+                        else if(!showBoard)
+                        {
+                            //Hit button with x,y
+                        }
+                    }
+                }
+
+                else
+                {
+                    if(state == gameState.GAME_OVER_PLAYER_TWO)
+                    {
+                        if(showBoard)
+                        {
+                            setupPlayer(playerTwo)
+                            showBoard = false
+                        }
+
+                        else if(!showBoard)
+                        {
+                            //Hit button with x,y
+                        }
+                    }
+                }
+
+                count++
+            }, (count*1000).toLong())
+        }
+
+        replay = false
     }
 }
