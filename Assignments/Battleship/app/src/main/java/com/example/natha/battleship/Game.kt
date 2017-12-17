@@ -319,6 +319,6 @@ class Game : AppCompatActivity(){
         super.onDestroy()
         mDbRootRef.removeEventListener(childEventListener)
         unregisterReceiver(broadCastReceiver)
-        handler = Handler()
+        handler.removeCallbacksAndMessages(null)
     }
 }

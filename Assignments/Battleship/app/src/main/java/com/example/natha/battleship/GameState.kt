@@ -46,12 +46,14 @@ class GameState() : AppCompatActivity() {
     lateinit var auth : FirebaseAuth
     lateinit var currentUser : FirebaseUser
     lateinit var buttons : LinearLayout
+    var handler = Handler()
     var state = gameState.STARTED
     var gameId = ""
     var joinGameOver = false
     var spectating = false
     var isPlayerOne = false
     var replayMiss = false
+    var replaySunk = false
     var joining = false
     var replay = false
     val childListener = (object : ChildEventListener {
@@ -60,7 +62,7 @@ class GameState() : AppCompatActivity() {
         }
 
         override fun onChildChanged(snapshot: DataSnapshot?, p1: String?) {
-                loadFromDatabase()
+            loadFromDatabase()
             Log.e("ONCHILDCHANGED", "CHILD CHANGED")
         }
 
@@ -114,7 +116,7 @@ class GameState() : AppCompatActivity() {
                     if (isPlayerOne) doAttack(view, playerOne, playerTwo)
                     else if(!isPlayerOne) doAttack(view, playerTwo, playerOne)
                 }
-                else doAttack(view, playerTwo, playerOne)
+                else if(isPlayerOne) doAttack(view, playerOne, playerTwo)
             }
             else if(state == gameState.PLAYER_TWO_TURN)
             {
@@ -122,7 +124,7 @@ class GameState() : AppCompatActivity() {
                     if (isPlayerOne) doAttack(view, playerTwo, playerOne)
                     else if(!isPlayerOne) doAttack(view, playerOne, playerTwo)
                 }
-                else doAttack(view, playerTwo, playerOne)
+                else if(!isPlayerOne) doAttack(view, playerOne, playerTwo)
             }
         }
     }
@@ -225,108 +227,107 @@ class GameState() : AppCompatActivity() {
         var hit = false
         var sunk = false
 
-            for (i in enemy.ships) {
-                var hitCount = 0
-                var pos = 0
-                for (j in i.pos) {
-                    if(replay && xVal == j.first-12 && yVal == j.second-1) hit = true
-                    else if(xVal == j.first && yVal == j.second) hit = true
-                    if(hit) {
-                        i.pos[pos] = Triple(xVal, yVal, 2)
-                        view.text = "Hit"
-                        enemy.oppAttacks.add(Triple(xVal, yVal, 2))
-                        player.myAttacks.add(Triple(xVal, yVal, 2))
-                        view.setBackgroundColor(Color.YELLOW)
-                        view.isClickable = false
-                        hitCount++
-                    }
-                    if (j.third == 2) hitCount++
-                    if (hitCount == i.size) {
-                        sunk = true
-                        enemy.shipCount--
-                    }
-                    if (sunk) {
-                        pos = 0
-                        for (k in i.pos) {
-                            var pos2 = 0
-                            for (l in player.myAttacks) {
-                                if(replay && l.first == k.first - 12 && l.second == k.second - 1) player.myAttacks[pos2] = Triple(l.first, l.second, 3)
-                                else if (l.first == k.first && l.second == k.second) player.myAttacks[pos2] = Triple(l.first, l.second, 3)
-                                pos2++
-                            }
-                            pos2 = 0
-                            for (l in enemy.oppAttacks) {
-                                if (l.first == k.first - 12 && l.second == k.second) enemy.oppAttacks[pos2] = Triple(l.first, l.second, 3)
-                                pos2++
-                            }
-                            i.pos[pos] = Triple(k.first, k.second, 3)
-                            var buttons = findViewById<ViewGroup>(R.id.buttons)
-                            var row = buttons.getChildAt(k.first - 1)
-                            if (row is LinearLayout) {
-                                var button = row.getChildAt(k.second - 1)
-                                if (button is Button) {
-                                    button.setBackgroundColor(Color.RED)
-                                    if (pos == 0 || pos == i.size - 1) button.text = "**Sunk**"
-                                    else button.text = "Sunk"
-                                }
-                            }
-                            pos++
-                        }
-
-                        if (enemy.shipCount == 0) {
-                            if (state == gameState.PLAYER_ONE_TURN) {
-                                state = gameState.GAME_OVER_PLAYER_ONE
-                                findViewById<Button>(R.id.Okay).setText("Player One Wins!")
-                            } else {
-                                state = gameState.GAME_OVER_PLAYER_TWO
-                                findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
-                            }
-                            var views = findViewById<ViewGroup>(R.id.buttons)
-                            for (l in 0..views.childCount - 1) {
-                                var view = views.getChildAt(l)
-                                if (view is LinearLayout) {
-                                    for (m in 0..view.childCount - 1) {
-                                        var button = view.getChildAt(m)
-                                        if (button is Button) button.isClickable = false
-                                    }
-                                }
-                            }
-                        }
-                        break
-                    }
-                    pos++
-                    if (sunk) break
+        for (i in enemy.ships) {
+            var hitCount = 0
+            var pos = 0
+            for (j in i.pos) {
+                if(xVal == j.first && yVal == j.second) {
+                    i.pos[pos] = Triple(xVal, yVal, 2)
+                    view.text = "Hit"
+                    enemy.oppAttacks.add(Triple(xVal, yVal, 2))
+                    player.myAttacks.add(Triple(xVal, yVal, 2))
+                    view.setBackgroundColor(Color.YELLOW)
+                    view.isClickable = false
+                    hitCount++
+                    hit = true
                 }
-                if (sunk || hit) break
-            }
-            if (!hit && !sunk) {
-                if(replay) replayMiss = true
-                view.setBackgroundColor(Color.WHITE)
-                enemy.oppAttacks.add(Triple(xVal, yVal, 1))
-                player.myAttacks.add(Triple(xVal, yVal, 1))
-                view.setText("Miss")
-                view.isClickable = false
-                if (state == gameState.PLAYER_ONE_TURN) {
-                    findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
-                    state = gameState.PLAYER_TWO_TURN
-                } else if (state == gameState.PLAYER_TWO_TURN) {
-                    findViewById<Button>(R.id.Okay).setText("Player One's Turn")
-                    state = gameState.PLAYER_ONE_TURN
+                if (j.third == 2) hitCount++
+                if (hitCount == i.size) {
+                    sunk = true
+                    replaySunk = true
+                    enemy.shipCount--
                 }
-                var views = findViewById<ViewGroup>(R.id.buttons)
-                for (i in 0..views.childCount - 1) {
-                    var view = views.getChildAt(i)
-                    if (view is LinearLayout) {
-                        for (j in 0..view.childCount - 1) {
-                            var button = view.getChildAt(j)
+                if (sunk) {
+                    pos = 0
+                    for (k in i.pos) {
+                        var pos2 = 0
+                        for (l in player.myAttacks) {
+                            if (l.first == k.first && l.second == k.second) player.myAttacks[pos2] = Triple(l.first, l.second, 3)
+                            pos2++
+                        }
+                        pos2 = 0
+                        for (l in enemy.oppAttacks) {
+                            if (l.first == k.first - 12 && l.second == k.second) enemy.oppAttacks[pos2] = Triple(l.first, l.second, 3)
+                            pos2++
+                        }
+                        i.pos[pos] = Triple(k.first, k.second, 3)
+                        var buttons = findViewById<ViewGroup>(R.id.buttons)
+                        var row = buttons.getChildAt(k.first - 1)
+                        if (row is LinearLayout) {
+                            var button = row.getChildAt(k.second - 1)
                             if (button is Button) {
-                                button.isClickable = false
+                                button.setBackgroundColor(Color.RED)
+                                if (pos == 0 || pos == i.size - 1) button.text = "**Sunk**"
+                                else button.text = "Sunk"
                             }
+                        }
+                        pos++
+                    }
+
+                    if (enemy.shipCount == 0) {
+                        if (state == gameState.PLAYER_ONE_TURN) {
+                            state = gameState.GAME_OVER_PLAYER_ONE
+                            findViewById<Button>(R.id.Okay).setText("Player One Wins!")
+                        } else {
+                            state = gameState.GAME_OVER_PLAYER_TWO
+                            findViewById<Button>(R.id.Okay).setText("Player Two Wins!")
+                        }
+                        var views = findViewById<ViewGroup>(R.id.buttons)
+                        for (l in 0..views.childCount - 1) {
+                            var view = views.getChildAt(l)
+                            if (view is LinearLayout) {
+                                for (m in 0..view.childCount - 1) {
+                                    var button = view.getChildAt(m)
+                                    if (button is Button) button.isClickable = false
+                                }
+                            }
+                        }
+                    }
+                    break
+                }
+                pos++
+                if (sunk) break
+            }
+            if (sunk || hit) break
+        }
+        if (!hit && !sunk) {
+            if(replay) replayMiss = true
+            view.setBackgroundColor(Color.WHITE)
+            enemy.oppAttacks.add(Triple(xVal, yVal, 1))
+            player.myAttacks.add(Triple(xVal, yVal, 1))
+            view.setText("Miss")
+            view.isClickable = false
+            if (state == gameState.PLAYER_ONE_TURN) {
+                findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
+                state = gameState.PLAYER_TWO_TURN
+            } else if (state == gameState.PLAYER_TWO_TURN) {
+                findViewById<Button>(R.id.Okay).setText("Player One's Turn")
+                state = gameState.PLAYER_ONE_TURN
+            }
+            var views = findViewById<ViewGroup>(R.id.buttons)
+            for (i in 0..views.childCount - 1) {
+                var view = views.getChildAt(i)
+                if (view is LinearLayout) {
+                    for (j in 0..view.childCount - 1) {
+                        var button = view.getChildAt(j)
+                        if (button is Button) {
+                            button.isClickable = false
                         }
                     }
                 }
             }
-            if(!replay)updateDatabase(false)
+        }
+        if(!replay)updateDatabase(false)
     }
 
     fun shipPlacement(size : Int) : ArrayList<Triple<Int,Int,Int>>
@@ -397,13 +398,13 @@ class GameState() : AppCompatActivity() {
                                     if (button is Button) {
                                         if (l.third == 3) {
                                             if((!button.text.equals("**Sunk**") || !button.text.equals("Sunk")) && (button.background as ColorDrawable).color != Color.RED)
-                                            if (count == 1 || count == size) button.setText("**Sunk**")
-                                            else button.setText("Sunk")
+                                                if (count == 1 || count == size) button.setText("**Sunk**")
+                                                else button.setText("Sunk")
                                             button.setBackgroundColor(Color.RED)
                                         } else if (l.third == 2) {
                                             if((!button.text.equals("**Hit**") || !button.text.equals("Hit")) && (button.background as ColorDrawable).color != Color.YELLOW)
-                                            if (count == 1 || count == size) button.setText("**Hit**")
-                                            else button.setText("Hit")
+                                                if (count == 1 || count == size) button.setText("**Hit**")
+                                                else button.setText("Hit")
                                             button.setBackgroundColor(Color.YELLOW)
                                         } else if (l.third == 0) {
                                             if(!button.text.equals("**") || (button.background as ColorDrawable).color != Color.GRAY) {
@@ -500,7 +501,8 @@ class GameState() : AppCompatActivity() {
                             {
                                 if(button.id != R.id.Okay)
                                 {
-                                    if(!spectating || replay)button.setOnClickListener(clickListener)
+                                    button.setOnClickListener(clickListener)
+                                    if(spectating || replay) button.isClickable = false
                                     button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
                                     button.setText("")
                                     doneWithButton = true
@@ -776,7 +778,7 @@ class GameState() : AppCompatActivity() {
                     Log.e("PLAYER TWO NAME", player.child("name").value.toString())
                     playerName = player.child("name").value.toString()
                     if(playerName.isEmpty()) enemyNameDisplay.setText("Waiting for player...")
-                    else if(spectating) enemyNameDisplay.setText("Spectating")
+                    else if(spectating) enemyNameDisplay.setText("You are spectating...")
                     else enemyNameDisplay.setText(playerName + "//Ships Left: " + playerShipCount)
 
                 }
@@ -862,18 +864,18 @@ class GameState() : AppCompatActivity() {
                             {
                                 enemyNameDisplay.setTextColor(Color.YELLOW)
                                 myNameDisplay.setTextColor(Color.WHITE)
-                                    for (i in 0..buttons.childCount - 1) {
-                                        var view = buttons.getChildAt(i)
-                                        if (view is LinearLayout) {
-                                            for (j in 0..view.childCount - 1) {
-                                                var button = view.getChildAt(j)
-                                                if (button is Button) {
-                                                    button.isClickable = false
-                                                }
+                                for (i in 0..buttons.childCount - 1) {
+                                    var view = buttons.getChildAt(i)
+                                    if (view is LinearLayout) {
+                                        for (j in 0..view.childCount - 1) {
+                                            var button = view.getChildAt(j)
+                                            if (button is Button) {
+                                                button.isClickable = false
                                             }
                                         }
                                     }
                                 }
+                            }
                         }
                         else if(stateOfGame == gameState.PLAYER_TWO_TURN.name)
                         {
@@ -978,28 +980,6 @@ class GameState() : AppCompatActivity() {
                             alert.show().setCanceledOnTouchOutside(false)
                             joinGameOver = false
                         }
-
-                        else{
-                            var timer = System.currentTimeMillis()
-                            while(System.currentTimeMillis() - timer < 2000){}
-                            var alert = alert("") {
-                                neutralPressed("Yes") {
-                                    replay = true
-                                    replayGame()
-                                }
-                                negativeButton("No") {
-
-                                }
-                            }
-                            val myMsg = TextView(applicationContext)
-                            myMsg.text = "Would you like to see a replay of this game?"
-                            myMsg.setTextColor(Color.WHITE)
-                            myMsg.gravity = Gravity.CENTER
-                            alert.customView = myMsg
-                            alert.show().setCanceledOnTouchOutside(false)
-                            joinGameOver = false
-                        }
-
                     }
                     gameState.STARTED.name ->
                     {
@@ -1088,84 +1068,111 @@ class GameState() : AppCompatActivity() {
         var playerOneAttackCount = 0
         var playerTwoAttackCount = 0
         var maxTurns : Int
-        if(playerTwoAttacks.size > playerOneAttacks.size) maxTurns = playerTwoAttacks.size
-        else maxTurns = playerOneAttacks.size
+        maxTurns = (playerTwoAttacks.size + playerOneAttacks.size) * 3
 
         for(i in 1..maxTurns) {
-            Handler().postDelayed(Runnable {
+            handler.postDelayed(Runnable {
                 Log.e("REPLAY RUNNING", "REPLAY RUNNING")
 
                 if(state != gameState.GAME_OVER_PLAYER_TWO || state != gameState.GAME_OVER_PLAYER_ONE) {
                     if (isPlayerOne) {
                         if (state == gameState.PLAYER_ONE_TURN) {
-                            myNameDisplay.text = playerOne.name
-                            enemyNameDisplay.text = playerTwo.name
+                            myNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                            enemyNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                            myNameDisplay.setTextColor(Color.YELLOW)
+                            enemyNameDisplay.setTextColor(Color.WHITE)
                             findViewById<Button>(R.id.Okay).setText("Player One's Turn")
                             if (showBoard) {
                                 setupPlayer(playerOne)
                                 showBoard = false
                             } else if (!showBoard) {
-                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first) as LinearLayout
-                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second) as Button
+                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first-1) as LinearLayout
+                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second-1) as Button
                                 button.performClick()
                                 if (replayMiss) {
                                     showBoard = true
                                     replayMiss = false
+                                }
+                                else if(replaySunk)
+                                {
+                                    enemyNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                                    replaySunk = false
                                 }
                                 playerOneAttackCount++
                             }
                         }
 
                         else if (state == gameState.PLAYER_TWO_TURN) {
-                            myNameDisplay.text = playerTwo.name
-                            enemyNameDisplay.text = playerOne.name
+                            myNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                            enemyNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                            myNameDisplay.setTextColor(Color.YELLOW)
+                            enemyNameDisplay.setTextColor(Color.WHITE)
                             findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
                             if (showBoard) {
                                 setupPlayer(playerTwo)
                                 showBoard = false
                             } else if (!showBoard) {
-                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first) as LinearLayout
-                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second) as Button
+                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first-1) as LinearLayout
+                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second-1) as Button
                                 button.performClick()
                                 if (replayMiss) {
                                     showBoard = true
                                     replayMiss = false
+                                }
+                                else if(replaySunk)
+                                {
+                                    enemyNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                                    replaySunk = false
                                 }
                                 playerTwoAttackCount++
                             }
                         }
                     } else {
                         if (state == gameState.PLAYER_ONE_TURN) {
-                            myNameDisplay.text = playerTwo.name
-                            enemyNameDisplay.text = playerOne.name
+                            myNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                            enemyNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                            myNameDisplay.setTextColor(Color.YELLOW)
+                            enemyNameDisplay.setTextColor(Color.WHITE)
                             findViewById<Button>(R.id.Okay).setText("Player One's Turn")
                             if (showBoard) {
                                 setupPlayer(playerTwo)
                                 showBoard = false
                             } else if (!showBoard) {
-                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first) as LinearLayout
-                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second) as Button
+                                var linLay = buttons.getChildAt(playerTwoAttacks[playerTwoAttackCount].first-1) as LinearLayout
+                                var button = linLay.getChildAt(playerTwoAttacks[playerTwoAttackCount].second-1) as Button
                                 button.performClick()
                                 if (replayMiss) {
                                     showBoard = true
                                     replayMiss = false
                                 }
+                                else if(replaySunk)
+                                {
+                                    enemyNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                                    replaySunk = false
+                                }
                                 playerTwoAttackCount++
                             }
                         } else if (state == gameState.PLAYER_TWO_TURN) {
-                            myNameDisplay.text = playerOne.name
-                            enemyNameDisplay.text = playerTwo.name
+                            myNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
+                            enemyNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                            myNameDisplay.setTextColor(Color.YELLOW)
+                            enemyNameDisplay.setTextColor(Color.WHITE)
                             findViewById<Button>(R.id.Okay).setText("Player Two's Turn")
                             if (showBoard) {
                                 setupPlayer(playerOne)
                                 showBoard = false
                             } else if (!showBoard) {
-                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first) as LinearLayout
-                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second)
+                                var linLay = buttons.getChildAt(playerOneAttacks[playerOneAttackCount].first-1) as LinearLayout
+                                var button = linLay.getChildAt(playerOneAttacks[playerOneAttackCount].second-1)
                                 button.performClick()
                                 if (replayMiss) {
                                     showBoard = true
                                     replayMiss = false
+                                }
+                                else if(replaySunk)
+                                {
+                                    enemyNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
+                                    replaySunk = false
                                 }
                                 playerOneAttackCount++
                             }
@@ -1173,9 +1180,12 @@ class GameState() : AppCompatActivity() {
                     }
                 }
 
-                else replay = false
-
             }, (i*1000).toLong())
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 }

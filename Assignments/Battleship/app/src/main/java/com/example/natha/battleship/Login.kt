@@ -430,6 +430,7 @@ class Login : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
         handler = Handler()
     }
 
