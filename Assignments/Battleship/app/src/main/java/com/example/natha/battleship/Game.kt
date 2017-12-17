@@ -1,44 +1,21 @@
 package com.example.natha.battleship
 
-import android.Manifest
 import android.content.*
-import android.content.pm.PackageManager
-import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.drawable.Drawable
-import android.media.Image
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v4.widget.ContentLoadingProgressBar
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
-import android.util.Log.i
-import android.view.Gravity
 import android.view.View
 import android.widget.*
-import com.example.natha.battleship.R.id.my_recycler_view
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonStreamParser
-import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.game_selection.*
-import java.io.*
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.FirebaseDatabase
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.Collections.replaceAll
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
@@ -192,24 +169,24 @@ class Game : AppCompatActivity(){
 
                     when(state) {
                         GameState.gameState.STARTED.name -> {
-                            if(playerTwoName.isEmpty()) dataString = "Game Started!\n" + playerOneName + " is waiting for player to join"
-                            else dataString = "Game Started!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + "\nShips left: " + playerTwoShipCount
+                            if(playerTwoName.isEmpty()) dataString = "Game Started!\n\n" + playerOneName + " is waiting for player to join"
+                            else dataString = "Game Started!\n\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\n\nPlayer Two: " + playerTwoName + "\nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledstart, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_ONE_TURN.name -> {
-                            dataString = "Player One's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledbattle, dataString, gameId))
+                            dataString = "Player One's Turn!\n\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\n\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledfight, dataString, gameId))
                         }
                         GameState.gameState.PLAYER_TWO_TURN.name -> {
-                            dataString = "Player Two's Turn!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
-                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledbattle, dataString, gameId))
+                            dataString = "Player Two's Turn!\n\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\n\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
+                            recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaledfight, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_ONE.name -> {
-                            dataString = "Player One Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
+                            dataString = "Player One Wins!\n\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\n\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaleddelete, dataString, gameId))
                         }
                         GameState.gameState.GAME_OVER_PLAYER_TWO.name -> {
-                            dataString = "Player Two Wins!\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
+                            dataString = "Player Two Wins!\n\n" + "Player One: " + playerOneName + "\nShips left: " + playerOneShipCount + "\n\nPlayer Two: " + playerTwoName + " \nShips left: " + playerTwoShipCount
                             recyclerViewDataset.add(MyAdapter.ImageWithTitle(R.drawable.scaleddelete, dataString, gameId))
                         }
                     }
@@ -238,7 +215,7 @@ class Game : AppCompatActivity(){
         my_recycler_view.layoutManager = recyclerViewLayoutManager
 
         my_recycler_view.adapter = MyAdapter({
-            databaseList.add(0,MyAdapter.ImageWithTitle(R.drawable.scaledplus, "New Game", ""))
+            databaseList.add(0,MyAdapter.ImageWithTitle(R.drawable.scaledplus, "\nNew Game", ""))
             databaseList.toTypedArray()
         }()).apply {
             setOnMyAdapterItemSelectedListener { myAdapterItem: MyAdapter.MyAdapterItem ->
@@ -301,7 +278,7 @@ class Game : AppCompatActivity(){
                             }
                         }
 
-                        else if (myAdapterItem.title.equals("New Game"))
+                        else if (myAdapterItem.title.contains("New Game"))
                         {
                             Log.e("NEW GAME", "Starting new game!")
                             intent.putExtra("isPlayerOne", true)

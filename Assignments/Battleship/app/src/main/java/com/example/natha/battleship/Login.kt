@@ -156,7 +156,7 @@ class Login : AppCompatActivity() {
                 passwordField.text.clear()
                 passwordField.hint = "Password:"
                 cancel.visibility = View.INVISIBLE
-                loginButtons.visibility = View.INVISIBLE
+                loginButtons.visibility = View.VISIBLE
                 errorField.setBackgroundColor(android.R.attr.editTextBackground)
                 errorField.text = ""
                 errorField.visibility = View.VISIBLE
