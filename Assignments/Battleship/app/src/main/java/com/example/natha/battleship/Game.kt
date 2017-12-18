@@ -19,7 +19,9 @@ import com.google.firebase.database.FirebaseDatabase
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
-
+/**
+ * This class loads all of the games on the database that are relevent to the user.
+ */
 class Game : AppCompatActivity(){
     lateinit var logout : Button
     lateinit var auth : FirebaseAuth
@@ -30,10 +32,14 @@ class Game : AppCompatActivity(){
     lateinit var checkInternet : TextView
     lateinit var loadingPanel : ProgressBar
     lateinit var recyclerView : android.support.v7.widget.RecyclerView
+    private lateinit var recyclerViewLayoutManager: LinearLayoutManager
     var connected = false
     var handler = Handler()
     val KILL = "com.example.natha.battleship.KILL"
 
+
+    //This is a receiver used so i can use the buttons in the titledimageview and kill this activity
+    //as well as open the actual game activity
     val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
             Log.e("BROADCAST RECEIVED", "RECEIVED KILL!")
@@ -44,6 +50,7 @@ class Game : AppCompatActivity(){
         }
     }
 
+    //This listener is called when the Firebase database changes and updates the games shown on the screen
     val childEventListener = object : ChildEventListener {
         override fun onChildAdded(p0: DataSnapshot?, p1: String?) {setupRecyclerView()}
 
@@ -56,6 +63,10 @@ class Game : AppCompatActivity(){
         override fun onCancelled(p0: DatabaseError?) {}
     }
 
+    /**
+     * Reference buttons and set logout button listener.
+     * If a connection isnt aquired after 10 seconds, display a connection error warning
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_selection)
@@ -90,11 +101,16 @@ class Game : AppCompatActivity(){
             }, 10000)
     }
 
+    /**
+     * Read all of the game data from the Firebase database and display it in a recycler view.
+     */
     fun setupRecyclerView()
     {
         val recyclerViewDataset: MutableList<MyAdapter.MyAdapterItem> = mutableListOf()
         var gamesToIgnore = ArrayList<String>()
 
+
+        //This listener is used to read data from the Firebase database games.
         mDbRootRef.addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -110,6 +126,7 @@ class Game : AppCompatActivity(){
                 var gamesSnapshot = dataSnapshot.child("Games")
                 var gameId = ""
 
+                //Iterate over all of the games and display the needed information for each card on the display
                 for (game in gamesSnapshot.children) {
                     Log.e("GAME READ", "Game key is: " + game.key + ", Game value is: " + game.value)
 
@@ -167,6 +184,8 @@ class Game : AppCompatActivity(){
 
                     var dataString : String
 
+
+                    //Display the text and image on the card
                     when(state) {
                         GameState.gameState.STARTED.name -> {
                             if(playerTwoName.isEmpty()) dataString = "Game Started!\n\n" + playerOneName + " is waiting for player to join"
@@ -197,6 +216,7 @@ class Game : AppCompatActivity(){
                 setupFiles(recyclerViewDataset)
             }
 
+            //Give warning with no internet connection
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.e("NO INTERNET", "NO INTERNET")
                 checkInternet.visibility = View.VISIBLE
@@ -206,8 +226,9 @@ class Game : AppCompatActivity(){
         })
     }
 
-    private lateinit var recyclerViewLayoutManager: LinearLayoutManager
-
+    /**
+     * This sets up the click listener for all the different cards shown in the recycler view
+     */
     fun setupFiles(databaseList : MutableList<MyAdapter.MyAdapterItem>) {
         recyclerViewLayoutManager = LinearLayoutManager(this)
 
@@ -226,6 +247,10 @@ class Game : AppCompatActivity(){
                         Log.e("FileSelection", "Selected item contained image of Id (${myAdapterItem.button}")
                         Log.e("FileSelection", "myAdapterTitle: " + myAdapterItem.title)
                         intent = Intent(applicationContext, GameState::class.java)
+
+                        //Condition when game has just started, either joining as second player or checking in as singleplayer
+                        //Matching emails with current user email to decide on which player
+                        //Send certain intents based on each situation
                         if(myAdapterItem.title.contains("waiting for player"))
                         {
                             var matched = false
@@ -250,6 +275,10 @@ class Game : AppCompatActivity(){
                             }
                         }
 
+
+                        //Conditions where game has started, game is in progress, or a player has won
+                        //Matching emails with current user email to decide on which player
+                        //Send certain intents based on each situation
                         else if(myAdapterItem.title.contains("Game Started") || myAdapterItem.title.contains("Player One's Turn")
                                 || myAdapterItem.title.contains("Player Two's Turn") || myAdapterItem.title.contains("Wins!"))
                         {
@@ -278,6 +307,7 @@ class Game : AppCompatActivity(){
                             }
                         }
 
+                        //New Game selected, send new game intent
                         else if (myAdapterItem.title.contains("New Game"))
                         {
                             Log.e("NEW GAME", "Starting new game!")
@@ -292,6 +322,9 @@ class Game : AppCompatActivity(){
         }
     }
 
+    /**
+     * Unregister broadcast receiver and kill handler that might be running when the activity closes
+     */
     override fun onDestroy() {
         super.onDestroy()
         mDbRootRef.removeEventListener(childEventListener)

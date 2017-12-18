@@ -29,9 +29,14 @@ import android.widget.TextView
 
 /**
  * Created by Natha on 10/20/2017.
+ *
+ * This class holds all the logic for the game board.
+ * It sets up the players, writes to the databases, and reads from the database.
+ * It also calculates each attack and performs the replay feature of the game.
  */
 class GameState() : AppCompatActivity() {
 
+    //Representation of what state the game is in
     enum class gameState
     {
         STARTED, PLAYER_ONE_TURN, PLAYER_TWO_TURN, GAME_OVER_PLAYER_ONE, GAME_OVER_PLAYER_TWO
@@ -56,6 +61,8 @@ class GameState() : AppCompatActivity() {
     var replaySunk = false
     var joining = false
     var replay = false
+
+    //Chile listener that updates the game board anytime there is a change.
     val childListener = (object : ChildEventListener {
         override fun onChildAdded(snapshot: DataSnapshot?, p1: String?) {
             Log.e("ONCHILDADDED", "CHILD ADDED")
@@ -80,9 +87,11 @@ class GameState() : AppCompatActivity() {
     })
 
 
+    //Click listener for start button or turn attack
     val clickListener = View.OnClickListener { view ->
         if(view.id == R.id.Okay)
         {
+            //If the game is started and there is a player, update the state of the game and setup the player
             if(state == gameState.STARTED) {
                 if (!enemyNameDisplay.text.equals("Waiting for player...") && isPlayerOne) {
                     Log.e("STARTING", "Starting game!")
@@ -109,6 +118,8 @@ class GameState() : AppCompatActivity() {
             }
         }
 
+        //Pick which player is which depending on the turn and whether or not this is a replay
+        //and call the method that performs the attack.
         else if(view is Button)
         {
             if(state == gameState.PLAYER_ONE_TURN) {
@@ -129,6 +140,10 @@ class GameState() : AppCompatActivity() {
         }
     }
 
+    /**
+     * Setup button references and member variables
+     * Iterate through
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.game_board)
@@ -141,6 +156,8 @@ class GameState() : AppCompatActivity() {
         if(auth != null && auth.currentUser != null) currentUser = auth.currentUser!!
         findViewById<Button>(R.id.Okay).setOnClickListener(clickListener)
         mDbRootRef.addChildEventListener(childListener)
+
+        //Saved instance state variables
         if(savedInstanceState != null) {
 
             Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE AFTER")
@@ -154,6 +171,10 @@ class GameState() : AppCompatActivity() {
                 }
             }
         }
+
+        //Decide what to do on activity open.
+        //Player may be joining or starting a new game, or be opening a game player is currently in or finished.
+        //Decide which player it is and whether or not they are spectating or not.
         else if(intent != null && intent.extras != null && !intent.extras.isEmpty)
         {
             gameId = ""
@@ -175,6 +196,8 @@ class GameState() : AppCompatActivity() {
                         loadFromDatabase()
                     }
 
+
+                    //If a new game, setup both players information and update the database
                     "New Game" ->
                     {
                         var playerOneSetup = false
@@ -220,17 +243,26 @@ class GameState() : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * Do attack calculations and update the player information
+     */
     fun doAttack(view : Button, player : Player, enemy : Player)
     {
+        //Get X and Y value based off button label
         var xVal = view.resources.getResourceName(view.id).substringAfter("/")[0].toInt() - 64
         var yVal = Integer.parseInt(view.resources.getResourceName(view.id).substringAfter("/").substringBefore("_2").substring(1))
         var hit = false
         var sunk = false
 
+        //Iterate through enemy ships and determine a hit or a miss
+        //Keep track of shipcount, posititions, and values.
+        //Disable buton on attack.
         for (i in enemy.ships) {
             var hitCount = 0
             var pos = 0
             for (j in i.pos) {
+                //Ship was hit
                 if(xVal == j.first && yVal == j.second) {
                     i.pos[pos] = Triple(xVal, yVal, 2)
                     view.text = "Hit"
@@ -242,11 +274,13 @@ class GameState() : AppCompatActivity() {
                     hit = true
                 }
                 if (j.third == 2) hitCount++
+                //Ship was sunk
                 if (hitCount == i.size) {
                     sunk = true
                     replaySunk = true
                     enemy.shipCount--
                 }
+                //Ship was sunk, go back through all buttons/data and set them all to sunk
                 if (sunk) {
                     pos = 0
                     for (k in i.pos) {
@@ -274,6 +308,7 @@ class GameState() : AppCompatActivity() {
                         pos++
                     }
 
+                    //If all ships were sunk, update game to OVER and allow no buttons to be clicked
                     if (enemy.shipCount == 0) {
                         if (state == gameState.PLAYER_ONE_TURN) {
                             state = gameState.GAME_OVER_PLAYER_ONE
@@ -300,6 +335,8 @@ class GameState() : AppCompatActivity() {
             }
             if (sunk || hit) break
         }
+
+        //If it is a miss, change states, data structure,  and update button to be unclickable
         if (!hit && !sunk) {
             if(replay) replayMiss = true
             view.setBackgroundColor(Color.WHITE)
@@ -327,9 +364,13 @@ class GameState() : AppCompatActivity() {
                 }
             }
         }
+        //update databases if not a replay
         if(!replay)updateDatabase(false)
     }
 
+    /**
+     * Calculates ship placement on board
+     */
     fun shipPlacement(size : Int) : ArrayList<Triple<Int,Int,Int>>
     {
         var up = false
@@ -342,6 +383,8 @@ class GameState() : AppCompatActivity() {
         var firstX = random.nextInt(10 - 1) + 1
         var firstY = random.nextInt(10 - 1) + 1
         pos.add(Triple(firstX, firstY, 0))
+
+        //Choose a random direction to go and make sure there is enough room for ship length
         for(i in 1..size)
         {
             if(!directionChosen)
@@ -370,6 +413,8 @@ class GameState() : AppCompatActivity() {
                     }
                 }
             }
+
+            //Increase direction for ship position data
             else if(up) pos.add(Triple(pos.last().first, pos.last().second - 1, 0))
             else if(down) pos.add(Triple(pos.last().first, pos.last().second + 1, 0))
             else if(left) pos.add(Triple(pos.last().first - 1, pos.last().second, 0))
@@ -379,14 +424,20 @@ class GameState() : AppCompatActivity() {
         return pos
     }
 
+
+    /**
+     * Visually setup all "current" player information
+     */
     fun setupPlayer(player : Player) {
 
         var doneWithButton = false
 
+        //Iterate through all buttons
         for (i in 0..buttons.childCount) {
             if (buttons.getChildAt(i) is LinearLayout) {
                 for (j in 0..(buttons.getChildAt(i) as LinearLayout).childCount) {
 
+                    //Display player ships based on data
                     for (k in player.ships) {
                         var size = k.size
                         var count = 1
@@ -423,6 +474,8 @@ class GameState() : AppCompatActivity() {
                     }
 
                     if (!doneWithButton) {
+
+                        //Display player attacks against opponent based on data
                         for (k in player.myAttacks) {
                             if (k.first - 1 == i && k.second - 1 == j) {
                                 var linLay = buttons.getChildAt(i)
@@ -459,6 +512,8 @@ class GameState() : AppCompatActivity() {
                     }
 
                     if (!doneWithButton) {
+
+                        //Display opponent attacks against player based on data
                         for (k in player.oppAttacks) {
                             if (k.first + 12 == i && k.second - 1 == j) {
                                 var linLay = buttons.getChildAt(i)
@@ -491,6 +546,7 @@ class GameState() : AppCompatActivity() {
                         }
                     }
 
+                    //Default button to blue because nothing has happened yet
                     if (((isPlayerOne && state == GameState.gameState.PLAYER_ONE_TURN) || (!isPlayerOne && state == GameState.gameState.PLAYER_TWO_TURN) || spectating || replay) && !doneWithButton)
                     {
                         var linLay = buttons.getChildAt(i)
@@ -502,6 +558,7 @@ class GameState() : AppCompatActivity() {
                                 if(button.id != R.id.Okay)
                                 {
                                     button.setOnClickListener(clickListener)
+                                    //Buttons are not clickable during spectaion or replay
                                     if(spectating || replay) button.isClickable = false
                                     button.setBackgroundColor(resources.getColor(android.R.color.holo_blue_light))
                                     button.setText("")
@@ -517,6 +574,9 @@ class GameState() : AppCompatActivity() {
         }
     }
 
+    /**
+     * Remove event listener on activity finish
+     */
     override fun onBackPressed() {
         var intent = Intent(this, Game::class.java)
         mDbRootRef.removeEventListener(childListener)
@@ -524,6 +584,9 @@ class GameState() : AppCompatActivity() {
         finish()
     }
 
+    /**
+     * Reload state of game on close/open of app
+     */
     public override fun onSaveInstanceState(savedInstanceState: Bundle?) {
         if(savedInstanceState !is Bundle) return
         Log.e("SAVEDINSTANCESTATE", "IN SAVED INSTANCE STATE BEFORE")
@@ -534,6 +597,9 @@ class GameState() : AppCompatActivity() {
         super.onSaveInstanceState(savedInstanceState)
     }
 
+    /**
+     * Update Firebase database with all player info and state of game
+     */
     fun updateDatabase(newGame : Boolean)
     {
         if(newGame)
@@ -566,14 +632,19 @@ class GameState() : AppCompatActivity() {
 
     }
 
+    /**
+     * Load all information from firebase on game change or entering a game
+     */
     fun loadFromDatabase()
     {
+
+        //Iterate through data on specific game given an ID from the recycler view click
         FirebaseDatabase.getInstance().reference.child("Games").addListenerForSingleValueEvent(object : ValueEventListener
         {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
 
-                if(isPlayerOne) Log.e("IM PLAYER ONE!!!!", "IM PLAYER ONEEEE!!!!")
-                if(!isPlayerOne) Log.e("IM PLAYER TWO!!!!", "IM PLAYER TWOOOO!!!!")
+                if(isPlayerOne) Log.e("IM PLAYER ONE!!!!", "IM PLAYER ONE!!!!")
+                if(!isPlayerOne) Log.e("IM PLAYER TWO!!!!", "IM PLAYER TWO!!!!")
 
                 var game : DataSnapshot
 
@@ -616,6 +687,7 @@ class GameState() : AppCompatActivity() {
                     return
                 }
 
+                //Display enemy name if there is one
                 if(state == gameState.STARTED && isPlayerOne)
                 {
                     if(game.hasChild("Player Two") && game.child("Player Two").hasChild("name"))
@@ -633,6 +705,7 @@ class GameState() : AppCompatActivity() {
                     }
                 }
 
+                //Select which player we are loading for the local data
                 if(joining)
                 {
                     currentPlayer = "Player Two"
@@ -662,7 +735,7 @@ class GameState() : AppCompatActivity() {
                     enemyPlayer = "Player Two"
                 }
 
-
+                //Select which player from database based on which player we are
                 if(game.hasChild(currentPlayer)) player = game.child(currentPlayer)
                 if(game.hasChild(enemyPlayer)) enemy = game.child(enemyPlayer)
 
@@ -739,8 +812,11 @@ class GameState() : AppCompatActivity() {
                     }
                 }
 
+                //Create the player
                 playerOne = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
 
+
+                //Reset data for loading other player data
                 shipsData = ArrayList<Ship>()
                 oppAttacksData = ArrayList<Triple<Int,Int,Int>>()
                 myAttacksData = ArrayList<Triple<Int,Int,Int>>()
@@ -750,6 +826,7 @@ class GameState() : AppCompatActivity() {
                 myAttacks = null
                 oppAttacks = null
 
+                //Determine other player to use from database
                 if(currentPlayer.equals("Player One"))
                 {
                     currentPlayer = "Player Two"
@@ -838,8 +915,10 @@ class GameState() : AppCompatActivity() {
                     }
                 }
 
+                //Create other player
                 playerTwo = Player(shipsData, oppAttacksData, myAttacksData, playerName, playerShipCount)
 
+                //Setup player visually based on state of game
                 setupPlayer(playerOne)
                 when(stateOfGame)
                 {
@@ -962,6 +1041,7 @@ class GameState() : AppCompatActivity() {
                             }
                         }
 
+                        //If the game is over and you are joining it, prompt player for a replay of the game
                         if(joinGameOver) {
                             var alert = alert("") {
                                 neutralPressed("Yes") {
@@ -1019,23 +1099,23 @@ class GameState() : AppCompatActivity() {
         })
     }
 
+    /**
+     * Replay the game move by move with a slight delay in between each turn and from each player's view
+     */
     fun replayGame()
     {
+        //Create data structures for attack positions and set state to first player turn
         var playerOneAttacks = ArrayList<Pair<Int,Int>>()
         var playerTwoAttacks = ArrayList<Pair<Int,Int>>()
         state = gameState.PLAYER_ONE_TURN
 
 
-        for(i in playerOne.myAttacks)
-        {
-            playerOneAttacks.add(Pair(i.first, i.second))
-        }
+        //Add attack positions from player data into our data structure
+        for(i in playerOne.myAttacks) playerOneAttacks.add(Pair(i.first, i.second))
 
-        for(i in playerTwo.myAttacks)
-        {
-            playerTwoAttacks.add(Pair(i.first,  i.second))
-        }
+        for(i in playerTwo.myAttacks) playerTwoAttacks.add(Pair(i.first,  i.second))
 
+        //Reset ship status on each player
         for(i in playerOne.ships)
         {
             var count = 0
@@ -1056,6 +1136,7 @@ class GameState() : AppCompatActivity() {
             }
         }
 
+        //Reset player attack information and shipcount
         playerOne.myAttacks.clear()
         playerOne.oppAttacks.clear()
         playerTwo.myAttacks.clear()
@@ -1064,17 +1145,23 @@ class GameState() : AppCompatActivity() {
         playerOne.shipCount = 5
         playerTwo.shipCount = 5
 
+        //Replay variables
         var showBoard = true
         var playerOneAttackCount = 0
         var playerTwoAttackCount = 0
         var maxTurns : Int
         maxTurns = (playerTwoAttacks.size + playerOneAttacks.size) * 3
 
+        //Iterate over a MAX value of turns until end of game, updating everything each second
         for(i in 1..maxTurns) {
             handler.postDelayed(Runnable {
                 Log.e("REPLAY RUNNING", "REPLAY RUNNING")
 
+                //Game must be in state of playing
                 if(state != gameState.GAME_OVER_PLAYER_TWO || state != gameState.GAME_OVER_PLAYER_ONE) {
+
+                    //If player one, read from correct attack list and perform the attack, creating manual click event
+                    //Depends on which state it is as well
                     if (isPlayerOne) {
                         if (state == gameState.PLAYER_ONE_TURN) {
                             myNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
@@ -1127,7 +1214,10 @@ class GameState() : AppCompatActivity() {
                                 playerTwoAttackCount++
                             }
                         }
-                    } else {
+                    }
+                    //If player two, read from correct attack list and perform the attack, creating manual click event
+                    //Depends on which state as well
+                    else {
                         if (state == gameState.PLAYER_ONE_TURN) {
                             myNameDisplay.text = playerTwo.name + "//Ships Left " + playerTwo.shipCount
                             enemyNameDisplay.text = playerOne.name + "//Ships Left " + playerOne.shipCount
@@ -1184,6 +1274,9 @@ class GameState() : AppCompatActivity() {
         }
     }
 
+    /**
+     * Destroy handler on activity destroy
+     */
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)

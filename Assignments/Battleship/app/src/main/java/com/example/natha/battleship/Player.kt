@@ -4,6 +4,9 @@ import java.io.Serializable
 
 /**
  * Created by Nathan on 10/20/2017.
+ *
+ * This class holds all player information. The ships, a list of attacks with positions,
+ * a list of opponent attacks with positions, the player name, and how many ships are left.
  */
 class Player() : Serializable{
     var ships = ArrayList<Ship>()

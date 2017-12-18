@@ -30,8 +30,13 @@ import kotlinx.android.synthetic.main.login.*
 
 /**
  * Created by Natha on 11/12/2017.
+ *
+ * This class provides a login process for the user. It prompts for email verification if signing up for the first time,
+ * Otherwise, it lets you login and takes you to the game selections activity.
  */
 class Login : AppCompatActivity() {
+
+    //Member variables
     lateinit var emailField : EditText
     lateinit var passwordField : EditText
     lateinit var errorField : TextView
@@ -46,7 +51,10 @@ class Login : AppCompatActivity() {
     lateinit var loginState : LoginState
 
 
-
+/**
+Sets up all member variables and if user has already had email verified, it automatically takes you to the
+ game selection screen. Otherwise, it waits for user input. Also warns the user if there is an internet connection problem.
+ */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
@@ -93,16 +101,16 @@ class Login : AppCompatActivity() {
                 finish()
             }
         }
-
         else  errorField.text = "Check internet settings"
-
-
     }
 
+    //Click listener for all buttons on the screen
     val clickListener = View.OnClickListener { view ->
 
         when(view.id)
         {
+            //On login click, it checks the format of the password to make sure its good, if not, it will give a warning on
+            //what the format should be. Otherwise if will perform a sign in.
             R.id.login ->
             {
                 if(checkConnection()) {
@@ -123,6 +131,8 @@ class Login : AppCompatActivity() {
                 else errorField.text = "Check internet settings"
             }
 
+            //On register click, it checks the format of the password to make sure its good, if not, it will give a warning on
+            //what the format should be. Otherwise it will perform a user creation.
             R.id.register ->
             {
                 if(checkConnection()) {
@@ -144,6 +154,8 @@ class Login : AppCompatActivity() {
 
             }
 
+            //This button only appears during the registration process and the system is waiting for email verification.
+            //If clicked, it will take you back to the main login screen again.
             R.id.cancel ->
             {
                 emailField.text.clear()
@@ -169,8 +181,11 @@ class Login : AppCompatActivity() {
         }
     }
 
+
+    // This listener is a reply from Firebase to give notice if a user creation/login is valid or not
     val onCompleteListener = OnCompleteListener<AuthResult>{ task ->
 
+        //On a success, it checks if the user is signing in with an existing account or if the user is creating one
         if(task.isSuccessful) {
             Log.e("Login", "login or creation")
             auth = FirebaseAuth.getInstance()
@@ -179,6 +194,9 @@ class Login : AppCompatActivity() {
                 currentUser = auth.currentUser!!
             }
 
+
+            //If user has already logged in on the deviceit will take it straight to the game,
+            //otherwise it will send an email to your account for verification and wait for verification
             if (loginState == LoginState.SIGNING_IN) {
                 if (currentUser.isEmailVerified) {
                     Log.e("LOGIN", "Email is verified on sign in, take to main screen")
@@ -281,6 +299,8 @@ class Login : AppCompatActivity() {
                         }, i.toLong() * 1000)
                     }
                 }
+
+                //On registration Email is sent out here and activity waits for reply
             } else if (loginState == LoginState.CREATING) {
                 emailField.setText("Email sent out, please verify your email.")
                 emailField.isFocusable = false
@@ -376,6 +396,11 @@ class Login : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * Email verification sent here. If it fails it resets to main login screen and notifies the user.
+     * Otherwise the email is sent.
+     */
     private fun sendVerificationEmail() {
         Log.e("LOGIN", "Sending verification email")
         loginState = LoginState.VERIFYING
@@ -402,6 +427,11 @@ class Login : AppCompatActivity() {
             } else Log.e("LOGIN", "EMAIL SUCCEEDED ON SEND")
         })
     }
+
+    /**
+    If the back button is pressed while in the email verification screen, it takes you back to the login screen.
+     Otherwise it exits the app
+     */
     override fun onBackPressed() {
         if(loginState == LoginState.VERIFYING)
         {
@@ -428,12 +458,18 @@ class Login : AppCompatActivity() {
         else super.onBackPressed()
     }
 
+    /**
+     * Destroys the handler and activity
+     */
     override fun onDestroy() {
         super.onDestroy()
         handler.removeCallbacksAndMessages(null)
         handler = Handler()
     }
 
+    /**
+     * Checks to see if there is wifi or cell connnection
+     */
     fun checkConnection() : Boolean
     {
         var cm = this.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
